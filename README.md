@@ -1,2 +1,3 @@
-# matlab-toy-model
-Rounded latch LaMSA toy model implemented in MATLAB. 
+# MATLAB LaMSA Model
+
+LaMSA toy model implemented in MATLAB. 
