@@ -66,7 +66,7 @@ The main function solve_model is generally structured as follows
 + Unlatching
   + Create an anonymous function wrapping unlatching_ode.m into a function that only takes time and state variables (position, velocity)
   + Perform a similar step for unlatching_ode.m
-  + Set up the ODE solver to stop running when the value
+  + Set up the ODE solver to stop running when the value of unlatching_end changes sign (when the normal force becomes less than zero)
   + Using ode45, solve the unlatching ODE
   + The unlatching ODE is for the horizontal position of the latch, so use y_L to convert from x to y.
 + Launch
