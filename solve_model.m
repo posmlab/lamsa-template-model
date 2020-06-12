@@ -1,4 +1,4 @@
-function [sol,transition_times] = solve_model(F_in,F_out,F_s,m_eff,m_L,t_L_guess,v_0L,y_L)
+function [sol,transition_times] = solve_model(F_in,F_out,F_s,m_eff,m_L,t_L_guess,v_0L,y_L,coeff_fric)
 %Solve set of differential equations for loading, unlatching, and launching
 %   phases of LAMSA motion
 LARGE_NUM = 1E10; % subtract a large number in fzero function to trick fzero into identifying points where motor or spring suddnely go to 0
@@ -26,10 +26,10 @@ if (exitflag<0)
 end
 
 %% Unlatching phase: Fs vs FLatch
-[inst_check,~,~]=unlatching_end(0,[0,v_0L],m_eff,m_L,F_s,F_out,y0,y_L);
+[inst_check,~,~]=unlatching_end(0,[0,v_0L],m_eff,m_L,F_s,F_out,y0,y_L,coeff_fric);
 if inst_check>0 
-    unlatch_opts=odeset('Events',@(t,y) unlatching_end(t,y,m_eff,m_L,F_s,F_out,y0,y_L),'RelTol',1E-7,'AbsTol',1E-10);
-    ode=@(t,y) unlatching_ode(t,y,m_eff,m_L,F_s,F_out,y0,y_L);
+    unlatch_opts=odeset('Events',@(t,y) unlatching_end(t,y,m_eff,m_L,F_s,F_out,y0,y_L,coeff_fric),'RelTol',1E-7,'AbsTol',1E-10);
+    ode=@(t,y) unlatching_ode(t,y,m_eff,m_L,F_s,F_out,y0,y_L,coeff_fric);
     tspan=linspace(0,t_L_guess,1000);%[0,t_L_guess];
     [t_unlatch,x_unlatch]=ode45(ode,tspan,[0 v_0L],unlatch_opts);
     % This ODE is for the latch x-coordinate, but we want the y-coordinate, so
