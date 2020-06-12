@@ -3,7 +3,7 @@ close all
 clearvars
 tic
 debug = false;
-N=100;
+N=50;
 
 
 
