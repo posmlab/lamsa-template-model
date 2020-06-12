@@ -1,4 +1,5 @@
-%Vary F_max and m_eff and plot performance metrics
+%run this file to generate heatplots for the 6 performance metrics
+%vary parameters below 
 close all
 clearvars
 tic
@@ -6,17 +7,19 @@ debug = false;
 N=50;
 
 
-
+%setting x axis on the plot (Fmax)
 xname = 'Fmax';
 xrange = [-1 3];
 Fmaxs=logspace(xrange(1),xrange(2),N);
 
+%setting y axis value on plot (Vmax)
 yname = 'vmax';
 yrange = [-3 3];
 v_maxs=logspace(yrange(1),yrange(2),N);
 
 metrics = {'tto','vto','Pmax','ymax','tL','KEmax'};
 
+%parameters for the loading motor
 L = 10E-3;
 rho = 10;
 sigma_f = 10E6;
@@ -25,6 +28,7 @@ d = 5E-3;
 v_max=5.0000;
 motor_in=@(t,x) (Fmax*(1-x(2)/v_max)) .* (abs(x(1))<=d); %Linear F-v motor 
 
+%parameters for spring set up/ launch/ latch
 m=1E-3;
 m_s=1E-4;
 m_eff = m + m_s/3;
@@ -37,6 +41,7 @@ R=2E-1;
 k=1;
 spring=@(t,x) -k*x(1).*(abs(k*x(1))<F_spring_max);
 
+%assuming a rounded edge 
 yL=@(x) R*(1-sqrt(1-x^2/R^2));
 syms x;
 yL_prime = diff(yL(x));
