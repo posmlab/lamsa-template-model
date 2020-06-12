@@ -28,6 +28,7 @@ motor_in=@(t,x) (Fmax*(1-x(2)/v_max)) .* (abs(x(1))<=d); %Linear F-v motor
 m=1E-3;
 m_s=1E-4;
 m_eff = m + m_s/3;
+coeff_fric = 0;
 m_L=1E2;
 load_time_constraint=Inf;
 F_spring_max=1E4;
@@ -54,7 +55,7 @@ for i=1:N %iterate over y-axis-variable of plot
   
     for j=1:N %iterate over x-axis-variable of plot
          motor_out=@(t,x) (Fmaxs(j)*(1-x(2)/v_maxs(i))) .* (abs(x(1))<=d); %Linear F-v motor 
-        [sol,transition_times]=solve_model(motor_in,motor_out,spring,m_eff,m_L,R/v_0L,v_0L,y_L);
+        [sol,transition_times]=solve_model(motor_in,motor_out,spring,m_eff,m_L,R/v_0L,v_0L,y_L, coeff_fric);
         if (debug)
             figure(h1)
             plot(sol(:,1),sol(:,2),'.');
