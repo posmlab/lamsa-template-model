@@ -23,8 +23,7 @@ function metrics = get_metrics(sol,transition_times,m_eff,met_names)
     if isKey(metrics,'tL')
         metrics('tL')=transition_times(1);
     end
-    if isKey(metrics,'yunlatch')
-        index=find(sol(:,1)==transition_times(1),1,"first");
-        metrics('yunlatch')= sol(index, 2);
-    end
+    if isKey(metrics,'yUnlatch')
+        metrics('yUnlatch')
+    
 end
