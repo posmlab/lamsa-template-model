@@ -17,28 +17,28 @@ yname = 'vmax';
 yrange = [-3 3];
 v_maxs=logspace(yrange(1),yrange(2),N);
 
-metrics = {'tto','vto','Pmax','ymax','tL','KEmax'};
+metrics = {'tto','vto','Pmax','ymax','tL','KEmax','yunlatch'};
 
 %parameters for the loading motor
-L = 10E-3;
-rho = 10;
+L = 10E-1;
+rho = 20;
 sigma_f = 10E6;
 Fmax = 20;
-d = 5E-3;
+d = 3;
 v_max=5.0000;
 motor_in=@(t,x) (Fmax*(1-x(2)/v_max)) .* (abs(x(1))<=d); %Linear F-v motor 
 
 %parameters for spring set up/ launch/ latch
-m=1E-3;
+m=10;
 m_s=1E-4;
 m_eff = m + m_s/3;
-coeff_fric = 0;
-m_L=1E2;
+coeff_fric = .5;
+m_L=1E5;
 load_time_constraint=Inf;
-F_spring_max=1E4;
+F_spring_max=1E5;
 v_0L=0;
-R=2E-1;
-k=1;
+R=1;
+k=5;
 spring=@(t,x) -k*x(1).*(abs(k*x(1))<F_spring_max);
 
 %assuming a rounded edge 
