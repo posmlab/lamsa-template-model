@@ -1,4 +1,5 @@
-function [sol,transition_times] = solve_model(F_in,F_out,F_s,m_eff,m_L,t_L_guess,v_0L,y_L)
+%function [sol,transition_times] = solve_model(F_in,F_out,F_s,m_eff,m_L,t_L_guess,v_0L,y_L)
+function [sol,transition_times] = solve_model(F_in,F_out,F_s,m_eff,Latch)
 %Solve set of differential equations for loading, unlatching, and launching
 %   phases of LAMSA motion
 LARGE_NUM = 1E10; % subtract a large number in fzero function to trick fzero into identifying points where motor or spring suddnely go to 0
@@ -26,18 +27,24 @@ if (exitflag<0)
 end
 
 %% Unlatching phase: Fs vs FLatch
-[inst_check,~,~]=unlatching_end(0,[0,v_0L],m_eff,m_L,F_s,F_out,y0,y_L);
+[inst_check,~,~]=unlatching_end(0,[0,Latch.v_0],m_eff,Latch.mass,F_s,F_out,y0,Latch.y_L);
 if inst_check>0 
-    unlatch_opts=odeset('Events',@(t,y) unlatching_end(t,y,m_eff,m_L,F_s,F_out,y0,y_L),'RelTol',1E-7,'AbsTol',1E-10);
-    ode=@(t,y) unlatching_ode(t,y,m_eff,m_L,F_s,F_out,y0,y_L);
+    unlatch_opts=odeset('Events',@(t,y) unlatching_end(t,y,m_eff,Latch.mass,F_s,F_out,y0,Latch.y_L),'RelTol',1E-7,'AbsTol',1E-10);
+    ode=@(t,y) unlatching_ode(t,y,m_eff,Latch.mass,F_s,F_out,y0,Latch.y_L);
+    
+    a_0L = F_out(0,[0 0]) / Latch.mass;
+    % calculate t_L_guess using quadratic formula
+    % and the following kinematic equation: R = (1/2)a*t^2 + v_0*t  
+    t_L_guess = (((-1*Latch.v_0) + sqrt((Latch.v_0)^2  + (2*a_0L*Latch.max_width)))/(a_0L));
+    
     tspan=linspace(0,t_L_guess,1000);%[0,t_L_guess];
-    [t_unlatch,x_unlatch]=ode45(ode,tspan,[0 v_0L],unlatch_opts);
+    [t_unlatch,x_unlatch]=ode45(ode,tspan,[0 Latch.v_0],unlatch_opts);
     % This ODE is for the latch x-coordinate, but we want the y-coordinate, so
     % convert
     y_unlatch=zeros(size(x_unlatch));
     for i=1:length(y_unlatch)
-        y_unlatch(i,1)=y_L{1}(x_unlatch(i,1))+y0;
-        y_unlatch(i,2)=x_unlatch(i,2)*y_L{2}(x_unlatch(i,1));
+        y_unlatch(i,1)=Latch.y_L{1}(x_unlatch(i,1))+y0;
+        y_unlatch(i,2)=x_unlatch(i,2)*Latch.y_L{2}(x_unlatch(i,1));
     end
     if (imag(y_unlatch))
         disp(y_unlatch);
