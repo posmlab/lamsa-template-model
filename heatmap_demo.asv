@@ -39,10 +39,10 @@ load_time_constraint=Inf;
 F_spring_max=1E4;
 k=1;
 
-latch = rounded_latch(R);
+latch = rounded_latch(R,m_L,mass,coeff_fric);
 spring = linear_spring(k,F_spring_max);
 loading_motor = linear_motor(Fmax_motor,vmax_motor,range_of_motion);
-unlatching_motor.Time_independent
+unlatching_motor.Time_independent = true;
 
 % initialize an output value matrix for each metric
 for ii=1:length(metrics)

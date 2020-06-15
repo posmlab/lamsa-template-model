@@ -1,7 +1,7 @@
-function latch = rounded_latch(R,coeff_fric)
+function latch = rounded_latch(R, m_L, v_0, coeff_fric)
 latch.max_width=R;
-latch.mass=1E2;
-latch.v_0=0;
+latch.mass=m_L;
+latch.v_0=v_0;
 yL=@(x) latch.max_width*(1-sqrt(1-x^2/latch.max_width^2));
 syms x;
 yL_prime = diff(yL(x));

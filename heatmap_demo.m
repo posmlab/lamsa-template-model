@@ -38,11 +38,12 @@ R=2E-1;
 load_time_constraint=Inf;
 F_spring_max=1E4;
 k=1;
+v_0L=0;
+m_L= 1E5;
 
-latch = rounded_latch(R,coeff_fric);
+latch = rounded_latch(R,m_L, v_0L, coeff_fric);
 spring = linear_spring(k,F_spring_max);
 loading_motor = linear_motor(Fmax_motor,vmax_motor,range_of_motion);
-unlatching_motor.Time_independent = true;
 
 % initialize an output value matrix for each metric
 for ii=1:length(metrics)
@@ -54,7 +55,8 @@ if (debug)
 end
 for i=1:N %iterate over y-axis-variable of plot
     for j=1:N %iterate over x-axis-variable of plot
-         unlatching_motor.Force=@(t,x) (Fmaxs(j)*(1-x(2)/v_maxs(i))) .* (abs(x(1))<=range_of_motion); %Linear F-v motor 
+         %unlatching_motor.Force=@(t,x) (Fmaxs(j)*(1-x(2)/v_maxs(i))) .* (abs(x(1))<=range_of_motion); %Linear F-v motor 
+        unlatching_motor = linear_motor(Fmaxs(j),v_maxs(i),range_of_motion);
         [sol,transition_times]=solve_model(loading_motor,unlatching_motor,m_eff,latch,spring);
 
         if (debug)
