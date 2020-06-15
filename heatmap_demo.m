@@ -9,21 +9,21 @@ N=50;
 
 %setting x axis on the plot (Fmax)
 xname = 'Fmax';
-xrange = [2 5];
+xrange = [0 4];
 Fmaxs=logspace(xrange(1),xrange(2),N);
 
 %setting y axis value on plot (Vmax)
 yname = 'vmax';
-yrange = [1 3];
+yrange = [-1 3];
 v_maxs=logspace(yrange(1),yrange(2),N);
 
 metrics = {'tto','vto','Pmax','ymax','tL','KEmax','yunlatch'};
 
 %parameters for the loading motor
 time_independent_motor= true;
-L = 10E-1;
-rho = 20;
-sigma_f = 10E6;
+%L = 10E-1;
+%rho = 20;
+%sigma_f = 10E6;
 Fmax = 20;
 d = 3;
 v_max=5.0000;
@@ -31,16 +31,16 @@ motor_in=@(t,x) (Fmax*(1-x(2)/v_max)) .* (abs(x(1))<=d); %Linear F-v motor
 
 %parameters for spring set up/ launch/ latch
 time_independent_spring= true ;
-m=10;
+m=100;
 m_s=1E-4;
 m_eff = m + m_s/3;
-coeff_fric = .05;
+coeff_fric = .1;
 m_L=1E5;
 load_time_constraint=Inf;
 F_spring_max=1E5;
 v_0L=0;
-R=1;
-k=5;
+R=2E-1;
+k=2;
 spring=@(t,x) -k*x(1).*(abs(k*x(1))<F_spring_max);
 
 %assuming a rounded edge 
