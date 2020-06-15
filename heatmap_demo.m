@@ -33,15 +33,15 @@ F_spring_max=1E4;
 k=1;
 spring=@(t,x) -k*x(1).*(abs(k*x(1))<F_spring_max);
 
+Latch.max_width=2E-1;
+Latch.mass=1E2;
+Latch.v_0=0;
 
 yL=@(x) Latch.max_width*(1-sqrt(1-x^2/Latch.max_width^2));
 syms x;
 yL_prime = diff(yL(x));
 yL_doubleprime = diff(yL(x),2);
 Latch.y_L = {yL, matlabFunction(yL_prime), matlabFunction(yL_doubleprime)};
-Latch.mass=1E2;
-Latch.v_0=0;
-Latch.max_width=2E-1;
 
 % initialize an output value matrix for each metric
 for ii=1:length(metrics)

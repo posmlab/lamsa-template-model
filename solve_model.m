@@ -33,10 +33,19 @@ if inst_check>0
     ode=@(t,y) unlatching_ode(t,y,m_eff,Latch.mass,F_s,F_out,y0,Latch.y_L);
     
     a_0L = F_out(0,[0 0]) / Latch.mass;
-    % calculate t_L_guess using quadratic formula
-    % and the following kinematic equation: R = (1/2)a*t^2 + v_0*t  
-    t_L_guess = (((-1*Latch.v_0) + sqrt((Latch.v_0)^2  + (2*a_0L*Latch.max_width)))/(a_0L));
     
+    if (a_0L ~= 0)
+        % calculate t_L_guess using quadratic formula
+        % and the following kinematic equation: R = (1/2)a*t^2 + v_0*t  
+        t_L_guess = (((-1*Latch.v_0) + sqrt((Latch.v_0)^2  + (2*a_0L*Latch.max_width)))/(a_0L));
+    elseif (Latch.v_0 ~= 0 )
+        t_L_guess = Latch.max_width/Latch.v_0        
+    else
+        warning("The latch's initial velocity and acceleration are both zero.")
+        sol = [0,0,0]
+        transition_times = [0,0]
+        return
+    end
     tspan=linspace(0,t_L_guess,1000);%[0,t_L_guess];
     [t_unlatch,x_unlatch]=ode45(ode,tspan,[0 Latch.v_0],unlatch_opts);
     % This ODE is for the latch x-coordinate, but we want the y-coordinate, so
