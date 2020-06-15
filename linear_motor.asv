@@ -1,0 +1,1 @@
+function motor = linear_motor(Fmax_motor, vmax_motor, range_of_motion); 

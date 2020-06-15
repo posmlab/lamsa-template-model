@@ -7,6 +7,7 @@ debug = false;
 N=50;
 
 
+
 %setting x axis on the plot (Fmax)
 xname = 'Fmax';
 xrange = [0 4];
@@ -24,37 +25,24 @@ time_independent_motor= true;
 %L = 10E-1;
 %rho = 20;
 %sigma_f = 10E6;
-Fmax = 20;
-d = 3;
-v_max=5.0000;
-motor_in=@(t,x) (Fmax*(1-x(2)/v_max)) .* (abs(x(1))<=d); %Linear F-v motor 
+Fmax_motor = 20;
+range_of_motion = 3;
+vmax_motor=5.0000;
 
 %parameters for spring set up/ launch/ latch
-time_independent_spring= true ;
 m=100;
 m_s=1E-4;
 m_eff = m + m_s/3;
-
 coeff_fric = .1;
-
 R=2E-1;
-
-
 load_time_constraint=Inf;
 F_spring_max=1E4;
 k=1;
-spring=@(t,x) -k*x(1).*(abs(k*x(1))<F_spring_max);
 
-Latch.max_width=R;
-Latch.mass=1E2;
-Latch.v_0=0;
-
-yL=@(x) Latch.max_width*(1-sqrt(1-x^2/Latch.max_width^2));
-
-syms x;
-yL_prime = diff(yL(x));
-yL_doubleprime = diff(yL(x),2);
-Latch.y_L = {yL, matlabFunction(yL_prime), matlabFunction(yL_doubleprime)};
+latch = rounded_latch(R,coeff_fric);
+spring = linear_spring(k,F_spring_max);
+loading_motor = linear_motor(Fmax_motor,vmax_motor,range_of_motion);
+unlatching_motor.Time_independent = true;
 
 % initialize an output value matrix for each metric
 for ii=1:length(metrics)
@@ -65,12 +53,9 @@ if (debug)
     h2 = figure()
 end
 for i=1:N %iterate over y-axis-variable of plot
-  
     for j=1:N %iterate over x-axis-variable of plot
-         motor_out=@(t,x) (Fmaxs(j)*(1-x(2)/v_maxs(i))) .* (abs(x(1))<=d); %Linear F-v motor 
-
-        [sol,transition_times]=solve_model(motor_in,motor_out,spring,m_eff,Latch, coeff_fric, time_independent_spring, time_independent_motor);
-        %[sol,transition_times]=solve_model(motor_in,motor_out,spring,m_eff,m_L,R/v_0L,v_0L,y_L);
+         unlatching_motor.Force=@(t,x) (Fmaxs(j)*(1-x(2)/v_maxs(i))) .* (abs(x(1))<=range_of_motion); %Linear F-v motor 
+        [sol,transition_times]=solve_model(loading_motor,unlatching_motor,m_eff,latch,spring);
 
         if (debug)
             figure(h1)
