@@ -29,11 +29,11 @@ end
 %check for time independence
 if time_independent_spring == true && time_independent_motor == true
     F_friction = coeff_fric*F_s(0,[y0,0]);
+    F_s(0,[y0, 0]);
+    F_out(0,[0, 0]);
     if F_out(0,[0 , 0]) < F_friction
         warning('latch cannot overcome friction force');
-        sol = [0,0,0];
-        transition_times = [0,0];
-        return
+        return[sol,transition_times] = [0,0]
     end 
 else %there is time dependence
     warning('time dependence in latch or motor');

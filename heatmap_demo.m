@@ -9,17 +9,18 @@ N=50;
 
 %setting x axis on the plot (Fmax)
 xname = 'Fmax';
-xrange = [-1 3];
+xrange = [2 5];
 Fmaxs=logspace(xrange(1),xrange(2),N);
 
 %setting y axis value on plot (Vmax)
 yname = 'vmax';
-yrange = [-3 3];
+yrange = [1 3];
 v_maxs=logspace(yrange(1),yrange(2),N);
 
 metrics = {'tto','vto','Pmax','ymax','tL','KEmax','yunlatch'};
 
 %parameters for the loading motor
+time_independent_motor= true;
 L = 10E-1;
 rho = 20;
 sigma_f = 10E6;
@@ -29,10 +30,11 @@ v_max=5.0000;
 motor_in=@(t,x) (Fmax*(1-x(2)/v_max)) .* (abs(x(1))<=d); %Linear F-v motor 
 
 %parameters for spring set up/ launch/ latch
+time_independent_spring= true ;
 m=10;
 m_s=1E-4;
 m_eff = m + m_s/3;
-coeff_fric = .5;
+coeff_fric = .05;
 m_L=1E5;
 load_time_constraint=Inf;
 F_spring_max=1E5;
@@ -60,7 +62,7 @@ for i=1:N %iterate over y-axis-variable of plot
   
     for j=1:N %iterate over x-axis-variable of plot
          motor_out=@(t,x) (Fmaxs(j)*(1-x(2)/v_maxs(i))) .* (abs(x(1))<=d); %Linear F-v motor 
-        [sol,transition_times]=solve_model(motor_in,motor_out,spring,m_eff,m_L,R/v_0L,v_0L,y_L, coeff_fric);
+        [sol,transition_times]=solve_model(motor_in,motor_out,spring,m_eff,m_L,R/v_0L,v_0L,y_L, coeff_fric, time_independent_spring, time_independent_motor);
         if (debug)
             figure(h1)
             plot(sol(:,1),sol(:,2),'.');
