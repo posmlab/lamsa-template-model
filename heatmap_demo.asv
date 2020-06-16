@@ -54,9 +54,8 @@ if (debug)
 end
 for i=1:N %iterate over y-axis-variable of plot
     for j=1:N %iterate over x-axis-variable of plot
-         unlatching_motor.force=@(t,x) (Fmaxs(j)*(1-x(2)/v_maxs(i))) .* (abs(x(1))<=d); %Linear F-v motor 
-        [sol,transition_times]=solve_model(,unlatching_motor,m_eff,latch,spring,coeff_fric, time_independent_motor);
-        %[sol,transition_times]=solve_model(motor_in,motor_out,spring,m_eff,m_L,R/v_0L,v_0L,y_L);
+         unlatching_motor.Force=@(t,x) (Fmaxs(j)*(1-x(2)/v_maxs(i))) .* (abs(x(1))<=range_of_motion); %Linear F-v motor 
+        [sol,transition_times]=solve_model(loading_motor,unlatching_motor,m_eff,latch,spring);
 
         if (debug)
             figure(h1)

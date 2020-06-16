@@ -1,12 +1,9 @@
 
-function [sol,transition_times] = solve_model(loading_motor,unlatching_motor,m_eff,latch,spring)
+function [sol,transition_times] = solve_model(loading_motor,unlatching_motor,load,latch,spring)
 %Solve set of differential equations for loading, unlatching, and launching
 %   phases of LAMSA motion
 LARGE_NUM = 1E10; % subtract a large number in fzero function to trick fzero into identifying points where motor or spring suddnely go to 0
-F_s = spring.Force;
-F_in = loading_motor.Force;
-F_out = unlatching_motor.Force;
-coeff_fric = latch.coeff_fric;
+m_eff = load.mass + spring.mass/3;
 
 
 %% Loading phase: Fs vs. Fin
@@ -16,17 +13,17 @@ coeff_fric = latch.coeff_fric;
 y_list = logspace(-20,20,40); % sweep through 40 orders of magnitude
 F_list = zeros(size(y_list));
 for i = 1:length(y_list)
-    F_list(i) = F_in(0,[y_list(i) 0]);
+    F_list(i) = loading_motor.Force(0,[y_list(i) 0]);
 end
 y_guess_motor = -y_list(find(F_list>0,1,'last'));
 
 % initial guess based on initial spring stiffness
-y_guess_spring = F_in(0,[0 0])/((F_s(0,eps)-F_s(0,0))/eps);
+y_guess_spring = loading_motor.Force(0,[0 0])/((spring.Force(0,eps)-spring.Force(0,0))/eps);
 
 % use fzero to find when Fs=Fin
 y_guess = max([y_guess_motor, y_guess_spring]);
 options =  {};% optimset('Display','iter');
-[y0,~,exitflag]=fzero(@(y) (F_in(0,[y 0])-F_s(0,[y 0])) - LARGE_NUM*((~F_in(0,[y 0]))||(~F_s(0,[y 0])))+LARGE_NUM*(y>0),y_guess,options);
+[y0,~,exitflag]=fzero(@(y) (loading_motor.Force(0,[y 0])-spring.Force(0,[y 0])) - LARGE_NUM*((~loading_motor.Force(0,[y 0]))||(~spring.Force(0,[y 0])))+LARGE_NUM*(y>0),y_guess,options);
 if (exitflag<0)
     error('fzero failed');
 end
@@ -35,8 +32,8 @@ end
 
 %check for time independence
 if spring.Time_independent == true && unlatching_motor.Time_independent == true
-    F_friction = coeff_fric*F_s(0,[y0,0]);
-    if F_out(0,[0 , 0]) < F_friction
+    F_friction = latch.coeff_fric*spring.Force(0,[y0,0]);
+    if unlatching_motor.Force(0,[0 , 0]) < F_friction
         warning('latch cannot overcome friction force');
         sol = [0,0,0];
         transition_times = [0,0];
@@ -46,12 +43,12 @@ else %there is time dependence
     warning('time dependence in latch or motor');
 end    
 
-[inst_check,~,~]=unlatching_end(0,[0,latch.v_0],m_eff,latch.mass,F_s,F_out,y0,latch.y_L, coeff_fric);
+[inst_check,~,~]=unlatching_end(0,[0,latch.v_0],m_eff,y0,latch,spring,unlatching_motor);
 if inst_check>0 
-    unlatch_opts=odeset('Events',@(t,y) unlatching_end(t,y,m_eff,latch.mass,F_s,F_out,y0,latch.y_L, coeff_fric),'RelTol',1E-7,'AbsTol',1E-10);
-    ode=@(t,y) unlatching_ode(t,y,m_eff,latch.mass,F_s,F_out,y0,latch.y_L, coeff_fric);
+    unlatch_opts=odeset('Events',@(t,y) unlatching_end(t,y,m_eff,y0,latch,spring,unlatching_motor),'RelTol',1E-7,'AbsTol',1E-10);
+    ode=@(t,y) unlatching_ode(t,y,m_eff,y0,latch,spring,unlatching_motor);
     
-    a_0L = F_out(0,[0 0]) / latch.mass;
+    a_0L = unlatching_motor.Force(0,[0 0]) / latch.mass;
     
     if (a_0L ~= 0)
         % calculate t_L_guess using quadratic formula
@@ -90,11 +87,11 @@ y_unlatch = real(y_unlatch);
 %% Ballistic phase:Fs only
 %guess launch times by treating the spring as ideal-ish and getting the
 %   frequency
-stiffness=abs(F_s(0,y_unlatch(end,:))/y_unlatch(end,1)); %Here be divide by 0 errors, probably
+stiffness=abs(spring.Force(0,y_unlatch(end,:))/y_unlatch(end,1)); %Here be divide by 0 errors, probably
 nat_freq=sqrt(stiffness/m_eff);
 t_launch_guess=pi/nat_freq;
-launch_opts=odeset('Events',@(t,y) launching_end(t,y,F_s));
-ode=@(t,y) launching_ode(t,y,F_s,m_eff);
+launch_opts=odeset('Events',@(t,y) launching_end(t,y,spring));
+ode=@(t,y) launching_ode(t,y,m_eff,spring);
 tspan=linspace(0,t_launch_guess,1E3);
 y0=y_unlatch(end,:)';
 [t_launch,y_launch]=ode45(ode,tspan,y0,launch_opts);
