@@ -31,8 +31,9 @@ end
 %% Unlatching phase: Fs vs Flatch
 
 %check for time independence
+
 F_friction = latch.coeff_fric*spring.Force(0,[y0,0]);
-if unlatching_motor.Force(0,[0 , 0]) < F_friction
+if unlatching_motor.max_force < F_friction
     warning('latch cannot overcome friction force');
     sol = [0,0,0];
     transition_times = [0,0];
@@ -45,7 +46,7 @@ if inst_check>0
     unlatch_opts=odeset('Events',@(t,y) unlatching_end(t,y,m_eff,y0,latch,spring,unlatching_motor),'RelTol',1E-7,'AbsTol',1E-10);
     ode=@(t,y) unlatching_ode(t,y,m_eff,y0,latch,spring,unlatching_motor);
     
-    a_0L = unlatching_motor.Force(0,[0 0]) / latch.mass;
+    a_0L = unlatching_motor.max_force / latch.mass;
     
     if (a_0L ~= 0)
         % calculate t_L_guess using quadratic formula
