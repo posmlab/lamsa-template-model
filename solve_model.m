@@ -16,7 +16,7 @@ end
 y_guess_motor = -y_list(find(F_list>0,1,'last'));
 
 % initial guess based on initial spring stiffness
-y_guess_spring = F_in(0,[0 0])/((F_s(0,eps)-F_s(0,0))/eps);
+y_guess_spring = F_in(0,[0 0])/((F_s(0,10*eps)-F_s(0,0))/(10*eps));
 
 % use fzero to find when Fs=Fin
 y_guess = max([y_guess_motor, y_guess_spring]);
@@ -53,7 +53,7 @@ if inst_check>0
         % and the following kinematic equation: R = (1/2)a*t^2 + v_0*t  
         t_L_guess = (((-1*Latch.v_0) + sqrt((Latch.v_0)^2  + (2*a_0L*Latch.max_width)))/(a_0L));
     elseif (Latch.v_0 ~= 0 )
-        t_L_guess = Latch.max_width/Latch.v_0        
+        t_L_guess = Latch.max_width/Latch.v_0;     
     else
         warning("The latch's initial velocity and acceleration are both zero.")
         sol = [0,0,0]
@@ -85,7 +85,8 @@ y_unlatch = real(y_unlatch);
 %% Ballistic phase:Fs only
 %guess launch times by treating the spring as ideal-ish and getting the
 %   frequency
-stiffness = abs( ( F_s(0,y_unlatch(end,:)+eps) -F_s(0,y_unlatch(end,:)) ) / eps); %Here be divide by 0 errors, probably
+stiffness = abs( ( F_s(0,y_unlatch(end,:))-F_s(0,y_unlatch(end,:)+10*eps) ) / (10*eps)); %Here be divide by 0 errors, probably
+%stiffness=abs(F_s(0,y_unlatch(end,:))/y_unlatch(end,1))
 nat_freq=sqrt(stiffness/m_eff);
 t_launch_guess=pi/nat_freq;
 launch_opts=odeset('Events',@(t,y) launching_end(t,y,F_s));

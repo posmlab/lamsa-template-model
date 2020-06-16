@@ -43,10 +43,12 @@ R=2E-1;
 load_time_constraint=Inf;
 F_spring_max=1E4;
 k=1;
+k=2;
 spring=@(t,x) -k*x(1).*(abs(k*x(1))<F_spring_max);
 
 Latch.max_width=R;
 Latch.mass=1E2;
+Latch.mass=1E5;
 Latch.v_0=0;
 
 yL=@(x) Latch.max_width*(1-sqrt(1-x^2/Latch.max_width^2));
