@@ -18,7 +18,7 @@ end
 y_guess_motor = -y_list(find(F_list>0,1,'last'));
 
 % initial guess based on initial spring stiffness
-y_guess_spring = loading_motor.Force(0,[0 0])/((spring.Force(0,eps)-spring.Force(0,0))/eps);
+y_guess_spring = loading_motor.Force(0,[0 0])/((spring.Force(0,10*eps)-spring.Force(0,0))/(10*eps));
 
 % use fzero to find when Fs=Fin
 y_guess = max([y_guess_motor, y_guess_spring]);
@@ -85,7 +85,8 @@ y_unlatch = real(y_unlatch);
 %% Ballistic phase:Fs only
 %guess launch times by treating the spring as ideal-ish and getting the
 %   frequency
-stiffness=abs(spring.Force(0,y_unlatch(end,:))/y_unlatch(end,1)); %Here be divide by 0 errors, probably
+stiffness = abs(( spring.Force(0,y_unlatch(end,:))-spring.Force(0,y_unlatch(end,:)+10*eps) ) / (10*eps)); %Here be divide by 0 errors, probably
+%stiffness=abs(spring.Force(0,y_unlatch(end,:))/y_unlatch(end,1)); %Here be divide by 0 errors, probably
 nat_freq=sqrt(stiffness/m_eff);
 t_launch_guess=pi/nat_freq;
 launch_opts=odeset('Events',@(t,y) launching_end(t,y,spring));
