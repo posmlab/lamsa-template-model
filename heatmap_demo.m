@@ -14,7 +14,7 @@ Fmaxs=logspace(xrange(1),xrange(2),N);
 
 %setting y axis value on plot (Vmax)
 yname = 'vmax';
-yrange = [-1 3];
+yrange = [-1 4];
 v_maxs=logspace(yrange(1),yrange(2),N);
 
 metrics = {'tto','vto','Pmax','ymax','tL','KEmax','yunlatch'};
