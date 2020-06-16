@@ -15,7 +15,7 @@ Fmaxs=logspace(xrange(1),xrange(2),N);
 
 %setting y axis value on plot (Vmax of latch)
 yname = 'vmax';
-yrange = [-1 3];
+yrange = [-1 4];
 v_maxs=logspace(yrange(1),yrange(2),N);
 
 metrics = {'tto','vto','Pmax','ymax','tL','KEmax','yunlatch'};
@@ -35,12 +35,12 @@ load = load_mass(m);
 %parameters for the latch and struct initialization
 R=2E-1;
 m_L= 1E5;
-coeff_fric = .3;
+coeff_fric = .1;
 v_0L=0;
 latch = rounded_latch(R, m_L, coeff_fric, v_0L);
 
 %parameters for the spring and struct initialization
-k=1;
+k=2;
 m_s=1E-4;
 F_spring_max=1E4;
 spring = linear_spring(k, m_s, F_spring_max);
