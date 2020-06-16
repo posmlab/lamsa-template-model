@@ -8,42 +8,47 @@ N=50;
 
 
 
-%setting x axis on the plot (Fmax)
+%setting x axis on the plot (Fmax of latch)
 xname = 'Fmax';
 xrange = [0 4];
 Fmaxs=logspace(xrange(1),xrange(2),N);
 
-%setting y axis value on plot (Vmax)
+%setting y axis value on plot (Vmax of latch)
 yname = 'vmax';
 yrange = [-1 3];
 v_maxs=logspace(yrange(1),yrange(2),N);
 
 metrics = {'tto','vto','Pmax','ymax','tL','KEmax','yunlatch'};
 
-%parameters for the loading motor
-time_independent_motor= true;
-%L = 10E-1;
-%rho = 20;
-%sigma_f = 10E6;
+load_time_constraint=Inf;
+
+%parameters for the loading motor and struct initialization
 Fmax_motor = 20;
 range_of_motion = 3;
 vmax_motor=5.0000;
-
-%parameters for spring set up/ launch/ latch
-m=100;
-m_s=1E-4;
-coeff_fric = .1;
-R=2E-1;
-load_time_constraint=Inf;
-F_spring_max=1E4;
-k=1;
-v_0L=0;
-m_L= 1E5;
-
-load = load_mass(m);
-latch = rounded_latch(R, m_L, coeff_fric, v_0L);
-spring = linear_spring(k, m_s, F_spring_max);
 loading_motor = linear_motor(Fmax_motor, vmax_motor, range_of_motion);
+
+%parameters for the load and struct initialization
+m=100;
+load = load_mass(m);
+
+%parameters for the latch and struct initialization
+R=2E-1;
+m_L= 1E5;
+coeff_fric = .3;
+%everything was constant 
+v_0L=0;
+latch = rounded_latch(R, m_L, coeff_fric, v_0L);
+
+%parameters for the spring and struct initialization
+k=1;
+m_s=1E-4;
+F_spring_max=1E4;
+spring = linear_spring(k, m_s, F_spring_max);
+
+
+
+
 
 % initialize an output value matrix for each metric
 for ii=1:length(metrics)
@@ -55,8 +60,8 @@ if (debug)
 end
 for i=1:N %iterate over y-axis-variable of plot
     for j=1:N %iterate over x-axis-variable of plot
-         %unlatching_motor.Force=@(t,x) (Fmaxs(j)*(1-x(2)/v_maxs(i))) .* (abs(x(1))<=range_of_motion); %Linear F-v motor 
         unlatching_motor = linear_motor(Fmaxs(j),v_maxs(i),range_of_motion);
+        %input structs for each component
         [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring);
 
         if (debug)
