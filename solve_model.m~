@@ -120,11 +120,15 @@ params.latch_shape = rmfield(func_struct,{'file','type','within_file_path'});
 
 %% Writing .json output
 pretty = prettyjson(['parameters: ' jsonencode(params)]);
-timestamp = datetime('now', 'TimeZone', 'local', 'Format', 'yyyy-MM-dd_HH-mm-ss');
-fileName = sprintf("parameters_%s.json", timestamp);
+%timestamp = datetime('now', 'TimeZone', 'local', 'Format', 'yyyy/MM/dd_HH-mm-ss');
+%fileName = sprintf('parameters.%s.json', timestamp);
 
-fileID = fopen(fileName, 'w');
-if fileID == -1, error('Cannot create JSON file'); end
+fileID = fopen('param_test.json', 'w');
+%if fileID == -1, error('Cannot create JSON file'); end
 fwrite(fileID, pretty, 'char');
 fclose(fileID);
 end
+
+
+
+
