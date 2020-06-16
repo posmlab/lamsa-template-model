@@ -36,7 +36,6 @@ load = load_mass(m);
 R=2E-1;
 m_L= 1E5;
 coeff_fric = .3;
-%everything was constant 
 v_0L=0;
 latch = rounded_latch(R, m_L, coeff_fric, v_0L);
 
@@ -73,7 +72,7 @@ for i=1:N %iterate over y-axis-variable of plot
             hold on;
             ginput(1)
         end
-        met_dict=get_metrics(sol,transition_times,m,metrics);
+        met_dict=get_metrics(sol,transition_times,load, spring ,metrics);
         for ii=1:length(metrics)
             outval{ii}(i,j)=met_dict(metrics{ii});
         end
