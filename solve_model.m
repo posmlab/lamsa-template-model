@@ -99,5 +99,28 @@ transition_times=[t_unlatch(end),t_unlatch(end)+t_launch(end)];
 T=[t_unlatch;t_unlatch(end)+t_launch];
 Y=[y_unlatch;y_launch];
 sol=[T Y];
+
+%% save solution data to csv and json files
+
+outputDirectory = "output";
+if ~isdir(outputDirectory)
+    mkdir(outputDirectory)
 end
 
+%replace spaces with underscores
+dateString = string(datetime);
+cleanDateString = regexprep(dateString, " ", "_");
+cleanDateString = regexprep(cleanDateString, ":", "_");
+
+
+csvFilePath = outputDirectory + "/output--" + cleanDateString + ".csv";
+
+headers = ["Time", "y", "ydot", "x", "xdot", "normal force on latch x", ...
+    "normal force on load y", "frictional force on latch x", ...
+    "frictional force on load y", "spring force", ...
+    "unlatching motor force into"];
+
+writematrix(headers, csvFilePath);
+writematrix(sol, csvFilePath, 'WriteMode', 'append');
+
+end
