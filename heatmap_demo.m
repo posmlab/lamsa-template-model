@@ -39,12 +39,12 @@ load = load_mass(m);
 %parameters for the latch and struct initialization
 R=2E-1;
 m_L= 1E5;
-coeff_fric = .1;
+coeff_fric = 0;
 v_0L=0;
 latch = rounded_latch(R, m_L, coeff_fric, v_0L);
 
 %parameters for the spring and struct initialization
-k=.3;
+k=6;
 m_s=1E-4;
 F_spring_max=1E4;
 %characteristic_length for exponential spring
