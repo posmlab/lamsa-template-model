@@ -23,6 +23,7 @@ y_guess_spring = loading_motor.Force(0,[0 0])/((spring.Force(0,10*eps)-spring.Fo
 % use fzero to find when Fs=Fin
 y_guess = max([y_guess_motor, y_guess_spring]);
 options =  {};% optimset('Display','iter');
+%check this still calculates max force for different springs
 [y0,~,exitflag]=fzero(@(y) (loading_motor.Force(0,[y 0])-spring.Force(0,[y 0])) - LARGE_NUM*((~loading_motor.Force(0,[y 0]))||(~spring.Force(0,[y 0])))+LARGE_NUM*(y>0),y_guess,options);
 if (exitflag<0)
     error('fzero failed');
@@ -33,7 +34,7 @@ end
 %check for time independence
 
 F_friction = latch.coeff_fric*spring.Force(0,[y0,0]);
-if unlatching_motor.max_force < F_friction
+if unlatching_motor.max_force <= F_friction
     warning('latch cannot overcome friction force');
     sol = [0,0,0];
     transition_times = [0,0];
@@ -53,7 +54,7 @@ if inst_check>0
         % and the following kinematic equation: R = (1/2)a*t^2 + v_0*t  
         t_L_guess = (((-1*latch.v_0) + sqrt((latch.v_0)^2  + (2*a_0L*latch.max_width)))/(a_0L));
     elseif (latch.v_0 ~= 0 )
-        t_L_guess = latch.max_width/latch.v_0        
+        t_L_guess = latch.max_width/latch.v_0;        
     else
         warning("The latch's initial velocity and acceleration are both zero.")
         sol = [0,0,0]
@@ -85,7 +86,7 @@ y_unlatch = real(y_unlatch);
 %% Ballistic phase:Fs only
 %guess launch times by treating the spring as ideal-ish and getting the
 %   frequency
-stiffness = abs(( spring.Force(0,y_unlatch(end,:))-spring.Force(0,y_unlatch(end,:)+10*eps) ) / (10*eps)); %Here be divide by 0 errors, probably
+stiffness = abs( (spring.Force(0,y_unlatch(end,:)) - spring.Force(0,y_unlatch(end,:)+(100*eps))) / (100*eps)); 
 %stiffness=abs(spring.Force(0,y_unlatch(end,:))/y_unlatch(end,1)); %Here be divide by 0 errors, probably
 nat_freq=sqrt(stiffness/m_eff);
 t_launch_guess=pi/nat_freq;

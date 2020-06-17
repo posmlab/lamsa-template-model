@@ -11,7 +11,6 @@ elseif (nargin==5) % else return value of force for a specicifc
 else
     error('Linear spring needs between one to four arguments');
 end
-spring.Time_independent = true;
 spring.mass = m_s;
 end % end linear_spring
 
