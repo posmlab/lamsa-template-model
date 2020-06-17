@@ -47,7 +47,7 @@ latch = rounded_latch(R, m_L, coeff_fric, v_0L);
 k=1;
 m_s=1E-4;
 F_spring_max=1E4;
-%characteristic_length for exponential spring
+%extra parameters for exponential spring
 characteristic_length = 3;
 %spring = linear_spring(k, m_s, F_spring_max);
 spring=exponential_spring(k, characteristic_length, m_s, F_spring_max);
