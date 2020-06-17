@@ -1,6 +1,7 @@
-function metrics = get_metrics(sol,transition_times,m_eff,met_names)
+function metrics = get_metrics(sol,transition_times,load,spring,met_names)
 %Takes solution matrix (columns time, position, velocity)and the effective 
 %    mass and returns the metrics specified in met_names
+    m_eff = load.mass + spring.mass/3;
     metrics=containers.Map(met_names,zeros(length(met_names),1),'UniformValues',false);
     if isKey(metrics,'vto')
         metrics('vto')=sol(end,3);
