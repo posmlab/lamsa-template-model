@@ -85,7 +85,7 @@ y_unlatch = real(y_unlatch);
 %% Ballistic phase:Fs only
 %guess launch times by treating the spring as ideal-ish and getting the
 %   frequency
-stiffness = abs( (spring.Force(0,y_unlatch(end,:)) - spring.Force(0,y_unlatch(end,:)+(100*eps))) / (100*eps)); 
+stiffness = abs( (spring.Force(0,y_unlatch(end,:)) - spring.Force(0,y_unlatch(end,:)+(10*eps))) / (10*eps)); 
 %stiffness=abs(spring.Force(0,y_unlatch(end,:))/y_unlatch(end,1)); %Here be divide by 0 errors, probably
 nat_freq=sqrt(stiffness/m_eff);
 t_launch_guess=pi/nat_freq;
