@@ -31,7 +31,6 @@ end
 
 %% Unlatching phase: Fs vs Flatch
 
-%check for time independence
 
 F_friction = latch.coeff_fric*spring.Force(0,[y0,0]);
 if unlatching_motor.max_force <= F_friction
