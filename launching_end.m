@@ -1,6 +1,6 @@
-function [value,isterminal,direction] = launching_end(t,y,F_s)
+function [value,isterminal,direction] = launching_end(t,y,spring)
 %End condition for loading
-value=F_s(t,y);
+value=spring.Force(t,y);
 isterminal=1;
 direction=0;
 end
