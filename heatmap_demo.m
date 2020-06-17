@@ -56,6 +56,7 @@ spring = linear_spring(k, m_s, F_spring_max);
 
 
 
+
 % initialize an output value matrix for each metric
 for ii=1:length(metrics)
     outval{ii}=zeros(N);
