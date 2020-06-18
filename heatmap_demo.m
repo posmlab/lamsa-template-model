@@ -4,7 +4,7 @@ close all
 clearvars
 tic
 debug = false;
-N=35;
+N=1;
 
 
 
@@ -72,8 +72,11 @@ spring = linear_spring(k, m_s, F_spring_max);
 % spring=exponential_spring(k, characteristic_length, m_s,F_spring_max);
 
 
-
-
+% make a directory for every run
+dateString = string(datetime);
+cleanDateString = regexprep(dateString, " ", "_");
+cleanDateString = regexprep(cleanDateString, ":", "_");
+        
 
 % initialize an output value matrix for each metric
 for ii=1:length(metrics)
@@ -93,7 +96,8 @@ for i=1:N %iterate over y-axis-variable of plot
 %         m_s=As(i)*L*rho;
 %         spring = linear_spring(k, m_s, F_spring_max);
 %         %spring=exponential_spring(k, characteristic_length, m_s,F_spring_max);
-        [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring);
+        %replace spaces with underscores
+        [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring, cleanDateString);
 
         if (debug)
             figure(h1)
