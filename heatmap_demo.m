@@ -4,7 +4,7 @@ close all
 clearvars
 tic
 debug = false;
-N=4;
+N=1;
 
 
 

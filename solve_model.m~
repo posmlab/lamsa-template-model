@@ -101,15 +101,11 @@ y0=y_unlatch(end,:)';
 transition_times=[t_unlatch(end),t_unlatch(end)+t_launch(end)];
 T=[t_unlatch;t_unlatch(end)+t_launch];
 Y=[y_unlatch;y_launch];
-fill = zeros(length(Y) - length(X), 2);%Makes X the right size to fit in sol
-xFinal = [X;fill];
-for i=length(X):length(xFinal)%Likely needs slight revision, assumes stopping of latch at unlatch point
-    xFinal(i, 1) = X(end, 1);%See above
-    xFinal(i, 2) = 0; %Instantaneous stop of latch movement???
-end
+fill = zeros(length(Y) - length(X), 2);
+xFinal = [X;fill]
 disp(size(Y))
 disp(size(X))
-sol=[T Y xFinal];
+sol=[T Y];
 
 
 
