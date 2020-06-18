@@ -1,5 +1,5 @@
 
-function [sol,transition_times] = solve_model(loading_motor,unlatching_motor,load,latch,spring)
+function [sol,transition_times] = solve_model(loading_motor,unlatching_motor,load,latch,spring, outputDirectory)
 %Solve set of differential equations for loading, unlatching, and launching
 %   phases of LAMSA motion
 LARGE_NUM = 1E10; % subtract a large number in fzero function to trick fzero into identifying points where motor or spring suddnely go to 0
@@ -103,41 +103,45 @@ Y=[y_unlatch;y_launch];
 sol=[T Y];
 
 
+
 %% Establishing Parameters for .json output
 params = struct();
 
-params.m_L = m;
+params.m_L = latch.mass;
 
 params.m_eff = m_eff;
 
-params.v0 = Latch.v_0;
+params.v0 = latch.v_0;
 
-func_struct = functions(motor_in);
+func_struct = functions(loading_motor.Force);
 params.loading_motor = rmfield(func_struct,{'file','type','within_file_path'});
 
-func_struct = functions(spring);
+func_struct = functions(spring.Force);
 params.spring = rmfield(func_struct,{'file','type','within_file_path'});
 
-func_struct = functions(yL);
+func_struct = functions(latch.y_L{1});
 params.latch_shape = rmfield(func_struct,{'file','type','within_file_path'});
 
-%% Writing .json output
-pretty = prettyjson(['parameters: ' jsonencode(params)]);
-timestamp = datetime('now', 'TimeZone', 'local', 'Format', 'yyyy-MM-dd_HH-mm-ss');
-fileName = sprintf("parameters_%s.json", timestamp);
-
-fileID = fopen(fileName, 'w');
-if fileID == -1, error('Cannot create JSON file'); end
-fwrite(fileID, pretty, 'char');
-fclose(fileID);
-end
-
-%% save solution data to csv and json files
-
-outputDirectory = "output";
+%% Making output directory
 if ~isdir(outputDirectory)
     mkdir(outputDirectory)
 end
+
+timeStampString = string(datetime('now', 'TimeZone', 'local', 'Format', 'yyyy-MM-dd_HH-mm-ss-SSS'));
+
+%% Writing .json output
+pretty = prettyjson(['parameters: ' jsonencode(params)]);
+
+fileName = outputDirectory + sprintf("/parameters_%s.json", timeStampString);
+
+fileID = fopen(fileName, 'w');
+
+fwrite(fileID, pretty, 'char');
+fclose(fileID);
+
+%% save solution data to csv and json files
+
+
 
 %replace spaces with underscores
 dateString = string(datetime);
@@ -145,7 +149,7 @@ cleanDateString = regexprep(dateString, " ", "_");
 cleanDateString = regexprep(cleanDateString, ":", "_");
 
 
-csvFilePath = outputDirectory + "/output--" + cleanDateString + ".csv";
+csvFilePath = outputDirectory + "/raw_data--" + timeStampString + ".csv";
 
 headers = ["Time", "y", "ydot", "x", "xdot", "normal force on latch x", ...
     "normal force on load y", "frictional force on latch x", ...
