@@ -13,17 +13,17 @@ m_eff = load.mass + spring.mass/3;
 y_list = logspace(-20,20,40); % sweep through 40 orders of magnitude
 F_list = zeros(size(y_list));
 for i = 1:length(y_list)
-    F_list(i) = loading_motor.Force(0,[y_list(i) 0]);
+    F_list(i) = loading_motor.Force(Inf,[y_list(i) 0]);
 end
 y_guess_motor = -y_list(find(F_list>0,1,'last'));
 
 % initial guess based on initial spring stiffness
-y_guess_spring = loading_motor.Force(0,[0 0])/((spring.Force(0,10*eps)-spring.Force(0,0))/(10*eps));
+y_guess_spring = loading_motor.Force(Inf,[0 0])/((spring.Force(0,10*eps)-spring.Force(0,0))/(10*eps));
 
 % use fzero to find when Fs=Fin does this work for exponential spring?
 y_guess = max([y_guess_motor, y_guess_spring]);
 options =  {};% optimset('Display','iter');
-[y0,~,exitflag]=fzero(@(y) (loading_motor.Force(0,[y 0])-spring.Force(0,[y 0])) - LARGE_NUM*((~loading_motor.Force(0,[y 0]))||(~spring.Force(0,[y 0])))+LARGE_NUM*(y>0),y_guess,options);
+[y0,~,exitflag]=fzero(@(y) (loading_motor.Force(Inf,[y 0])-spring.Force(0,[y 0])) - LARGE_NUM*((~loading_motor.Force(Inf,[y 0]))||(~spring.Force(0,[y 0])))+LARGE_NUM*(y>0),y_guess,options);
 if (exitflag<0)
     error('fzero failed');
 end
@@ -41,6 +41,7 @@ end
 
 
 [inst_check,~,~]=unlatching_end(0,[0,latch.v_0],m_eff,y0,latch,spring,unlatching_motor);
+inst_check = 1;
 if inst_check>0 
     unlatch_opts=odeset('Events',@(t,y) unlatching_end(t,y,m_eff,y0,latch,spring,unlatching_motor),'RelTol',1E-7,'AbsTol',1E-10);
     ode=@(t,y) unlatching_ode(t,y,m_eff,y0,latch,spring,unlatching_motor);
@@ -84,8 +85,7 @@ y_unlatch = real(y_unlatch);
 %% Ballistic phase:Fs only
 %guess launch times by treating the spring as ideal-ish and getting the
 %   frequency
-
-stiffness = abs( (spring.Force(0,y_unlatch(end,:)) - spring.Force(0,y_unlatch(end,:)+(10*eps))) / (10*eps)); 
+stiffness = abs(( spring.Force(0,y_unlatch(end,:))-spring.Force(0,y_unlatch(end,:)+(100*eps)) ) / (100*eps)); %Here be divide by 0 errors, probably
 %stiffness=abs(spring.Force(0,y_unlatch(end,:))/y_unlatch(end,1)); %Here be divide by 0 errors, probably
 nat_freq=sqrt(stiffness/m_eff);
 t_launch_guess=pi/nat_freq;
