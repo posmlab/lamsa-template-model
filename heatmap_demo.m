@@ -10,13 +10,12 @@ N=1;
 
 %setting x axis on the plot (Fmax of latch)
 xname = 'Fmax';
-xrange = [-1 0];
+xrange = [-1 3];
 Fmaxs=logspace(xrange(1),xrange(2),N);
 
 %setting y axis value on plot (Vmax of latch)
 yname = 'vmax';
-
-yrange = [-3 -2];
+yrange = [-2 2];
 v_maxs=logspace(yrange(1),yrange(2),N);
 
 metrics = {'tto','vto','Pmax','ymax','tL','KEmax','yunlatch'};
@@ -44,12 +43,13 @@ load_time_constraint=Inf;
 %parameters for the loading motor
 Fmax_motor = 20;
 range_of_motion = 3;
-vmax_motor=100.0000;
+vmax_motor=10.0000;
 %extra parameters for hill muscle motor
-muscle_length=.1;
-r_activation=1E-2;
+muscle_length=10;
+r_activation=Inf;
 %struct initialization
-loading_motor = linear_motor(Fmax_motor, vmax_motor, range_of_motion);
+%loading_motor = linear_motor(Fmax_motor, vmax_motor, range_of_motion);
+loading_motor = hill_muscle_motor(muscle_length, Fmax_motor, vmax_motor,r_activation);
 
 %parameters for the load and struct initialization
 m=10;
