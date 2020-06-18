@@ -100,7 +100,9 @@ hold off
 %k<k_opt
 %values must be lower than k_opt otherwise whole range of x values isnt
 %reached
-k_opt=loading_motor.max_force/range_of_motion
+k_opt=loading_motor.max_force/range_of_motion;
+figure 
+plotspot=1;
 for k = [k_opt/5,k_opt/2,k_opt, k_opt*2]
     lin_spring=linear_spring(k, m_s, F_spring_max);
     expo_spring=exponential_spring(k, characteristic_length, m_s,F_spring_max);
@@ -117,19 +119,21 @@ for k = [k_opt/5,k_opt/2,k_opt, k_opt*2]
     for i = 1:linsz(1)
         linspring(i)=lin_spring.Force(linsol(i,1),[linsol(i,2), linsol(i,3)]);
     end
-    figure    
-    hold on
     y=Fmax_motor;
-    z=0;
-    line([-range_of_motion,0],[y,y]);
-    line([z,z],[0,Fmax_motor]);
+    z=0;    
     expo_range=size(exposol(:,2));
     lin_range=size(linsol(:,2));
+    subplot(2,2,plotspot); 
+    hold on
     plot(linsol(:,2),linspring(1:lin_range(1)),'r');
     plot(exposol(:,2),expospring(1:expo_range(1)),'k');
+    line([-range_of_motion,0],[y,y]);
+    line([z,z],[0,Fmax_motor]);
+      
     hold off
     lin_spring_work=trapz(linsol(:,2),linspring(1:lin_range(1)))
     expo_spring_work=trapz(exposol(:,2),expospring(1:expo_range(1)))
+    plotspot=plotspot+1;
 end  
 
 %to add
