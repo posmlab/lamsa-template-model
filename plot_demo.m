@@ -2,6 +2,7 @@ close all
 clearvars
 tic
 debug = false;
+addpath(genpath(pwd));
 
 dateString = string(datetime);
 cleanDateString = regexprep(dateString, " ", "_");
@@ -19,8 +20,8 @@ muscle_length=3;
 r_activation=.5;
 %struct initialization
 loading_motor = linear_motor(Fmax_motor, vmax_motor, range_of_motion);
-unlatching_motor=hill_muscle_motor(muscle_length, Fmax_motor, vmax_motor,r_activation);
-unlatching_motor2=linear_motor(Fmax_motor, vmax_motor, range_of_motion);
+unlatching_motor= hill_muscle_motor(muscle_length, Fmax_motor, vmax_motor,r_activation);
+unlatching_motor2= linear_motor(Fmax_motor, vmax_motor, range_of_motion);
 
 %parameters for the load and struct initialization
 m=100;
