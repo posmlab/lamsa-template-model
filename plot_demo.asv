@@ -3,6 +3,10 @@ clearvars
 tic
 debug = false;
 
+<<<<<<< Updated upstream
+=======
+load_time_constraint=Inf;
+>>>>>>> Stashed changes
 
 %parameters for the loading motor
 Fmax_motor = 20;
@@ -40,7 +44,13 @@ spring = linear_spring(k, m_s, F_spring_max);
 
 %plot force outputs of motor as a function of time
 unlatching_motor=hill_muscle_motor(muscle_length, Fmax_motor, vmax_motor,r_activation);
+<<<<<<< Updated upstream
 unlatching_motor.F_length
 unlatching_motor.F_length
 unlatching_motor.F_length
 
+=======
+
+timespan=sol(:,1);
+xspan=
+>>>>>>> Stashed changes

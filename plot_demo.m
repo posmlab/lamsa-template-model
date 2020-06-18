@@ -40,12 +40,5 @@ spring = linear_spring(k, m_s, F_spring_max);
 [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring);
 
 %plot force outputs of motor as a function of time
-<<<<<<< Updated upstream
-unlatching_motor=hill_muscle_motor(muscle_length, Fmax_motor, vmax_motor,r_activation);
-=======
 
-
-
-
->>>>>>> Stashed changes
 
