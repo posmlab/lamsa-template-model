@@ -27,11 +27,11 @@ Fmax_motor = 20;
 range_of_motion = 3;
 vmax_motor=10.0000;
 %extra parameters for hill muscle motor
-muscle_length=.1;
+muscle_length=10;
 r_activation=Inf;
 %struct initialization
-loading_motor = linear_motor(Fmax_motor, vmax_motor, range_of_motion);
-%loading_motor = hill_muscle_motor(muscle_length, Fmax_motor, vmax_motor,r_activation);
+%loading_motor = linear_motor(Fmax_motor, vmax_motor, range_of_motion);
+loading_motor = hill_muscle_motor(muscle_length, Fmax_motor, vmax_motor,r_activation);
 
 %parameters for the load and struct initialization
 m=100;
