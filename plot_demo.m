@@ -6,11 +6,11 @@ debug = false;
 load_time_constraint=Inf;
 
 %parameters for the loading motor
-Fmax_motor = 10;
-range_of_motion = 3;
+Fmax_motor = 5;
+range_of_motion = 1;
 vmax_motor=100.0000;
 %extra parameters for hill muscle motor
-muscle_length=.1;
+muscle_length=3;
 r_activation=.5;
 %struct initialization
 loading_motor = linear_motor(Fmax_motor, vmax_motor, range_of_motion);
@@ -42,7 +42,7 @@ spring = linear_spring(k, m_s, F_spring_max);
 %plot force outputs of motor as a function of time HILL MUSCLE
 sz=size(sol);
 for t = 1:sz(1)
-    force_array(t)=unlatching_motor.max_force*unlatching_motor.F_velocity(sol(t,1),[sol(t,2), sol(t,3)])*unlatching_motor.F_activation(sol(t,1),[sol(t,2), sol(t,3)]);
+    force_array(t)=unlatching_motor.max_force*unlatching_motor.F_length(sol(t,1),[sol(t,2), sol(t,3)])*unlatching_motor.F_velocity(sol(t,1),[sol(t,2), sol(t,3)])*unlatching_motor.F_activation(sol(t,1),[sol(t,2), sol(t,3)]);
     force_activation(t)=unlatching_motor.F_activation(sol(t,1),[sol(t,2), sol(t,3)]);
     force_velocity(t)=unlatching_motor.F_velocity(sol(t,1),[sol(t,2), sol(t,3)]);
     force_length(t)=unlatching_motor.F_length(sol(t,1),[sol(t,2), sol(t,3)]);
@@ -78,3 +78,6 @@ hold on
 plot(sol1(:,1),linearspring,'r');
 plot(sol2(:,1),exponentialspring,'k');
 hold off
+
+%comparing linear and exponential spring force vs displacement for kopt,
+%k<k_opt, k>kopt
