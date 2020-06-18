@@ -20,10 +20,9 @@ y_guess_motor = -y_list(find(F_list>0,1,'last'));
 % initial guess based on initial spring stiffness
 y_guess_spring = loading_motor.Force(0,[0 0])/((spring.Force(0,10*eps)-spring.Force(0,0))/(10*eps));
 
-% use fzero to find when Fs=Fin
+% use fzero to find when Fs=Fin does this work for exponential spring?
 y_guess = max([y_guess_motor, y_guess_spring]);
 options =  {};% optimset('Display','iter');
-%check this still calculates max force for different springs
 [y0,~,exitflag]=fzero(@(y) (loading_motor.Force(0,[y 0])-spring.Force(0,[y 0])) - LARGE_NUM*((~loading_motor.Force(0,[y 0]))||(~spring.Force(0,[y 0])))+LARGE_NUM*(y>0),y_guess,options);
 if (exitflag<0)
     error('fzero failed');
