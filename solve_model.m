@@ -107,8 +107,6 @@ for i=length(X):length(xFinal)%Likely needs slight revision, assumes stopping of
     xFinal(i, 1) = X(end, 1);%See above
     xFinal(i, 2) = 0; %Instantaneous stop of latch movement???
 end
-disp(size(Y))
-disp(size(X))
 sol=[T Y xFinal];
 
 
