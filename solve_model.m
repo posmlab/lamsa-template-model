@@ -104,56 +104,56 @@ sol=[T Y];
 
 
 %% Establishing Parameters for .json output
-params = struct();
-
-params.m_L = m;
-
-params.m_eff = m_eff;
-
-params.v0 = Latch.v_0;
-
-func_struct = functions(motor_in);
-params.loading_motor = rmfield(func_struct,{'file','type','within_file_path'});
-
-func_struct = functions(spring);
-params.spring = rmfield(func_struct,{'file','type','within_file_path'});
-
-func_struct = functions(yL);
-params.latch_shape = rmfield(func_struct,{'file','type','within_file_path'});
-
-%% Writing .json output
-pretty = prettyjson(['parameters: ' jsonencode(params)]);
-timestamp = datetime('now', 'TimeZone', 'local', 'Format', 'yyyy-MM-dd_HH-mm-ss');
-fileName = sprintf("parameters_%s.json", timestamp);
-
-fileID = fopen(fileName, 'w');
-if fileID == -1, error('Cannot create JSON file'); end
-fwrite(fileID, pretty, 'char');
-fclose(fileID);
-end
-
-%% save solution data to csv and json files
-
-outputDirectory = "output";
-if ~isdir(outputDirectory)
-    mkdir(outputDirectory)
-end
-
-%replace spaces with underscores
-dateString = string(datetime);
-cleanDateString = regexprep(dateString, " ", "_");
-cleanDateString = regexprep(cleanDateString, ":", "_");
-
-
-csvFilePath = outputDirectory + "/output--" + cleanDateString + ".csv";
-
-headers = ["Time", "y", "ydot", "x", "xdot", "normal force on latch x", ...
-    "normal force on load y", "frictional force on latch x", ...
-    "frictional force on load y", "spring force", ...
-    "unlatching motor force into"];
-
-writematrix(headers, csvFilePath);
-writematrix(sol, csvFilePath, 'WriteMode', 'append');
-
-end
-
+% params = struct();
+% 
+% params.m_L = m;
+% 
+% params.m_eff = m_eff;
+% 
+% params.v0 = Latch.v_0;
+% 
+% func_struct = functions(motor_in);
+% params.loading_motor = rmfield(func_struct,{'file','type','within_file_path'});
+% 
+% func_struct = functions(spring);
+% params.spring = rmfield(func_struct,{'file','type','within_file_path'});
+% 
+% func_struct = functions(yL);
+% params.latch_shape = rmfield(func_struct,{'file','type','within_file_path'});
+% 
+% %% Writing .json output
+% pretty = prettyjson(['parameters: ' jsonencode(params)]);
+% timestamp = datetime('now', 'TimeZone', 'local', 'Format', 'yyyy-MM-dd_HH-mm-ss');
+% fileName = sprintf("parameters_%s.json", timestamp);
+% 
+% fileID = fopen(fileName, 'w');
+% if fileID == -1, error('Cannot create JSON file'); end
+% fwrite(fileID, pretty, 'char');
+% fclose(fileID);
+% end
+% 
+% %% save solution data to csv and json files
+% 
+% outputDirectory = "output";
+% if ~isdir(outputDirectory)
+%     mkdir(outputDirectory)
+% end
+% 
+% %replace spaces with underscores
+% dateString = string(datetime);
+% cleanDateString = regexprep(dateString, " ", "_");
+% cleanDateString = regexprep(cleanDateString, ":", "_");
+% 
+% 
+% csvFilePath = outputDirectory + "/output--" + cleanDateString + ".csv";
+% 
+% headers = ["Time", "y", "ydot", "x", "xdot", "normal force on latch x", ...
+%     "normal force on load y", "frictional force on latch x", ...
+%     "frictional force on load y", "spring force", ...
+%     "unlatching motor force into"];
+% 
+% writematrix(headers, csvFilePath);
+% writematrix(sol, csvFilePath, 'WriteMode', 'append');
+% 
+% end
+% 

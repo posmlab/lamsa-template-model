@@ -15,7 +15,6 @@ Fmaxs=logspace(xrange(1),xrange(2),N);
 
 %setting y axis value on plot (Vmax of latch)
 yname = 'vmax';
-
 yrange = [-3 -2];
 v_maxs=logspace(yrange(1),yrange(2),N);
 

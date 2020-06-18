@@ -10,11 +10,10 @@ elseif (nargin == 7) %assume
 else
     error('Hill muscle motor requires 4 or 7 inputs (including a_L, b_L, or s, or using default values');
 end
-%F_length=@(t,x) exp(-((abs((((x(1)/muscle_length)^motor.b_L)-1)/motor.s))^motor.a_L));
-%F_velocity=@(t,x)(1-(x(2)/vmax_motor))/(1+(x(2)/(vmax_motor/4)));  
-%F_activation=@(t,x)min(r_activation*t,1);
-motor.Force = @(t,x) Fmax_motor*(1-(x(2)/vmax_motor))/(1+(x(2)/(vmax_motor/4)))*(exp(-((abs(((((muscle_length-x(1))/muscle_length)^(motor.b_L))-1)/motor.s)^motor.a_L))))*min(r_activation*t,1);
-%motor.Force = @(t,x) (((x(1))/muscle_length)<=1)*((x(1)/muscle_length)>=0.7)* Fmax_motor*(1-(x(2)/vmax_motor))/(1+(x(2)/(vmax_motor/4)))*(exp(-((abs(((((muscle_length-x(1))/muscle_length)^(motor.b_L))-1)/motor.s)^motor.a_L))))*min(r_activation*t,1);  
+motor.F_length=@(t,x) exp(-((abs((((x(1)/muscle_length)^motor.b_L)-1)/motor.s))^motor.a_L));
+motor.F_velocity=@(t,x)(1-(x(2)/vmax_motor))/(1+(x(2)/(vmax_motor/4)));  
+motor.F_activation=@(t,x)min(r_activation*t,1);
+motor.Force = @(t,x) (((x(1))/muscle_length)<=1)*((x(1)/muscle_length)>=0.7)* Fmax_motor*(1-(x(2)/vmax_motor))/(1+(x(2)/(vmax_motor/4)))*(exp(-((abs(((((muscle_length-x(1))/muscle_length)^(motor.b_L))-1)/motor.s)^motor.a_L))))*min(r_activation*t,1);  
 motor.max_force = Fmax_motor;
 end 
 
