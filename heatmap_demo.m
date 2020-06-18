@@ -7,6 +7,8 @@ tic
 debug = false;
 addpath(genpath(pwd)); % add all subdirectories to path to access the files in components-library
 
+%% edit the following parameters
+
 %% plot parameters 
 N=25; % determines resolution of heatplots
 
@@ -82,6 +84,8 @@ unlatching_motor_muscle_length = 10;
 unlatching_motor_r_activation = Inf;
 
 % unlatching motor struct initialization happens in next section
+
+%% end editable parameters
 
 %% initializing an output value matrix for each metric
 

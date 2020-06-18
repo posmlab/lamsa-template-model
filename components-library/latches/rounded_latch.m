@@ -13,6 +13,9 @@ function latch = rounded_latch(R, m_L, varargin)
     varargin_default_values = {0,0};
     
     % check and assign optional parameters
+    if (nargin < 2)
+        error('Rounded latch requires at least 2 arguments.');
+    end
     if (length(varargin)>length(varargin_param_names))
         error('Too many input parameters');
     end

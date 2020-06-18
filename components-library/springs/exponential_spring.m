@@ -13,6 +13,9 @@ function spring = exponential_spring(k_0, m_s, characteristic_length, varargin)
     varargin_default_values = {Inf};
     
     % check and assign optional parameters
+    if (nargin < 3)
+        error('Exponential spring requires at least 3 arguments.');
+    end
     if (length(varargin)>length(varargin_param_names))
         error('Too many input parameters');
     end

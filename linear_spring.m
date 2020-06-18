@@ -12,6 +12,9 @@ function spring = linear_spring(k,m_s,varargin)
     varargin_default_values = {Inf};
     
     % check and assign optional parameters
+    if (nargin < 2)
+        error('Linear spring requires at least 2 arguments.');
+    end
     if (length(varargin)>length(varargin_param_names))
         error('Too many input parameters');
     end

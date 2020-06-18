@@ -15,6 +15,9 @@ function motor = hill_muscle_motor(muscle_length,F_motor_max,v_motor_max,r_activ
     varargin_default_values = {muscle_length,2.08,-2.89,-0.75};
     
     % check and assign optional parameters
+    if (nargin < 4)
+        error('Hill muscle motor requires at least 4 arguments.');
+    end
     if (length(varargin)>length(varargin_param_names))
         error('Too many input parameters');
     end

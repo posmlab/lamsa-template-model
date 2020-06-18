@@ -9,7 +9,7 @@ function motor = linear_motor(F_motor_max, v_motor_max, range_of_motion)
     if (nargin == 3)
         motor.Force = @(t,x) (F_motor_max*(1-x(2)/v_motor_max)) .* (abs(x(1))<=range_of_motion);
     else
-        error('Linear motor requires 3 arguments. See comments in linear_motor.m for more information.');
+        error('Linear motor requires 3 arguments.');
     end
     motor.max_force = F_motor_max;
 end 
