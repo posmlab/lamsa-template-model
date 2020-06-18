@@ -4,6 +4,7 @@ close all
 clearvars
 tic
 debug = false;
+addpath(genpath(pwd)); %add all subdirectories to path: to help find the files in components-library
 N=25;
 
 
@@ -30,8 +31,8 @@ vmax_motor=10.0000;
 muscle_length=10;
 r_activation=Inf;
 %struct initialization
-%loading_motor = linear_motor(Fmax_motor, vmax_motor, range_of_motion);
-loading_motor = hill_muscle_motor(muscle_length, Fmax_motor, vmax_motor,r_activation);
+loading_motor = linear_motor(Fmax_motor, vmax_motor, range_of_motion);
+%loading_motor = hill_muscle_motor(muscle_length, Fmax_motor, vmax_motor,r_activation);
 
 %parameters for the load and struct initialization
 m=100;
@@ -50,8 +51,8 @@ m_s=1;
 F_spring_max=1E4;
 %extra parameters for exponential spring
 characteristic_length = 5;
-spring = linear_spring(k, m_s, F_spring_max);
-%spring=exponential_spring(k, characteristic_length, m_s, F_spring_max);
+%spring = linear_spring(k, m_s, F_spring_max);
+spring=exponential_spring(k, characteristic_length, m_s, F_spring_max);
 
 
 
@@ -67,8 +68,8 @@ if (debug)
 end
 for i=1:N %iterate over y-axis-variable of plot
     for j=1:N %iterate over x-axis-variable of plot
-        unlatching_motor = hill_muscle_motor(muscle_length, Fmaxs(j), v_maxs(i),r_activation);
-        %unlatching_motor = linear_motor(Fmaxs(j),v_maxs(i), range_of_motion);
+        %unlatching_motor = hill_muscle_motor(muscle_length, Fmaxs(j), v_maxs(i),r_activation);
+        unlatching_motor = linear_motor(Fmaxs(j),v_maxs(i), range_of_motion);
         %input structs for each component
         [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring);
 
