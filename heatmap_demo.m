@@ -26,7 +26,7 @@ load_time_constraint = Inf;
 
 %% loading motor
 
-% loading motor parameters
+% loading motor parameters for linear motor
 F_max_loading_motor = 20;
 loading_motor_range_of_motion = 3;
 v_max_loading_motor = 10.0000;
@@ -74,7 +74,7 @@ spring = linear_spring(k, m_s, F_spring_max);
 
 %% unlatching motor
 
-% unlatching motor paramters
+% unlatching motor paramters for linear motor
 unlatchinging_motor_range_of_motion = 3;
 
 % extra parameters for hill muscle motor

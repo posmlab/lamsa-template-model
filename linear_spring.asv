@@ -1,5 +1,5 @@
 %% linear_spring struct
-% arguments in required order:
+% arguments:
 %     k - spring constant
 %     m_s - mass of the spring
 %     F_spring_max - maximum amount of force the spring can exert
@@ -7,7 +7,7 @@
 % min # arguments = 2
 
 function spring = linear_spring(k,m_s,varargin)
-    % optional parameters
+    %optional parameters
     varargin_param_names = {'F_spring_max'};
     varargin_default_values = {Inf};
     
@@ -22,7 +22,7 @@ function spring = linear_spring(k,m_s,varargin)
         eval([varargin_param_names{i} '=varargin_default_values{i};'])
     end
     
-    % model
+    %model
     spring.Force = @(t,x)-k*x(1).*(abs(k*x(1))<F_spring_max);  
     spring.mass = m_s;
 end

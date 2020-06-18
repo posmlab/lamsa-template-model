@@ -26,7 +26,7 @@ load_time_constraint = Inf;
 
 %% loading motor
 
-% loading motor parameters
+% loading motor parameters for linear motor
 F_max_loading_motor = 20;
 loading_motor_range_of_motion = 3;
 v_max_loading_motor = 10.0000;
@@ -72,8 +72,9 @@ characteristic_length = 5;
 spring = linear_spring(k, m_s, F_spring_max);
 %spring = exponential_spring(k, characteristic_length, m_s, F_spring_max);
 
-%% unlatching motor parameters
+%% unlatching motor
 
+% unlatching motor paramters for linear motor
 unlatchinging_motor_range_of_motion = 3;
 
 % extra parameters for hill muscle motor
@@ -91,14 +92,15 @@ if (debug)
     h1 = figure()
     h2 = figure()
 end
-for i=1:N % iterate over y-axis-variable of plot
-    for j=1:N % iterate over x-axis-variable of plot
+for i = 1:N % iterate over y-axis-variable of plot
+    for j = 1:N % iterate over x-axis-variable of plot
         
+        % unlatching motor struct initialization
         unlatching_motor = hill_muscle_motor(unlatching_motor_muscle_length, Fmaxs(j), v_maxs(i), unlatching_motor_r_activation);
         %unlatching_motor = linear_motor(Fmaxs(j),v_maxs(i), unlatching_motor_range_of_motion);
         
-        % input structs for each component into solve_model
-        [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring);
+        % input structs for each component of LaMSA system into solve_model
+        [sol,transition_times]=solve_model(loading_motor, unlatching_motor, load, latch, spring);
 
         if (debug)
             figure(h1)

@@ -1,5 +1,5 @@
 %% linear_motor struct
-% arguments:
+% arguments in required order:
 %     F_motor_max - maximum amount of force the spring can exert
 %     v_motor_max - maximum velocity at which the motor can travel
 %     range_of_motion - how far the motor can contract
