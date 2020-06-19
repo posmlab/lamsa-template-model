@@ -13,9 +13,12 @@ addpath(genpath(pwd)); % add all subdirectories to path to access the files in c
 N=25; % determines resolution of heatplots
 
 % setting x axis on the plot (Fmax of latch)
-xname = 'Fmax';
+%xname = 'Fmax';
+xname = 'range_of_motion';
 xrange = [-1 3];
-Fmaxs = logspace(xrange(1),xrange(2),N);
+%Fmaxs = logspace(xrange(1),xrange(2),N);
+ds = logspace(xrange(1),xrange(2),N);
+
 
 %setting y axis value on plot (Vmax of latch)
 yname = 'vmax';
@@ -98,6 +101,7 @@ spring = linear_spring(k, m_s, F_spring_max);
 %% unlatching motor
 
 % unlatching motor paramters for linear motor
+F_max_unlatching_motor = 20;
 unlatchinging_motor_range_of_motion = 3;
 
 % extra parameters for hill muscle motor
@@ -126,8 +130,8 @@ end
 for i=1:N %iterate over y-axis-variable of plot
     for j=1:N %iterate over x-axis-variable of plot
         % unlatching motor struct initialization
-        unlatching_motor = hill_muscle_motor(unlatching_motor_muscle_length, Fmaxs(j), v_maxs(i),unlatching_motor_r_activation);
-        %unlatching_motor = linear_motor(Fmaxs(j),v_maxs(i), unlatching_motor_range_of_motion);
+        %unlatching_motor = hill_muscle_motor(unlatching_motor_muscle_length, Fmaxs(j), v_maxs(i),unlatching_motor_r_activation);
+        unlatching_motor = linear_motor(F_max_unlatching_motor,v_maxs(i), ds(j));
         %input structs for each component
 %         k = Es(j)*As(i)/L;
 %         F_spring_max= sigma_f*As(i);
@@ -146,7 +150,7 @@ for i=1:N %iterate over y-axis-variable of plot
             hold on;
             ginput(1)
         end
-        met_dict=get_metrics(sol,transition_times,load, spring ,metrics);
+        met_dict=get_metrics(sol,transition_times,load ,metrics);
         for ii=1:length(metrics)
             outval{ii}(i,j)=met_dict(metrics{ii});
         end
