@@ -83,6 +83,45 @@ t_unlatch = real(t_unlatch);
 y_unlatch = real(y_unlatch);
 
 
+%% Solving for Normal Force in the unlatching phase
+for i=1:size(X, 1)
+    num1 = (latch.mass*spring.Force(t_unlatch(i), y_unlatch(i, :))) - ...
+        (m_eff*latch.y_L{3}(X(i,1))*(X(i,2)^2)*latch.mass) - ...
+        (unlatching_motor.Force(t_unlatch(i), X(i,:))*m_eff*latch.y_L{2}(X(i,1)));
+    rad = 1 + ((latch.y_L{2}(X(i,1)))^2);
+    num2 = sqrt(rad);
+    den1 = m_eff*latch.y_L{2}(X(i,1))*(latch.y_L{2}(X(i,1)) - latch.coeff_fric);
+    den2 = latch.mass*(1+latch.coeff_fric*latch.y_L{2}(X(i,1)));
+    F_n(i) =(num1*num2)/(den1 + den2);
+end
+F_n = F_n';
+
+
+%Calculating Normal force using x_doubledot
+y_doubledot = (gradient(y_unlatch(:,2)))./(gradient(t_unlatch));
+for i=1:size(X, 1)
+    num3 = spring.Force(t_unlatch(i), y_unlatch(i, :)) - m_eff*y_doubledot(i);
+    rad = 1 + ((latch.y_L{2}(X(i,1)))^2);
+    num2 = sqrt(rad);
+    den = 1 + latch.coeff_fric*latch.y_L{2}(X(i, 1));
+    F_n2(i) = (num3*num2)/den;
+end
+F_n2 = F_n2';
+
+
+%Calculating normal force using unlatching end and x doubledot
+xL_doubledot = (gradient(X(:,2)))./(gradient(t_unlatch));
+for i=1:size(X, 1)
+    value = m_eff*(latch.y_L{3}(X(i,1))*(X(i,2)^2)+xL_doubledot(i)*latch.y_L{2}(X(i,1)));
+    num3 = spring.Force(t_unlatch(i), y_unlatch(i, :)) - value;
+    rad = 1 + ((latch.y_L{2}(X(i,1)))^2);
+    num2 = sqrt(rad);
+    den = 1 + latch.coeff_fric*latch.y_L{2}(X(i, 1));
+    F_n3(i) = (num3*num2)/den;
+end
+F_n3 = F_n3';
+disp([F_n, F_n2, ])
+
 %% Ballistic phase:Fs only
 %guess launch times by treating the spring as ideal-ish and getting the
 %   frequency
@@ -97,15 +136,20 @@ tspan=linspace(0,t_launch_guess,1E3);
 y0=y_unlatch(end,:)';
 [t_launch,y_launch]=ode45(ode,tspan,y0,launch_opts);
 
+% Solve latch dynamics during Ballistic Phase
+%     Currently assuming instaneous stopping of latch
+
 %% Stitch together solutions
 transition_times=[t_unlatch(end),t_unlatch(end)+t_launch(end)];
 T=[t_unlatch;t_unlatch(end)+t_launch];
 Y=[y_unlatch;y_launch];
-fill = zeros(length(Y) - length(X), 2);
-xFinal = [X;fill]
-disp(size(Y))
-disp(size(X))
-sol=[T Y];
+fill = repmat([X(end, 1), 0],length(Y) - length(X), 1);%Makes X the right size to fit in sol
+xFinal = [X;fill];
+for i = 1:size(T)
+    fSpring(i) = spring.Force(T(i), [Y(i,1), Y(i,2)]);
+end
+fSpring = fSpring';
+sol=[T Y xFinal fSpring];
 
 
 

@@ -61,7 +61,7 @@ if inst_check>0
         return
     end
     
-    tspan=linspace(0,t_L_guess,1000);%[0,t_L_guess];
+    tspan=linspace(0,t_L_guess*1000,1000000);%[0,t_L_guess]; Note 2nd and 3rd inputs are multiplied by 1000 for temporary fix
     [t_unlatch,x_unlatch]=ode45(ode,tspan,[0 latch.v_0],unlatch_opts);
     % This ODE is for the latch x-coordinate, but we want the y-coordinate, so
     % convert
@@ -83,6 +83,20 @@ t_unlatch = real(t_unlatch);
 y_unlatch = real(y_unlatch);
 
 
+%% Solving for Normal Force in the unlatching phase
+for i=1:size(X, 1)
+    num1 = (latch.mass*spring.Force(t_unlatch(i), y_unlatch(i, :))) - ...
+        (m_eff*latch.y_L{3}(X(i,1))*(X(i,2)^2)*latch.mass) - ...
+        (unlatching_motor.Force(t_unlatch(i), X(i,:))*m_eff*latch.y_L{2}(X(i,1)));
+    rad = 1 + ((latch.y_L{2}(X(i,1)))^2);
+    num2 = sqrt(rad);
+    den1 = m_eff*latch.y_L{2}(X(i,1))*(latch.y_L{2}(X(i,1)) - latch.coeff_fric);
+    den2 = latch.mass*(1+latch.coeff_fric*latch.y_L{2}(X(i,1)));
+    F_n(i) =(num1*num2)/(den1 + den2);
+end
+F_n = F_n';
+
+
 %% Ballistic phase:Fs only
 %guess launch times by treating the spring as ideal-ish and getting the
 %   frequency
@@ -97,17 +111,20 @@ tspan=linspace(0,t_launch_guess,1E3);
 y0=y_unlatch(end,:)';
 [t_launch,y_launch]=ode45(ode,tspan,y0,launch_opts);
 
+% Solve latch dynamics during Ballistic Phase
+%     Currently assuming instaneous stopping of latch
+
 %% Stitch together solutions
 transition_times=[t_unlatch(end),t_unlatch(end)+t_launch(end)];
 T=[t_unlatch;t_unlatch(end)+t_launch];
 Y=[y_unlatch;y_launch];
-fill = zeros(length(Y) - length(X), 2);%Makes X the right size to fit in sol
+fill = repmat([X(end, 1), 0],length(Y) - length(X), 1);%Makes X the right size to fit in sol
 xFinal = [X;fill];
-for i=length(X):length(xFinal)%Likely needs slight revision, assumes stopping of latch at unlatch point
-    xFinal(i, 1) = X(end, 1);%See above
-    xFinal(i, 2) = 0; %Instantaneous stop of latch movement???
+for i = 1:size(T)
+    fSpring(i) = spring.Force(T(i), [Y(i,1), Y(i,2)]);
 end
-sol=[T Y xFinal];
+fSpring = fSpring';
+sol=[T Y xFinal fSpring];
 
 
 

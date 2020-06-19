@@ -56,7 +56,7 @@ m=10;
 load = load_mass(m);
 
 %parameters for the latch and struct initialization
-R=2;
+R=5E-1;
 m_L= 10;
 coeff_fric = 0;
 v_0L=0;
