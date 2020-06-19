@@ -1,23 +1,26 @@
-%run this file to generate heatplots for the 6 performance metrics
-%vary parameters below 
+%% run this file to generate heatplots for the 6 performance metrics
+
+%% don't touch these
 close all
 clearvars
 tic
 debug = false;
-N=1;
+addpath(genpath(pwd)); % add all subdirectories to path to access the files in components-library
 
+%% edit the following parameters
 
+%% plot parameters 
+N=25; % determines resolution of heatplots
 
-%setting x axis on the plot (Fmax of latch)
+% setting x axis on the plot (Fmax of latch)
 xname = 'Fmax';
-xrange = [-1 0];
-Fmaxs=logspace(xrange(1),xrange(2),N);
+xrange = [-1 3];
+Fmaxs = logspace(xrange(1),xrange(2),N);
 
 %setting y axis value on plot (Vmax of latch)
 yname = 'vmax';
-
-yrange = [-3 -2];
-v_maxs=logspace(yrange(1),yrange(2),N);
+yrange = [-2 2];
+v_maxs = logspace(yrange(1),yrange(2),N);
 
 metrics = {'tto','vto','Pmax','ymax','tL','KEmax','yunlatch'};
 % hold on
@@ -39,38 +42,70 @@ metrics = {'tto','vto','Pmax','ymax','tL','KEmax','yunlatch'};
 % rho = 10;
 % sigma_f = 10E6;
 
-load_time_constraint=Inf;
+load_time_constraint = Inf;
 
-%parameters for the loading motor
-Fmax_motor = 20;
-range_of_motion = 3;
-vmax_motor=100.0000;
-%extra parameters for hill muscle motor
-muscle_length=.1;
-r_activation=1E-2;
-%struct initialization
-loading_motor = linear_motor(Fmax_motor, vmax_motor, range_of_motion);
+%% loading motor
 
-%parameters for the load and struct initialization
+% loading motor parameters for linear motor
+F_max_loading_motor = 20;
+loading_motor_range_of_motion = 3;
+v_max_loading_motor = 10.0000;
+
+% extra parameters for hill muscle motor
+loading_motor_muscle_length = 10;
+loading_motor_r_activation = Inf;
+
+% loading motor struct initialization
+%loading_motor = linear_motor(F_max_loading_motor, v_max_loading_motor, loading_motor_range_of_motion);
+loading_motor = hill_muscle_motor(loading_motor_muscle_length, F_max_loading_motor, v_max_loading_motor, loading_motor_r_activation);
+
+%% load mass
+
+% load mass parameters
 m=10;
+
+% load mass struct initialization
 load = load_mass(m);
 
-%parameters for the latch and struct initialization
-R=5E-1;
-m_L= 10;
+
+%% latch
+
+% latch parameters
+R=2;
+m_L= 100;
+
 coeff_fric = 0;
 v_0L=0;
+
+% latch struct initialization
 latch = rounded_latch(R, m_L, coeff_fric, v_0L);
 
-%parameters for the spring and struct initialization
-k=3;
+%% spring
+
+% spring paramters
+k = 6; % k or k_0 depending on linear or exponential spring
 m_s=1;
 F_spring_max=1E4;
-% characteristic_length for exponential spring
-characteristic_length = 5;
-spring = linear_spring(k, m_s, F_spring_max);
-% spring=exponential_spring(k, characteristic_length, m_s,F_spring_max);
 
+% extra parameters for exponential spring
+% should be a negative value
+characteristic_length = -5;
+
+% spring struct initialization
+spring = linear_spring(k, m_s, F_spring_max);
+%spring = exponential_spring(k, characteristic_length, m_s, F_spring_max);
+
+%% unlatching motor
+
+% unlatching motor paramters for linear motor
+unlatchinging_motor_range_of_motion = 3;
+
+% extra parameters for hill muscle motor
+unlatching_motor_muscle_length = 10;
+unlatching_motor_r_activation = Inf;
+
+% unlatching motor struct initialization happens in next section
+%% end editable parameters
 
 % make a directory for every run
 dateString = string(datetime);
@@ -78,7 +113,9 @@ cleanDateString = regexprep(dateString, " ", "_");
 cleanDateString = regexprep(cleanDateString, ":", "_");
         
 
-% initialize an output value matrix for each metric
+
+%% initializing an output value matrix for each metric
+
 for ii=1:length(metrics)
     outval{ii}=zeros(N);
 end
@@ -88,15 +125,16 @@ if (debug)
 end
 for i=1:N %iterate over y-axis-variable of plot
     for j=1:N %iterate over x-axis-variable of plot
-        unlatching_motor = hill_muscle_motor(muscle_length, Fmaxs(j), v_maxs(i),r_activation);
-        %unlatching_motor = linear_motor(Fmaxs(j),v_maxs(i), range_of_motion);
+        % unlatching motor struct initialization
+        unlatching_motor = hill_muscle_motor(unlatching_motor_muscle_length, Fmaxs(j), v_maxs(i),unlatching_motor_r_activation);
+        %unlatching_motor = linear_motor(Fmaxs(j),v_maxs(i), unlatching_motor_range_of_motion);
         %input structs for each component
 %         k = Es(j)*As(i)/L;
 %         F_spring_max= sigma_f*As(i);
 %         m_s=As(i)*L*rho;
 %         spring = linear_spring(k, m_s, F_spring_max);
 %         %spring=exponential_spring(k, characteristic_length, m_s,F_spring_max);
-        %replace spaces with underscores
+        % input structs for each component of LaMSA system into solve_model
         [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring, cleanDateString);
 
         if (debug)
@@ -117,7 +155,9 @@ for i=1:N %iterate over y-axis-variable of plot
    disp(['row ' num2str(i) ' of ' num2str(N)]);
 end
 toc
+
 %% Plot the output data
+
 for ii=1:length(metrics)
     figure();
     imagesc(xrange,yrange,outval{ii});

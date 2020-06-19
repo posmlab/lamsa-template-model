@@ -1,9 +1,0 @@
-function motor = hill_muscle_motor(muscle_length, Fmax_motor, vmax_motor,r_activation, a_L, b_L, s)
-if (nargin==4) %(muscle_length, Fmax_motor, vmax_motor,r_activation) we assume values of a_L,b_L,s from values in Rosario paper
-    
-
-
-F_length=@(t,x) exp^-((abs((((x(1)/muscle_length)^b_L)-1)/s))^a_L);
-F_velocity=@(t,x)(1-(x(2)/vmax_motor))/(1+(x(2)/(vmax_motor/4)));
-motor.force = @(t,x) Fmax_motor * F_length(t,x) * F_velocity(t,x) * min(r_activation*t,1);
-
