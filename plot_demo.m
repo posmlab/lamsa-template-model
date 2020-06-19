@@ -11,39 +11,73 @@ cleanDateString = regexprep(cleanDateString, ":", "_");
 load_time_constraint=Inf;
 
 
-%parameters for the loading motor
-Fmax_motor = 5;
-range_of_motion = 1;
-vmax_motor=10.0000;
-%extra parameters for hill muscle motor
-muscle_length=3;
-r_activation=.5;
-%struct initialization
-loading_motor = linear_motor(Fmax_motor, vmax_motor, range_of_motion);
-unlatching_motor= hill_muscle_motor(muscle_length, Fmax_motor, vmax_motor,r_activation);
-unlatching_motor2= linear_motor(Fmax_motor, vmax_motor, range_of_motion);
+load_time_constraint = Inf;
 
-%parameters for the load and struct initialization
-m=100;
+%% loading motor
+
+% loading motor parameters for linear motor
+F_max_loading_motor = 20;
+loading_motor_range_of_motion = 3;
+v_max_loading_motor = 10.0000;
+
+% extra parameters for hill muscle motor
+loading_motor_muscle_length = 10;
+loading_motor_r_activation = Inf;
+
+% loading motor struct initialization
+loading_motor = linear_motor(F_max_loading_motor, v_max_loading_motor, loading_motor_range_of_motion);
+loading_motor2 = hill_muscle_motor(loading_motor_muscle_length, F_max_loading_motor, v_max_loading_motor, loading_motor_r_activation);
+
+%% load mass
+
+% load mass parameters
+m=10;
+
+% load mass struct initialization
 load = load_mass(m);
 
-%parameters for the latch and struct initialization
+%% latch
+
+% latch parameters
 R=2;
-m_L= 10;
+m_L= 100;
 coeff_fric = 0;
 v_0L=0;
+
+% latch struct initialization
 latch = rounded_latch(R, m_L, coeff_fric, v_0L);
 
-%parameters for the spring and struct initialization
-k=3;
+%% spring
+
+% spring paramters
+k = 6; % k or k_0 depending on linear or exponential spring
 m_s=1;
 F_spring_max=1E4;
-% characteristic_length for exponential spring
-characteristic_length = -3;
-spring = linear_spring(k, m_s, F_spring_max);
-% spring=exponential_spring(k, characteristic_length, m_s,F_spring_max);
 
-%solving the model to get output 
+% extra parameters for exponential spring
+% should be a negative value
+characteristic_length = -5;
+
+% spring struct initialization
+spring = linear_spring(k, m_s, F_spring_max);
+%spring = exponential_spring(k, characteristic_length, m_s, F_spring_max);
+
+%% unlatching motor
+
+% unlatching motor paramters for linear motor
+unlatching_motor_range_of_motion = 3;
+F_max_unlatching_motor=10;
+v_max_unlatching_motor=5;
+
+% extra parameters for hill muscle motor
+unlatching_motor_muscle_length = 10;
+unlatching_motor_r_activation = Inf;
+
+unlatching_motor = hill_muscle_motor(unlatching_motor_muscle_length, F_max_unlatching_motor, v_max_unlatching_motor, unlatching_motor_r_activation);
+unlatching_motor2= linear_motor(F_max_unlatching_motor, v_max_unlatching_motor, unlatching_motor_range_of_motion);
+
+%% end editable parameters
+
 
 
 %plot force outputs of motor as a function of time HILL MUSCLE
@@ -100,7 +134,7 @@ hold off
 %k<k_opt
 %values must be lower than k_opt otherwise whole range of x values isnt
 %reached
-k_opt=loading_motor.max_force/range_of_motion;
+k_opt=loading_motor.max_force/loading_motor_range_of_motion;
 figure 
 plotspot=1;
 for k = [k_opt/5,k_opt/2,k_opt, k_opt*2]
@@ -119,7 +153,7 @@ for k = [k_opt/5,k_opt/2,k_opt, k_opt*2]
     for i = 1:linsz(1)
         linspring(i)=lin_spring.Force(linsol(i,1),[linsol(i,2), linsol(i,3)]);
     end
-    y=Fmax_motor;
+    y=F_max_loading_motor;
     z=0;    
     expo_range=size(exposol(:,2));
     lin_range=size(linsol(:,2));
@@ -127,8 +161,8 @@ for k = [k_opt/5,k_opt/2,k_opt, k_opt*2]
     hold on
     plot(linsol(:,2),linspring(1:lin_range(1)),'r');
     plot(exposol(:,2),expospring(1:expo_range(1)),'k');
-    line([-range_of_motion,0],[y,y]);
-    line([z,z],[0,Fmax_motor]);
+    line([-loading_motor_range_of_motion,0],[y,y]);
+    line([z,z],[0,y]);
       
     hold off
     lin_spring_work=trapz(linsol(:,2),linspring(1:lin_range(1)))
@@ -139,7 +173,6 @@ end
 %to add
 %pdf document in paper repository, results and discussion section
 %keep graphs simple to (constant v) to look at b of performance trafeoffs
-%set debugging issue for the muscke motor 
 
 
 
