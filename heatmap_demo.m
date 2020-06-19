@@ -86,7 +86,8 @@ m_s=1;
 F_spring_max=1E4;
 
 % extra parameters for exponential spring
-characteristic_length = 5;
+% should be a negative value
+characteristic_length = -5;
 
 % spring struct initialization
 spring = linear_spring(k, m_s, F_spring_max);
