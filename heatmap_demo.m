@@ -146,7 +146,7 @@ for i=1:N %iterate over y-axis-variable of plot
             hold on;
             ginput(1)
         end
-        met_dict=get_metrics(sol,transition_times,load, spring ,metrics);
+        met_dict=get_metrics(sol,transition_times,load ,metrics);
         for ii=1:length(metrics)
             outval{ii}(i,j)=met_dict(metrics{ii});
         end
