@@ -54,7 +54,7 @@ k_opt=loading_motor.max_force/loading_motor_range_of_motion;
 
 % extra parameters for exponential spring
 % should be a negative value
-characteristic_length = -5;
+characteristic_length = 5;
 
 % spring struct initialization
 spring = linear_spring(k, m_s, F_spring_max);
@@ -145,29 +145,30 @@ for l = 1:length(nonlinspringarr)
          xlabel(columntitles(1));
          n=n+2;
     end
-    
-    for i=6:11
+    for i = 6;
+    %for i=6:2:10
         %force plotting on y plot 
-        subplot(3,2,5)
-        hold on
-        plot(solutionset2(:,1),solutionset2(:,i),col(l))
+%         subplot(3,2,5)
+%         hold on
+%         plot(solutionset2(:,1),solutionset2(:,i),col(l))
     end
     title("Force Components Y");
     ylabel("Force");
     xlabel(columntitles(1));
     hold off
-    for i=6:11
+    for i=7;
+    %for i=7:2:11
         %force plotting on y plot 
-        subplot(3,2,6)
-        hold on
-        plot(solutionset2(:,1),solutionset2(:,i),col(l))
+%         subplot(3,2,6)
+%         hold on
+%         plot(solutionset2(:,1),solutionset2(:,i),col(l))
     end
     title("Force Components X");
     ylabel("Force");
     xlabel(columntitles(1));
     hold off
 hold off
-
+end
 %
 
 
