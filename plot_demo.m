@@ -152,7 +152,11 @@ columntitles=["Time", "y", "ydot", "x", "xdot", "normal force on latch x", ...
 n=1;
 figure
 for i = 2:sz1(2)
+<<<<<<< Updated upstream
     subplot(2,2,n)
+=======
+    subplot(3,2,n)
+>>>>>>> Stashed changes
     hold on
     plot(solutionset2(:,1),solutionset2(:,i),"m")
     plot(solutionset1(:,1),solutionset1(:,i),"b")
@@ -195,6 +199,7 @@ end
 k_opt=loading_motor.max_force/loading_motor_range_of_motion;
 figure 
 plotspot=1;
+<<<<<<< Updated upstream
 for k = [k_opt/5,k_opt/2,k_opt, k_opt*2]
     lin_spring=linear_spring(k, m_s, F_spring_max);
     expo_spring=exponential_spring(k, characteristic_length, m_s,F_spring_max);
@@ -202,6 +207,15 @@ for k = [k_opt/5,k_opt/2,k_opt, k_opt*2]
     linsol=sol;
     linsz=size(linsol);
     [sol,~]=solve_model(loading_motor,unlatching_motor2,load,latch,expo_spring,cleanDateString);
+=======
+for k = [k_opt/5,k_opt*2]
+    lin_spring=linear_spring(k, m_s, F_spring_max);
+    expo_spring=exponential_spring(k, characteristic_length, m_s,F_spring_max);
+    [sol,~]=solve_model(loading_motor2,unlatching_motor2,load,latch,lin_spring,cleanDateString);
+    linsol=sol;
+    linsz=size(linsol);
+    [sol,~]=solve_model(loading_motor2,unlatching_motor2,load,latch,expo_spring,cleanDateString);
+>>>>>>> Stashed changes
     exposol=sol;
     exposz=size(exposol);
     expospring=5+zeros(exposz(1));
@@ -210,6 +224,7 @@ for k = [k_opt/5,k_opt/2,k_opt, k_opt*2]
     end
     for i = 1:linsz(1)
         linspring(i)=lin_spring.Force(linsol(i,1),[linsol(i,2), linsol(i,3)]);
+<<<<<<< Updated upstream
     end
     y=F_max_loading_motor;
     z=0;    
@@ -217,10 +232,18 @@ for k = [k_opt/5,k_opt/2,k_opt, k_opt*2]
     lin_range=size(linsol(:,2));
     subplot(2,2,plotspot); 
     sgtitle("k opt="+k_opt,"Interpreter","Latex");
+=======
+    end   
+    expo_range=size(exposol(:,2));
+    lin_range=size(linsol(:,2));
+    subplot(1,2, plotspot); 
+    sgtitle("$k_{opt}$="+k_opt,"Interpreter","Latex");
+>>>>>>> Stashed changes
     hold on
     title("k="+k,"Interpreter","Latex");
     xlabel('disp.',"Interpreter","Latex");
     ylabel('F',"Interpreter","Latex");
+<<<<<<< Updated upstream
     plot(linsol(:,2),linspring(1:lin_range(1)),'r');
     plot(exposol(:,2),expospring(1:expo_range(1)),'k');
     line([-loading_motor_range_of_motion,0],[y,y]);
@@ -228,6 +251,18 @@ for k = [k_opt/5,k_opt/2,k_opt, k_opt*2]
     hold off
     lin_spring_work=trapz(linsol(:,2),linspring(1:lin_range(1)))
     expo_spring_work=trapz(exposol(:,2),expospring(1:expo_range(1)))
+=======
+    plot(loading_motor_muscle_length-linsol(:,2),linspring(1:lin_range(1)),'r');
+    plot(loading_motor_muscle_length-exposol(:,2),expospring(1:expo_range(1)),'k');
+    x=linspace(0,exposz(1),1000);
+    for i = 1:length(x)
+        loadforce(i)=loading_motor2.Force(exposol(i,1),[x(i), 0]);
+    end
+    plot(loading_motor_muscle_length-exposol(:,2),loadforce);
+    hold off
+%     lin_spring_work=trapz(linsol(:,2),linspring(1:lin_range(1)))
+%     expo_spring_work=trapz(exposol(:,2),expospring(1:expo_range(1)))
+>>>>>>> Stashed changes
     plotspot=plotspot+1;
 end  
 %% 
@@ -235,7 +270,10 @@ end
 
 
 
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
     
     
     
