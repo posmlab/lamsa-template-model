@@ -104,48 +104,70 @@ hold off
 %performance metrics as function of time for given inputs 
 %compares 2 runs over every column of sol 
 %code for iterating over k_vals 
-k_val=[k_opt/3,k_opt,k_opt*3];
+k_val=[k_opt/5,k_opt/2,k_opt,k_opt*20];
 for i = 1:length(k_val)
     nonlinspringarr(i)=exponential_spring(k_val(i),characteristic_length, m_s, F_spring_max);
 end
-for i = 1:length(springarr)  
-    
- 
-    [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring,cleanDateString);
-    solutionset1=sol;
-    sz1=size(solutionset1);
-    [sol,~]=solve_model(loading_motor,unlatching_motor2,load,latch,spring2,cleanDateString);
+figure
+hold on
+for l = 1:length(nonlinspringarr)  
+%     [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring,cleanDateString);
+%     solutionset1=sol;
+%     sz1=size(solutionset1);
+    [sol,~]=solve_model(loading_motor,unlatching_motor2,load,latch,nonlinspringarr(l),cleanDateString);
     solutionset2=sol;
     columntitles=["Time", "y", "ydot", "x", "xdot", "normal force on latch x", ...
         "normal force on load y", "frictional force on latch x", ...
         "frictional force on load y", "spring force", ...
         "unlatching motor force into"];
     n=1;
-    figure
-    hold on
+    col=["k","b","r","g"];
     for i = 2:3
         subplot(3,2,n)
         hold on
-        plot(solutionset2(:,1),solutionset2(:,i),"m")
-        plot(solutionset1(:,1),solutionset1(:,i),"b")
+        plot(solutionset2(:,1),solutionset2(:,i),col(l))
+%         plot(solutionset1(:,1),solutionset1(:,i),"b")
         hold off
         title(columntitles(i));
         ylabel(columntitles(i));
         xlabel(columntitles(1));
         n=n+2;
     end
-    m=2;
+    n=2;
     for i=4:5
-         subplot(3,2,m);
+         subplot(3,2,n);
          hold on
-         plot(solutionset2(:,1),solutionset2(:,i),"m")
-         plot(solutionset1(:,1),solutionset1(:,i),"b")
+         plot(solutionset2(:,1),solutionset2(:,i),col(l))
+%          plot(solutionset1(:,1),solutionset1(:,i),"b")
          hold off
          title(columntitles(i));
          ylabel(columntitles(i));
          xlabel(columntitles(1));
-         m=m+2;
+         n=n+2;
     end
+    
+    for i=6:11
+        %force plotting on y plot 
+        subplot(3,2,5)
+        hold on
+        plot(solutionset2(:,1),solutionset2(:,i),col(l))
+    end
+    title("Force Components Y");
+    ylabel("Force");
+    xlabel(columntitles(1));
+    hold off
+    for i=6:11
+        %force plotting on y plot 
+        subplot(3,2,6)
+        hold on
+        plot(solutionset2(:,1),solutionset2(:,i),col(l))
+    end
+    title("Force Components X");
+    ylabel("Force");
+    xlabel(columntitles(1));
+    hold off
+hold off
+
 %
 
 

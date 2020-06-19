@@ -133,20 +133,42 @@ for l = 1:length(nonlinspringarr)
         xlabel(columntitles(1));
         n=n+2;
     end
-    m=2;
+    n=2;
     for i=4:5
-         subplot(3,2,m);
+         subplot(3,2,n);
          hold on
          plot(solutionset2(:,1),solutionset2(:,i),col(l))
 %          plot(solutionset1(:,1),solutionset1(:,i),"b")
-         hold off
+         hold o
          title(columntitles(i));
          ylabel(columntitles(i));
          xlabel(columntitles(1));
-         m=m+2;
+         n=n+2;
     end
-end
+    for i = 6;
+    %for i=6:2:10
+        %force plotting on y plot 
+        subplot(3,2,5)
+        hold on
+        plot(solutionset2(:,1),solutionset2(:,i),col(l))
+    end
+    title("Force Components Y");
+    ylabel("Force");
+    xlabel(columntitles(1));
+    hold off
+    for i=7;
+    %for i=7:2:11
+        %force plotting on y plot 
+        subplot(3,2,6)
+        hold on
+        plot(solutionset2(:,1),solutionset2(:,i),col(l))
+    end
+    title("Force Components X");
+    ylabel("Force");
+    xlabel(columntitles(1));
+    hold off
 hold off
+end
 %
 
 
