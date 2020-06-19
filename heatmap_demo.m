@@ -67,12 +67,14 @@ m=10000;
 % load mass struct initialization
 load = load_mass(m);
 
+
 %% latch
 
 % latch parameters
 R=2;
 m_L= 100;
-coeff_fric = .01;
+
+coeff_fric = 0;
 v_0L=0;
 
 % latch struct initialization
