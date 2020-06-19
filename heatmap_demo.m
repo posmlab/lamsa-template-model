@@ -62,7 +62,7 @@ loading_motor = hill_muscle_motor(loading_motor_muscle_length, F_max_loading_mot
 %% load mass
 
 % load mass parameters
-m=10;
+m=10000;
 
 % load mass struct initialization
 load = load_mass(m);
@@ -72,7 +72,7 @@ load = load_mass(m);
 % latch parameters
 R=2;
 m_L= 100;
-coeff_fric = 0;
+coeff_fric = .01;
 v_0L=0;
 
 % latch struct initialization
@@ -81,7 +81,7 @@ latch = rounded_latch(R, m_L, coeff_fric, v_0L);
 %% spring
 
 % spring paramters
-k = 6; % k or k_0 depending on linear or exponential spring
+k = 1; % k or k_0 depending on linear or exponential spring
 m_s=1;
 F_spring_max=1E4;
 
