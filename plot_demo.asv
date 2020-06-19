@@ -77,8 +77,7 @@ unlatching_motor = hill_muscle_motor(unlatching_motor_muscle_length, F_max_unlat
 unlatching_motor2= linear_motor(F_max_unlatching_motor, v_max_unlatching_motor, unlatching_motor_range_of_motion);
 
 %% end editable parameters
-
-
+%% start time series plots 
 
 %plot force outputs of motor as a function of time HILL MUSCLE
 [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring,cleanDateString);
@@ -130,6 +129,9 @@ plot(sol1(:,1),linearspring,'r');
 plot(sol2(:,1),exponentialspring,'k');
 hold off
 
+
+%% start omparing the springs
+
 %comparing linear and exponential spring force vs displacement for kopt,
 %k<k_opt
 %values must be lower than k_opt otherwise whole range of x values isnt
@@ -158,7 +160,7 @@ for k = [k_opt/5,k_opt/2,k_opt, k_opt*2]
     expo_range=size(exposol(:,2));
     lin_range=size(linsol(:,2));
     subplot(2,2,plotspot); 
-    Title
+    sgtitle("k opt="+k_opt,"Interpreter","Latex");
     hold on
     title("k="+k,"Interpreter","Latex");
     xlabel('disp.',"Interpreter","Latex");
@@ -167,13 +169,12 @@ for k = [k_opt/5,k_opt/2,k_opt, k_opt*2]
     plot(exposol(:,2),expospring(1:expo_range(1)),'k');
     line([-loading_motor_range_of_motion,0],[y,y]);
     line([z,z],[0,y]);
-      
     hold off
     lin_spring_work=trapz(linsol(:,2),linspring(1:lin_range(1)))
     expo_spring_work=trapz(exposol(:,2),expospring(1:expo_range(1)))
     plotspot=plotspot+1;
 end  
-
+%%
 %to add
 %pdf document in paper repository, results and discussion section
 %keep graphs simple to (constant v) to look at b of performance trafeoffs

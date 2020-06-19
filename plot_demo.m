@@ -11,14 +11,12 @@ cleanDateString = regexprep(cleanDateString, ":", "_");
 load_time_constraint=Inf;
 
 
-load_time_constraint = Inf;
-
 %% loading motor
 
 % loading motor parameters for linear motor
-F_max_loading_motor = 20;
-loading_motor_range_of_motion = 3;
-v_max_loading_motor = 10.0000;
+F_max_loading_motor = 5;
+loading_motor_range_of_motion = 5;
+v_max_loading_motor = 100.0000;
 
 % extra parameters for hill muscle motor
 loading_motor_muscle_length = 10;
@@ -50,7 +48,7 @@ latch = rounded_latch(R, m_L, coeff_fric, v_0L);
 %% spring
 
 % spring paramters
-k = 6; % k or k_0 depending on linear or exponential spring
+k = 3; % k or k_0 depending on linear or exponential spring
 m_s=1;
 F_spring_max=1E4;
 
@@ -65,12 +63,12 @@ spring = linear_spring(k, m_s, F_spring_max);
 %% unlatching motor
 
 % unlatching motor paramters for linear motor
-unlatching_motor_range_of_motion = 3;
+unlatching_motor_range_of_motion = 5;
 F_max_unlatching_motor=10;
-v_max_unlatching_motor=5;
+v_max_unlatching_motor=100;
 
 % extra parameters for hill muscle motor
-unlatching_motor_muscle_length = 10;
+unlatching_motor_muscle_length = 9;
 unlatching_motor_r_activation = Inf;
 
 unlatching_motor = hill_muscle_motor(unlatching_motor_muscle_length, F_max_unlatching_motor, v_max_unlatching_motor, unlatching_motor_r_activation);
@@ -78,9 +76,9 @@ unlatching_motor2= linear_motor(F_max_unlatching_motor, v_max_unlatching_motor, 
 
 %% end editable parameters
 
+%% start time series plots 
 
-
-%plot force outputs of motor as a function of time HILL MUSCLE
+%plot force outputs of motor as a function of time HILL MUSCLE components
 [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring,cleanDateString);
 sz=size(sol);
 musclesol=sol;
@@ -130,6 +128,30 @@ plot(sol1(:,1),linearspring,'r');
 plot(sol2(:,1),exponentialspring,'k');
 hold off
 
+%% Figure with
+            %(1) 1D plot: power vs. stiffness in exponential spring model
+            %(2) 1D plot: sweep through max muscle force
+            %(3) 2D plot: combining the two
+            
+            
+            
+            
+            
+            
+            
+            
+%% figure with examples of loading from changing stiffness and force   
+
+
+
+
+
+
+
+
+
+%% spring comparison
+
 %comparing linear and exponential spring force vs displacement for kopt,
 %k<k_opt
 %values must be lower than k_opt otherwise whole range of x values isnt
@@ -172,7 +194,7 @@ for k = [k_opt/5,k_opt/2,k_opt, k_opt*2]
     expo_spring_work=trapz(exposol(:,2),expospring(1:expo_range(1)))
     plotspot=plotspot+1;
 end  
-
+%%
 %to add
 %pdf document in paper repository, results and discussion section
 %keep graphs simple to (constant v) to look at b of performance trafeoffs
