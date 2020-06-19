@@ -55,7 +55,8 @@ m_s=1;
 F_spring_max=1E4;
 
 % extra parameters for exponential spring
-characteristic_length = 5;
+% should be a negative value
+characteristic_length = -5;
 
 % spring struct initialization
 spring = linear_spring(k, m_s, F_spring_max);
@@ -64,14 +65,16 @@ spring = linear_spring(k, m_s, F_spring_max);
 %% unlatching motor
 
 % unlatching motor paramters for linear motor
-unlatchinging_motor_range_of_motion = 3;
+unlatching_motor_range_of_motion = 3;
+F_max_unlatching_motor=10;
+v_max_unlatching_motor=5;
 
 % extra parameters for hill muscle motor
 unlatching_motor_muscle_length = 10;
 unlatching_motor_r_activation = Inf;
 
 unlatching_motor = hill_muscle_motor(unlatching_motor_muscle_length, F_max_unlatching_motor, v_max_unlatching_motor, unlatching_motor_r_activation);
-unlatching_motor2= linear_motor(F_max_unlatching_motor, v_max_unlatching_motor, unlatching_motor_range_ o
+unlatching_motor2= linear_motor(F_max_unlatching_motor, v_max_unlatching_motor, unlatching_motor_range_of_motion);
 
 %% end editable parameters
 
@@ -131,7 +134,7 @@ hold off
 %k<k_opt
 %values must be lower than k_opt otherwise whole range of x values isnt
 %reached
-k_opt=loading_motor.max_force/range_of_motion;
+k_opt=loading_motor.max_force/loading_motor_range_of_motion;
 figure 
 plotspot=1;
 for k = [k_opt/5,k_opt/2,k_opt, k_opt*2]
@@ -150,16 +153,20 @@ for k = [k_opt/5,k_opt/2,k_opt, k_opt*2]
     for i = 1:linsz(1)
         linspring(i)=lin_spring.Force(linsol(i,1),[linsol(i,2), linsol(i,3)]);
     end
-    y=Fmax_motor;
+    y=F_max_loading_motor;
     z=0;    
     expo_range=size(exposol(:,2));
     lin_range=size(linsol(:,2));
     subplot(2,2,plotspot); 
+    Title
     hold on
+    title("k="+k,"Interpreter","Latex");
+    xlabel('disp.',"Interpreter","Latex");
+    ylabel('F',"Interpreter","Latex");
     plot(linsol(:,2),linspring(1:lin_range(1)),'r');
     plot(exposol(:,2),expospring(1:expo_range(1)),'k');
-    line([-range_of_motion,0],[y,y]);
-    line([z,z],[0,Fmax_motor]);
+    line([-loading_motor_range_of_motion,0],[y,y]);
+    line([z,z],[0,y]);
       
     hold off
     lin_spring_work=trapz(linsol(:,2),linspring(1:lin_range(1)))

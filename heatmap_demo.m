@@ -155,15 +155,17 @@ end
 toc
 
 %% Plot the output data
-
+figure
+n=1;
 for ii=1:length(metrics)
-    figure();
+    subplot(2,4,n);
     imagesc(xrange,yrange,outval{ii});
     set(gca,'YDir','normal');
     xlabel(xname,'Interpreter', 'Latex');
     ylabel(yname, 'Interpreter', 'Latex');
     c = colorbar;
     c.Label.String = metrics{ii};
+    n=n+1;
 end
 
 %%Comparison

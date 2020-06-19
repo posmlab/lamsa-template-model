@@ -158,12 +158,15 @@ for k = [k_opt/5,k_opt/2,k_opt, k_opt*2]
     expo_range=size(exposol(:,2));
     lin_range=size(linsol(:,2));
     subplot(2,2,plotspot); 
+    sgtitle("k opt="+k_opt,"Interpreter","Latex");
     hold on
+    title("k="+k,"Interpreter","Latex");
+    xlabel('disp.',"Interpreter","Latex");
+    ylabel('F',"Interpreter","Latex");
     plot(linsol(:,2),linspring(1:lin_range(1)),'r');
     plot(exposol(:,2),expospring(1:expo_range(1)),'k');
     line([-loading_motor_range_of_motion,0],[y,y]);
     line([z,z],[0,y]);
-      
     hold off
     lin_spring_work=trapz(linsol(:,2),linspring(1:lin_range(1)))
     expo_spring_work=trapz(exposol(:,2),expospring(1:expo_range(1)))
