@@ -1,4 +1,6 @@
-%% exponential_spring structmaste
+
+%% exponential_spring struct
+
 % arguments in required order:
 %     k_0 - initial spring constant
 %     m_s - mass of the spring
@@ -27,6 +29,7 @@ function spring = exponential_spring(k_0, m_s, characteristic_length, varargin)
     end
     
     % model
+
     spring.Force = @(t,x)characteristic_length*k_0*(exp(-x(1)/characteristic_length)-1).*(abs(characteristic_length*k_0*(exp(-x(1)/characteristic_length)-1))<F_spring_max);
     spring.mass = m_s;
 end
