@@ -104,7 +104,7 @@ hold off
 %performance metrics as function of time for given inputs 
 %compares 2 runs over every column of sol 
 %code for iterating over k_vals 
-k_val=[k_opt/5,k_opt/2,k_opt,k_opt*20];
+k_val=[k_opt/5,k_opt*5];
 for i = 1:length(k_val)
       %linspringarr(i)=linear_spring(k_val(i), m_s, F_spring_max)
       nonlinspringarr(i)=exponential_spring(k_val(i),characteristic_length, m_s, F_spring_max);
@@ -148,10 +148,10 @@ for l = 1:length(nonlinspringarr)
     end
     for i = 6
     %for i=6:2:10
-        %force plotting on y plot 
-%         subplot(3,2,5)
-%         hold on
-%         plot(solutionset2(:,1),solutionset2(:,i),col(l))
+        %force plotting on x plot 
+        subplot(3,2,6)
+        hold on
+        plot(solutionset2(:,1),solutionset2(:,i),col(l))
     end
     title("Force Components Y");
     ylabel("Force");
@@ -160,7 +160,7 @@ for l = 1:length(nonlinspringarr)
     for i=7
     %for i=7:2:11
         %force plotting on y plot 
-%         subplot(3,2,6)
+%         subplot(3,2,5)
 %         hold on
 %         plot(solutionset2(:,1),solutionset2(:,i),col(l))
     end
