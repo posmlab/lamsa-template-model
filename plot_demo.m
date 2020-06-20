@@ -14,7 +14,7 @@ load_time_constraint=Inf;
 %% loading motor
 
 % loading motor parameters for linear motor
-F_max_loading_motor = 5;
+F_max_loading_motor = 20;
 loading_motor_range_of_motion = 5;
 v_max_loading_motor = 100.0000;
 
@@ -106,7 +106,8 @@ hold off
 %code for iterating over k_vals 
 k_val=[k_opt/5,k_opt/2,k_opt,k_opt*20];
 for i = 1:length(k_val)
-    nonlinspringarr(i)=exponential_spring(k_val(i),characteristic_length, m_s, F_spring_max);
+      %linspringarr(i)=linear_spring(k_val(i), m_s, F_spring_max)
+      nonlinspringarr(i)=exponential_spring(k_val(i),characteristic_length, m_s, F_spring_max);
 end
 figure
 hold on
@@ -145,7 +146,7 @@ for l = 1:length(nonlinspringarr)
          xlabel(columntitles(1));
          n=n+2;
     end
-    for i = 6;
+    for i = 6
     %for i=6:2:10
         %force plotting on y plot 
 %         subplot(3,2,5)
@@ -156,7 +157,7 @@ for l = 1:length(nonlinspringarr)
     ylabel("Force");
     xlabel(columntitles(1));
     hold off
-    for i=7;
+    for i=7
     %for i=7:2:11
         %force plotting on y plot 
 %         subplot(3,2,6)
