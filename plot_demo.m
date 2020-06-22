@@ -40,7 +40,7 @@ load = load_mass(m);
 % latch parameters
 R=2;
 m_L= 100;
-coeff_fric = .1;
+coeff_fric = .03;
 v_0L=0;
 
 % latch struct initialization
