@@ -101,28 +101,29 @@ F_n = F_n';%switching to a column vector so we can add it to sol
 % Currently not working, some trig or possibly t_L issues
 
 % Defining the geometric definitions of sine and cosine
-%for i=1:size(X, 1)
-    %den = sqrt(1 + ((latch.y_L{2}(X(i, 1)))^2))
-    %sin_comp(i) = (latch.y_L{2}(X(i, 1)))/den;
-    %cos_comp(i) = 1/den;
-%end
 
-%sin_comp = sin_comp';
-%cos_comp = cos_comp';
+for i=1:size(X, 1)
+    den = sqrt(1 + (latch.y_L{2}(X(i, 1))^2));
+    sin_comp(i) = (latch.y_L{2}(X(i, 1)))/den;
+    cos_comp(i) = 1/den;
+end
+
+sin_comp = sin_comp';
+cos_comp = cos_comp';
 
 %Calculating Normal and Frictional Force Components
-%for i=1:size(X, 1);
-%    F_nx(i) = F_n(i) .* sin_comp(i);
-%    F_ny(i) = F_n(i) .* cos_comp(i);
-%    F_fx(i) = F_nx(i) * latch.coeff_fric;
-%    F_fy(i) = F_ny(i) * latch.coeff_fric;
-%end
-%F_nx = F_nx';
-%F_ny = F_ny';
-%F_fx = F_fx';
-%F_fy = F_fy';
+for i=1:size(X, 1);
+    F_nx(i) = F_n(i) .* sin_comp(i);
+    F_ny(i) = F_n(i) .* cos_comp(i);
+    F_fx(i) = F_nx(i) * latch.coeff_fric;
+    F_fy(i) = F_ny(i) * latch.coeff_fric;
+end
+F_nx = F_nx';
+F_ny = F_ny';
+F_fx = F_fx';
+F_fy = F_fy';
 
-%F_comp = [F_nx F_ny F_fx F_fy];
+F_comp = [F_nx F_ny F_fx F_fy];
 
 
 %% Ballistic phase:Fs only
@@ -152,9 +153,20 @@ xFinal = [X;fill];
 %F_compFinal = [F_comp; fill];
 for i = 1:size(T)
     fSpring(i) = spring.Force(T(i), [Y(i,1), Y(i,2)]);%fill out the fSpring vector to add to sol
+    fUnlatchingMotor(i) = unlatching_motor.Force(T(i), [xFinal(i,1), xFinal(i,2)]);
 end
 fSpring = fSpring';
-sol=[T Y xFinal fSpring];
+fUnlatchingMotor = fUnlatchingMotor';
+% add zeros to the end of F_comp because F_comp consists of 
+% forces during the unlatching phase, and the other vectors
+% include forces during the ballistic phase. 
+% Adding zeros makes this matrix the right size for appending 
+% to the rest of the sol.
+F_comp = [F_comp; zeros(size(T,1)-size(F_comp,1),4)];
+
+% stitch together various numbers 
+% for one big matrix to write to csv file 
+sol=[T Y xFinal F_comp fSpring fUnlatchingMotor];
 
 
 %% Establishing Parameters for .json output
@@ -214,10 +226,10 @@ csvFilePath = outputDirectory + "/raw_data--" + timeStampString + ".csv";%same a
 headers = ["Time", "y", "ydot", "x", "xdot", "normal force on latch x", ...
     "normal force on load y", "frictional force on latch x", ...
     "frictional force on load y", "spring force", ...
-    "unlatching motor force into"];
+    "unlatching motor force"];
 
-writematrix(headers, csvFilePath);
-writematrix(sol, csvFilePath, 'WriteMode', 'append');%creates headers for output file
+writematrix(headers, csvFilePath);%creates headers for output file
+writematrix(sol, csvFilePath, 'WriteMode', 'append');% addes actual data to csv file
 
 end
 
