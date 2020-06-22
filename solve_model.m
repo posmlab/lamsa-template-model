@@ -84,7 +84,7 @@ y_unlatch = real(y_unlatch);
 
 
 %% Solving for Normal Force in the unlatching phase
-for i=1:size(X, 1)
+for i=1:size(X, 1)% For derivation of this equation for F_n see Overleaf doc with LaMSA derivation
     num1 = (latch.mass*spring.Force(t_unlatch(i), y_unlatch(i, :))) - ...
         (m_eff*latch.y_L{3}(X(i,1))*(X(i,2)^2)*latch.mass) - ...
         (unlatching_motor.Force(t_unlatch(i), X(i,:))*m_eff*latch.y_L{2}(X(i,1)));
@@ -92,9 +92,36 @@ for i=1:size(X, 1)
     num2 = sqrt(rad);
     den1 = m_eff*latch.y_L{2}(X(i,1))*(latch.y_L{2}(X(i,1)) - latch.coeff_fric);
     den2 = latch.mass*(1+latch.coeff_fric*latch.y_L{2}(X(i,1)));
-    F_n(i) =(num1*num2)/(den1 + den2);
+    F_n(i) =(num1*num2)/(den1 + den2);%filling in the F_n vector until unlatch time
 end
-F_n = F_n';
+F_n = F_n';%switching to a column vector so we can add it to sol
+%disp(F_n)
+
+%% Components of Normal Force And Frictional Force
+% Currently not working, some trig or possibly t_L issues
+% Defining the geometric definitions of sine and cosine
+%for i=1:size(X, 1)
+    %den = sqrt(1 + (latch.y_L{2}(X(i, 1))^2))
+    %sin_comp(i) = (latch.y_L{2}(X(i, 1)))/den;
+    %cos_comp(i) = 1/den;
+%end
+
+%sin_comp = sin_comp';
+%cos_comp = cos_comp';
+
+%Calculating Normal and Frictional Force Components
+%for i=1:size(X, 1);
+%    F_nx(i) = F_n(i) .* sin_comp(i);
+%    F_ny(i) = F_n(i) .* cos_comp(i);
+%    F_fx(i) = F_nx(i) * latch.coeff_fric;
+%    F_fy(i) = F_ny(i) * latch.coeff_fric;
+%end
+%F_nx = F_nx';
+%F_ny = F_ny';
+%F_fx = F_fx';
+%F_fy = F_fy';
+
+%F_comp = [F_nx F_ny F_fx F_fy];
 
 
 %% Ballistic phase:Fs only
@@ -118,13 +145,14 @@ transition_times=[t_unlatch(end),t_unlatch(end)+t_launch(end)];
 T=[t_unlatch;t_unlatch(end)+t_launch];
 Y=[y_unlatch;y_launch];
 fill = repmat([X(end, 1), 0],length(Y) - length(X), 1);%Makes X the right size to fit in sol
+fill2 = repmat([0 0 0 0],length(Y) - length(X), 1);%Makes F_%s the right size to fit in sol
 xFinal = [X;fill];
+%F_compFinal = [F_comp; fill];
 for i = 1:size(T)
-    fSpring(i) = spring.Force(T(i), [Y(i,1), Y(i,2)]);
+    fSpring(i) = spring.Force(T(i), [Y(i,1), Y(i,2)]);%fill out the fSpring vector to add to sol
 end
 fSpring = fSpring';
 sol=[T Y xFinal fSpring];
-
 
 
 %% Establishing Parameters for .json output
@@ -146,16 +174,16 @@ func_struct = functions(latch.y_L{1});
 params.latch_shape = rmfield(func_struct,{'file','type','within_file_path'});
 
 %% Making output directory
-if ~isdir(outputDirectory)
+if ~isdir(outputDirectory)%checks for and possibly creates output directory
     mkdir(outputDirectory)
 end
 
 timeStampString = string(datetime('now', 'TimeZone', 'local', 'Format', 'yyyy-MM-dd_HH-mm-ss-SSS'));
 
 %% Writing .json output
-pretty = prettyjson(['parameters: ' jsonencode(params)]);
+pretty = prettyjson(['parameters: ' jsonencode(params)]);%makes the parameter json file readable
 
-fileName = outputDirectory + sprintf("/parameters_%s.json", timeStampString);
+fileName = outputDirectory + sprintf("/parameters_%s.json", timeStampString);%ensures the file is in the output directory
 
 fileID = fopen(fileName, 'w');
 
@@ -169,10 +197,10 @@ fclose(fileID);
 %replace spaces with underscores
 dateString = string(datetime);
 cleanDateString = regexprep(dateString, " ", "_");
-cleanDateString = regexprep(cleanDateString, ":", "_");
+cleanDateString = regexprep(cleanDateString, ":", "_");%creates file friendly output name
 
 
-csvFilePath = outputDirectory + "/raw_data--" + timeStampString + ".csv";
+csvFilePath = outputDirectory + "/raw_data--" + timeStampString + ".csv";%same as above for json file, ensures location
 
 headers = ["Time", "y", "ydot", "x", "xdot", "normal force on latch x", ...
     "normal force on load y", "frictional force on latch x", ...
@@ -180,7 +208,7 @@ headers = ["Time", "y", "ydot", "x", "xdot", "normal force on latch x", ...
     "unlatching motor force into"];
 
 writematrix(headers, csvFilePath);
-writematrix(sol, csvFilePath, 'WriteMode', 'append');
+writematrix(sol, csvFilePath, 'WriteMode', 'append');%creates headers for output file
 
 end
 
