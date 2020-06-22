@@ -10,11 +10,11 @@ addpath(genpath(pwd)); % add all subdirectories to path to access the files in c
 %% edit the following parameters
 
 %% plot parameters 
-N=25; % determines resolution of heatplots
+N=1; % determines resolution of heatplots
 
 % setting x axis on the plot (Fmax of latch)
 %xname = 'Fmax';
-xname = 'range_of_motion';
+xname = 'range of motion';
 xrange = [-1 3];
 %Fmaxs = logspace(xrange(1),xrange(2),N);
 ds = logspace(xrange(1),xrange(2),N);

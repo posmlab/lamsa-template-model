@@ -1,3 +1,4 @@
 # ignore output data files
 *.csv
 *.json
+*.asv
