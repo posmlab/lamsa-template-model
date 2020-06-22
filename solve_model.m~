@@ -102,7 +102,7 @@ F_n = F_n';%switching to a column vector so we can add it to sol
 
 % Defining the geometric definitions of sine and cosine
 %for i=1:size(X, 1)
-    %den = sqrt(1 + ((latch.y_L{2}(X(i, 1)))^2))
+    %den = sqrt(1 + (latch.y_L{2}(X(i, 1))^2))
     %sin_comp(i) = (latch.y_L{2}(X(i, 1)))/den;
     %cos_comp(i) = 1/den;
 %end
@@ -146,15 +146,15 @@ transition_times=[t_unlatch(end),t_unlatch(end)+t_launch(end)];
 T=[t_unlatch;t_unlatch(end)+t_launch];
 Y=[y_unlatch;y_launch];
 fill = repmat([X(end, 1), 0],length(Y) - length(X), 1);%Makes X the right size to fit in sol
-%fill2 = repmat([0],length(Y) - length(X), 1);%Makes F_n the right size to fit in sol
-%F_N = [F_n;fill2];
+fill2 = repmat([0],length(Y) - length(X), 1);%Makes F_n the right size to fit in sol
+F_N = [F_n;fill2];
 xFinal = [X;fill];
 %F_compFinal = [F_comp; fill];
 for i = 1:size(T)
     fSpring(i) = spring.Force(T(i), [Y(i,1), Y(i,2)]);%fill out the fSpring vector to add to sol
 end
 fSpring = fSpring';
-sol=[T Y xFinal fSpring];
+sol=[T Y xFinal fSpring F_N];
 
 
 %% Establishing Parameters for .json output
@@ -172,15 +172,8 @@ params.loading_motor = rmfield(func_struct,{'file','type','within_file_path'});
 func_struct = functions(spring.Force);
 params.spring = rmfield(func_struct,{'file','type','within_file_path'});
 
-func_struct = functions(unlatching_motor.Force);
-params.unlatching_force = rmfield(func_struct,{'file','type','within_file_path'});
-
 func_struct = functions(latch.y_L{1});
 params.latch_shape = rmfield(func_struct,{'file','type','within_file_path'});
-
-params.unlatch_time = transition_times(1);
-
-params.launch_time = transition_times(2);
 
 %% Making output directory
 if ~isdir(outputDirectory)%checks for and possibly creates output directory
