@@ -38,7 +38,7 @@ load = load_mass(m);
 %% latch
 
 % latch parameters
-R=2;
+R=1;
 m_L= 100;
 coeff_fric = 0;
 v_0L=0;
@@ -118,7 +118,7 @@ for l = 1:length(nonlinspringarr)
 %     sz1=size(solutionset1);
     [sol,~]=solve_model(loading_motor,unlatching_motor2,load,latch,nonlinspringarr(l),cleanDateString);
     solutionset2=sol;
-    columntitles=["Time", "y", "ydot", "x", "xdot", "normal force on latch x", ...
+    columntitles=["Time", "y postition", "y velocity", "x position", "x velocity", "normal force on latch x", ...
         "normal force on load y", "frictional force on latch x", ...
         "frictional force on load y", "spring force", ...
         "unlatching motor force into"];
@@ -127,44 +127,47 @@ for l = 1:length(nonlinspringarr)
     units=[" [s]"," [m]"," [m/s]"];
     for i = 2:3
         subplot(3,2,n)
+        set(gca,'TickLabelInterpreter','latex')
         hold on
         plot(solutionset2(:,1),solutionset2(:,i),col(l))
 %         plot(solutionset1(:,1),solutionset1(:,i),"b")
         hold off
         title(columntitles(i),"Interpreter","latex");
-        ylabel(columntitles(i)+units(i));
-        xlabel(columntitles(1)+units(1],"Interpreter","latex");
+        ylabel(columntitles(i)+units(i),"Interpreter","latex");
+        xlabel(columntitles(1)+units(1),"Interpreter","latex");
         n=n+2;
     end
     n=2;
     for i=4:5
          subplot(3,2,n);
+         set(gca,'TickLabelInterpreter','latex')
          hold on
          plot(solutionset2(:,1),solutionset2(:,i),col(l))
 %          plot(solutionset1(:,1),solutionset1(:,i),"b")
          hold off
          title(columntitles(i),"Interpreter","latex");
-         ylabel(columntitles(i));
+         ylabel(columntitles(i)+units(i-2),"Interpreter","latex");
          xlabel(columntitles(1)+" [s]","Interpreter","latex");
          n=n+2;
     end
-    for i = 7
-    %for i=6:2:10
+    col2=["Blue","Red","LightBlue","Orange","DarkBlue","DarkSalmon"];
+    for i=7:2:11
         %force plotting on x plot 
         subplot(3,2,5)
+        set(gca,'TickLabelInterpreter','latex')
         hold on
-        plot(solutionset2(:,1),solutionset2(:,i),col(l))
+        plot(solutionset2(:,1),solutionset2(:,i),col2(l))
     end
     title("Force Components Y","Interpreter","latex");
     ylabel("Force [N]","Interpreter","latex");
     xlabel(columntitles(1)+" [s]","Interpreter","latex");
     hold off
-    for i=6
-    %for i=7:2:11
+    for i=6:2:10
         %force plotting on y plot 
         subplot(3,2,6)
+        set(gca,'TickLabelInterpreter','latex')
         hold on
-        plot(solutionset2(:,1),solutionset2(:,i),col(l))
+        plot(solutionset2(:,1),solutionset2(:,i),col2(p));
     end
     title("Force Components X","Interpreter","latex");
     ylabel("Force [N]","Interpreter","latex");
@@ -195,17 +198,39 @@ figure
 hold on
 for val=1:2
     subplot(2,2,val)
+    set(gca,'TickLabelInterpreter','latex')
     [sol,~]=solve_model(loading_motor,musclearr(1),load,latch,expospringarr(val),cleanDateString);
     solu1=sol;
     plot(solu1(:,1),load.mass*solu1(:,3).*gradient(solu1(:,3))./gradient(solu1(:,1)))
 end
 for val=1:2
     subplot(2,2,val+2)
+    set(gca,'TickLabelInterpreter','latex')
     [sol,~]=solve_model(loading_motor,musclearr(val),load,latch,expospringarr(3),cleanDateString);
     solu2=sol;
     plot(solu2(:,1),load.mass*solu2(:,3).*gradient(solu2(:,3))./gradient(solu2(:,1)))
 end
-hold off
+subplot(2,2,1)
+title("muscle max="+max_muscle_force(1)+ " [N], k="+k_val(1)+" [N/m]","Interpreter","latex");
+xlabel("Time [s]","interpreter","latex")
+ylabel("Power [W]","interpreter","latex")
+set(gca,'TickLabelInterpreter','latex')
+subplot(2,2,2)
+xlabel("Time [s]","interpreter","latex")
+ylabel("Power [W]","interpreter","latex")
+title("muscle max="+max_muscle_force(1)+ " [N], k="+k_val(2)+" [N/m]","Interpreter","latex");
+set(gca,'TickLabelInterpreter','latex')
+subplot(2,2,3)
+xlabel("Time [s]","interpreter","latex")
+ylabel("Power [W]","interpreter","latex")
+title("muscle max="+max_muscle_force(1)+ " [N], k="+k_val(3)+" [N/m]","Interpreter","latex");
+set(gca,'TickLabelInterpreter','latex')
+subplot(2,2,4)
+title("muscle max="+max_muscle_force(2)+" [N], k="+k_val(3)+" [N/m]","Interpreter","latex");
+xlabel("Time [s]","interpreter","latex")
+set(gca,'TickLabelInterpreter','latex')
+ylabel("Power [W]","interpreter","latex")
+hold off 
 
 
 
@@ -222,6 +247,10 @@ for i=1:length(k_val)
     max_power(i)=max(load.mass*sol(:,3).*gradient(sol(:,3))./gradient(sol(:,1)));
 end
 plot(k_val,max_power,'.')
+title("max power vs. stiffness","Interpreter","latex")
+xlabel("k value [N/m]","interpreter","latex")
+ylabel("max power [W]","interpreter","latex")
+set(gca,'TickLabelInterpreter','latex')
 hold off
 
 
@@ -235,6 +264,10 @@ for i=1:length(muscle_max)
     max_power(i)=max(load.mass*sol(:,3).*gradient(sol(:,3))./gradient(sol(:,1)));
 end
 plot(muscle_max,max_power,'.')
+title("max power vs. max muscle power","Interpreter","latex")
+xlabel("max muscle power [N]","interpreter","latex")
+ylabel("max power [W]","interpreter","latex")
+set(gca,'TickLabelInterpreter','latex')
 hold off
 
 
@@ -242,12 +275,12 @@ hold off
 N=20;
 
 % setting x axis on the plot (Fmax of latch)
-xname = 'k val';
+xname = 'k value [N/m]';
 xrange = [1 20];
 k_val = linspace(xrange(1),xrange(2),N);
 
 %setting y axis value on plot (Vmax of latch)
-yname = 'muscle max';
+yname = 'muscle max force [N]';
 yrange = [1 30];
 muscle_max_f = linspace(yrange(1),yrange(2),N);
 
@@ -269,11 +302,13 @@ end
 figure
 for ii=1:length(metrics)
     imagesc(xrange,yrange,outval{ii});
-    set(gca,'YDir','normal');
+    set(gca,'YDir','normal','TickLabelInterpreter','latex');
     xlabel(xname,'Interpreter', 'Latex');
     ylabel(yname, 'Interpreter', 'Latex');
     c = colorbar;
-    c.Label.String = metrics{ii};
+    set(c,'TickLabelInterpreter','latex')
+    c.Label.String = metrics{ii}+"[W]";
+    c.Label.Interpreter="latex";
 end
             
             
@@ -293,7 +328,7 @@ end
 figure 
 plotspot=1;
 
-for k = [k_opt/3,k_opt*2]
+for k = [k_opt/3,k_opt+2]
     lin_spring=linear_spring(k, m_s, F_spring_max);
     expo_spring=exponential_spring(k, characteristic_length, m_s,F_spring_max);
     [sol,~]=solve_model(loading_motor2,unlatching_motor2,load,latch,lin_spring,cleanDateString);
@@ -312,11 +347,11 @@ for k = [k_opt/3,k_opt*2]
     expo_range=size(exposol(:,2));
     lin_range=size(linsol(:,2));
     subplot(1,2, plotspot); 
-    sgtitle("$k_{opt}$="+k_opt,"Interpreter","Latex");
+    sgtitle("$k_{opt}$="+k_opt +" [N/m]","Interpreter","Latex");
     hold on
-    title("k="+k,"Interpreter","Latex");
-    xlabel('disp.',"Interpreter","Latex");
-    ylabel('F',"Interpreter","Latex");
+    title("k="+k +" [N/m]","Interpreter","Latex");
+    xlabel('muscle length [m]',"Interpreter","Latex");
+    ylabel('F [N]',"Interpreter","Latex");
     plot(loading_motor_muscle_length+linsol(:,2),linspring(1:lin_range(1)),'r');
     plot(loading_motor_muscle_length+exposol(:,2),expospring(1:expo_range(1)),'k');
     y=linspace(-7,3,1000);
