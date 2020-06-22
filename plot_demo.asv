@@ -10,6 +10,8 @@ cleanDateString = regexprep(cleanDateString, ":", "_");
         
 load_time_constraint=Inf;
 
+metrics={'Pmax'};
+
 
 %% loading motor
 
@@ -122,15 +124,16 @@ for l = 1:length(nonlinspringarr)
         "unlatching motor force into"];
     n=1;
     col=["k","b","r","g"];
+    units=[" [s]"," [m]"," [m/s]"];
     for i = 2:3
         subplot(3,2,n)
         hold on
         plot(solutionset2(:,1),solutionset2(:,i),col(l))
 %         plot(solutionset1(:,1),solutionset1(:,i),"b")
         hold off
-        title(columntitles(i));
-        ylabel(columntitles(i));
-        xlabel(columntitles(1));
+        title(columntitles(i),"Interpreter","latex");
+        ylabel(columntitles(i)+units(i));
+        xlabel(columntitles(1)+units(1],"Interpreter","latex");
         n=n+2;
     end
     n=2;
@@ -140,32 +143,32 @@ for l = 1:length(nonlinspringarr)
          plot(solutionset2(:,1),solutionset2(:,i),col(l))
 %          plot(solutionset1(:,1),solutionset1(:,i),"b")
          hold off
-         title(columntitles(i));
+         title(columntitles(i),"Interpreter","latex");
          ylabel(columntitles(i));
-         xlabel(columntitles(1));
+         xlabel(columntitles(1)+" [s]","Interpreter","latex");
          n=n+2;
     end
-    for i = 6
+    for i = 7
     %for i=6:2:10
         %force plotting on x plot 
+        subplot(3,2,5)
+        hold on
+        plot(solutionset2(:,1),solutionset2(:,i),col(l))
+    end
+    title("Force Components Y","Interpreter","latex");
+    ylabel("Force [N]","Interpreter","latex");
+    xlabel(columntitles(1)+" [s]","Interpreter","latex");
+    hold off
+    for i=6
+    %for i=7:2:11
+        %force plotting on y plot 
         subplot(3,2,6)
         hold on
         plot(solutionset2(:,1),solutionset2(:,i),col(l))
     end
-    title("Force Components Y");
-    ylabel("Force");
-    xlabel(columntitles(1));
-    hold off
-    for i=7
-    %for i=7:2:11
-        %force plotting on y plot 
-%         subplot(3,2,5)
-%         hold on
-%         plot(solutionset2(:,1),solutionset2(:,i),col(l))
-    end
-    title("Force Components X");
-    ylabel("Force");
-    xlabel(columntitles(1));
+    title("Force Components X","Interpreter","latex");
+    ylabel("Force [N]","Interpreter","latex");
+    xlabel(columntitles(1)+" [s]","Interpreter","latex");
     hold off
 hold off
 end
@@ -214,8 +217,8 @@ hold off
 k_val=linspace(k_opt/5,k_opt*5,100);
 figure
 for i=1:length(k_val)
-    exspringarr(i)=exponential_spring(k_val(i),characteristic_length, m_s, F_spring_max);
-    [sol,~]=solve_model(loading_motor,unlatching_motor2,load,latch,exspringarr(i),cleanDateString);
+    exspring=exponential_spring(k_val(i),characteristic_length, m_s, F_spring_max);
+    [sol,~]=solve_model(loading_motor,unlatching_motor2,load,latch,exspring,cleanDateString);
     max_power(i)=max(load.mass*sol(:,3).*gradient(sol(:,3))./gradient(sol(:,1)));
 end
 plot(k_val,max_power,'.')
@@ -227,8 +230,8 @@ hold off
 muscle_max=linspace(1,40,100);
 figure
 for i=1:length(muscle_max)
-    motorarr(i)=hill_muscle_motor(unlatching_motor_muscle_length, muscle_max(i), v_max_unlatching_motor, unlatching_motor_r_activation);
-    [sol,~]=solve_model(loading_motor,motorarr(i),load,latch,spring2,cleanDateString);
+    motor=hill_muscle_motor(unlatching_motor_muscle_length, muscle_max(i), v_max_unlatching_motor, unlatching_motor_r_activation);
+    [sol,~]=solve_model(loading_motor,motor,load,latch,spring2,cleanDateString);
     max_power(i)=max(load.mass*sol(:,3).*gradient(sol(:,3))./gradient(sol(:,1)));
 end
 plot(muscle_max,max_power,'.')
@@ -236,11 +239,42 @@ hold off
 
 
 %(3) 2D plot: combining the two
-N=30;
-k_val=linspace(1,30,N);
-muscle_max_f=linspace(1,30,N);
+N=20;
+
+% setting x axis on the plot (Fmax of latch)
+xname = 'k val';
+xrange = [1 20];
+k_val = linspace(xrange(1),xrange(2),N);
+
+%setting y axis value on plot (Vmax of latch)
+yname = 'muscle max';
+yrange = [1 30];
+muscle_max_f = linspace(yrange(1),yrange(2),N);
+
+for ii=1:length(metrics)
+    outval{ii}=zeros(N);
+end
 for i=1:N
     for j=1:N
+        motorarray(i)=hill_muscle_motor(unlatching_motor_muscle_length, muscle_max_f(i), v_max_unlatching_motor, unlatching_motor_r_activation);
+        springarray(j)=exponential_spring(k_val(j),characteristic_length, m_s, F_spring_max);
+        [sol,transition_times]=solve_model(loading_motor,motorarray(i),load,latch,springarray(j),cleanDateString);
+        met_dict=get_metrics(sol,transition_times,load ,metrics);
+        for ii=1:length(metrics)
+            outval{ii}(i,j)=met_dict(metrics{ii});
+        end 
+    end
+   disp(['row ' num2str(i) ' of ' num2str(N)]);
+end
+figure
+for ii=1:length(metrics)
+    imagesc(xrange,yrange,outval{ii});
+    set(gca,'YDir','normal');
+    xlabel(xname,'Interpreter', 'Latex');
+    ylabel(yname, 'Interpreter', 'Latex');
+    c = colorbar;
+    c.Label.String = metrics{ii};
+end
             
             
             
@@ -259,7 +293,7 @@ for i=1:N
 figure 
 plotspot=1;
 
-for k = [k_opt/3,k_opt*3]
+for k = [k_opt/3,k_opt*2]
     lin_spring=linear_spring(k, m_s, F_spring_max);
     expo_spring=exponential_spring(k, characteristic_length, m_s,F_spring_max);
     [sol,~]=solve_model(loading_motor2,unlatching_motor2,load,latch,lin_spring,cleanDateString);
@@ -285,7 +319,7 @@ for k = [k_opt/3,k_opt*3]
     ylabel('F',"Interpreter","Latex");
     plot(loading_motor_muscle_length+linsol(:,2),linspring(1:lin_range(1)),'r');
     plot(loading_motor_muscle_length+exposol(:,2),expospring(1:expo_range(1)),'k');
-    y=linspace(-3,3,1000);
+    y=linspace(-7,3,1000);
     for i = 1:length(y)
         loadforce(i)=loading_motor2.Force(Inf,[y(i), 0]);
     end

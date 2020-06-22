@@ -40,7 +40,7 @@ load = load_mass(m);
 % latch parameters
 R=2;
 m_L= 100;
-coeff_fric = 0;
+coeff_fric = .1;
 v_0L=0;
 
 % latch struct initialization
@@ -124,15 +124,16 @@ for l = 1:length(nonlinspringarr)
         "unlatching motor force into"];
     n=1;
     col=["k","b","r","g"];
+    units=[" [s]"," [m]"," [m/s]"];
     for i = 2:3
         subplot(3,2,n)
         hold on
         plot(solutionset2(:,1),solutionset2(:,i),col(l))
 %         plot(solutionset1(:,1),solutionset1(:,i),"b")
         hold off
-        title(columntitles(i));
-        ylabel(columntitles(i));
-        xlabel(columntitles(1));
+        title(columntitles(i),"Interpreter","latex");
+        ylabel(columntitles(i)+units(i),"Interpreter","latex");
+        xlabel(columntitles(1)+units(1),"Interpreter","latex");
         n=n+2;
     end
     n=2;
@@ -142,32 +143,30 @@ for l = 1:length(nonlinspringarr)
          plot(solutionset2(:,1),solutionset2(:,i),col(l))
 %          plot(solutionset1(:,1),solutionset1(:,i),"b")
          hold off
-         title(columntitles(i));
-         ylabel(columntitles(i));
-         xlabel(columntitles(1));
+         title(columntitles(i),"Interpreter","latex");
+         ylabel(columntitles(i)+units(i-2),"Interpreter","latex");
+         xlabel(columntitles(1)+" [s]","Interpreter","latex");
          n=n+2;
     end
-    for i = 6
-    %for i=6:2:10
+    for i=7:2:11
         %force plotting on x plot 
+        subplot(3,2,5)
+        hold on
+        plot(solutionset2(:,1),solutionset2(:,i),col(l))
+    end
+    title("Force Components Y","Interpreter","latex");
+    ylabel("Force [N]","Interpreter","latex");
+    xlabel(columntitles(1)+" [s]","Interpreter","latex");
+    hold off
+    for i=6:2:10
+        %force plotting on y plot 
         subplot(3,2,6)
         hold on
         plot(solutionset2(:,1),solutionset2(:,i),col(l))
     end
-    title("Force Components Y");
-    ylabel("Force");
-    xlabel(columntitles(1));
-    hold off
-    for i=7
-    %for i=7:2:11
-        %force plotting on y plot 
-%         subplot(3,2,5)
-%         hold on
-%         plot(solutionset2(:,1),solutionset2(:,i),col(l))
-    end
-    title("Force Components X");
-    ylabel("Force");
-    xlabel(columntitles(1));
+    title("Force Components X","Interpreter","latex");
+    ylabel("Force [N]","Interpreter","latex");
+    xlabel(columntitles(1)+" [s]","Interpreter","latex");
     hold off
 hold off
 end
