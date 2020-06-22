@@ -1,20 +1,21 @@
 %% exponential_spring struct
+
 % arguments in required order:
 %     k_0 - initial spring constant
+%     characteristic_length - exponential growth constant of force
 %     m_s - mass of the spring
-%     characteristic_length - length of the spring at which force = 0
+%     (optional)
 %     F_spring_max - maximum amount of force the spring can exert
 %     (optional)
-% min # arguments = 3
+% min # arguments = 2
 
-function spring = exponential_spring(k_0, m_s, characteristic_length, varargin)
+function spring = exponential_spring(k_0,characteristic_length, varargin)
     % optional parameters
-    varargin_param_names = {'F_spring_max'};
-    varargin_default_values = {Inf};
-    
+    varargin_param_names = {'m_s','F_spring_max'};
+    varargin_default_values = {0,Inf};
     % check and assign optional parameters
-    if (nargin < 3)
-        error('Exponential spring requires at least 3 arguments.');
+    if (nargin < 2)
+        error('Exponential spring requires at least 2 arguments.');
     end
     if (length(varargin)>length(varargin_param_names))
         error('Too many input parameters');
@@ -27,6 +28,6 @@ function spring = exponential_spring(k_0, m_s, characteristic_length, varargin)
     end
     
     % model
-    spring.Force = @(t,x)-characteristic_length*k_0*(exp(x(1)/characteristic_length)-1).*(abs(characteristic_length*k_0*(exp(x(1)/characteristic_length)-1))<F_spring_max);
+    spring.Force = @(t,x)characteristic_length*k_0*(exp(-x(1)/characteristic_length)-1).*(abs(characteristic_length*k_0*(exp(-x(1)/characteristic_length)-1))<F_spring_max);
     spring.mass = m_s;
 end
