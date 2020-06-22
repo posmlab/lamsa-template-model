@@ -10,6 +10,8 @@ cleanDateString = regexprep(cleanDateString, ":", "_");
         
 load_time_constraint=Inf;
 
+metrics={'Pmax'};
+
 
 %% loading motor
 
@@ -19,7 +21,7 @@ loading_motor_range_of_motion = 5;
 v_max_loading_motor = 100.0000;
 
 % extra parameters for hill muscle motor
-loading_motor_muscle_length = 5;
+loading_motor_muscle_length = 7;
 loading_motor_r_activation = Inf;
 
 % loading motor struct initialization
@@ -54,11 +56,11 @@ k_opt=loading_motor.max_force/loading_motor_range_of_motion;
 
 % extra parameters for exponential spring
 % should be a negative value
-characteristic_length = -5;
+characteristic_length = 5;
 
 % spring struct initialization
-spring = linear_spring(k, m_s, F_spring_max);
-spring2 = exponential_spring(k, characteristic_length, m_s, F_spring_max);
+spring = linear_spring(k_opt, m_s, F_spring_max);
+spring2 = exponential_spring(k_opt, characteristic_length, m_s, F_spring_max);
 
 %% unlatching motor
 
@@ -78,27 +80,26 @@ unlatching_motor2= linear_motor(F_max_unlatching_motor, v_max_unlatching_motor, 
 
 %% start time series plots 
 
-%plot force outputs of motor as a function of time HILL MUSCLE components
-[sol,~]=solve_model(loading_motor,unlatching_motor,load,latch,spring,cleanDateString);
-sz=size(sol);
-musclesol=sol;
-for t = 1:sz(1)
-    force_array(t)=unlatching_motor.max_force*unlatching_motor.F_length(musclesol(t,1),[musclesol(t,4), musclesol(t,5)])*unlatching_motor.F_velocity(musclesol(t,1),[musclesol(t,4), musclesol(t,5)])*unlatching_motor.F_activation(musclesol(t,1),[musclesol(t,4), musclesol(t,5)]);
-    force_activation(t)=unlatching_motor.F_activation(musclesol(t,1),[musclesol(t,4), musclesol(t,5)]);
-    force_velocity(t)=unlatching_motor.F_velocity(musclesol(t,1),[musclesol(t,4), musclesol(t,5)]);
-    force_length(t)=unlatching_motor.F_length(musclesol(t,1),[musclesol(t,4), musclesol(t,5)]);
-    max_force=unlatching_motor.max_force;
-    
-end
-figure
-hold on
-plot(musclesol(:,1),force_array,'r');
-plot(musclesol(:,1),force_activation,'k');
-plot(musclesol(:,1),force_velocity,'b');
-plot(musclesol(:,1),force_length,'m');
-plot(musclesol(:,1),max_force,'g');
-hold off
-
+% %plot force outputs of motor as a function of time HILL MUSCLE components
+% [sol,~]=solve_model(loading_motor,unlatching_motor,load,latch,spring,cleanDateString);
+% sz=size(sol);
+% musclesol=sol;
+% for t = 1:sz(1)
+%     force_array(t)=unlatching_motor.max_force*unlatching_motor.F_length(musclesol(t,1),[musclesol(t,4), musclesol(t,5)])*unlatching_motor.F_velocity(musclesol(t,1),[musclesol(t,4), musclesol(t,5)])*unlatching_motor.F_activation(musclesol(t,1),[musclesol(t,4), musclesol(t,5)]);
+%     force_activation(t)=unlatching_motor.F_activation(musclesol(t,1),[musclesol(t,4), musclesol(t,5)]);
+%     force_velocity(t)=unlatching_motor.F_velocity(musclesol(t,1),[musclesol(t,4), musclesol(t,5)]);
+%     force_length(t)=unlatching_motor.F_length(musclesol(t,1),[musclesol(t,4), musclesol(t,5)]);
+%     max_force=unlatching_motor.max_force;
+%     
+% end
+% figure
+% hold on
+% plot(musclesol(:,1),force_array,'r');
+% plot(musclesol(:,1),force_activation,'k');
+% plot(musclesol(:,1),force_velocity,'b');
+% plot(musclesol(:,1),force_length,'m');
+% plot(musclesol(:,1),max_force,'g');
+% hold off
 
 
 %performance metrics as function of time for given inputs 
@@ -180,12 +181,99 @@ end
 
 
 %% Figure with
-            %power vs. time (four examples)2 of each
-            %(1) 1D plot: power vs. stiffness in exponential spring model
-            %   loop over k values  
-            %(2) 1D plot: sweep through max muscle force
-            %(3) 2D plot: combining the two
-            
+%power vs. time (four examples)2 of each m*sol(:,3).*gradient(sol(:,3))./gradient(sol(:,1))
+k_val=[k_opt/5,k_opt*5,k_opt];
+for i = 1:length(k_val)
+      expospringarr(i)=exponential_spring(k_val(i),characteristic_length, m_s, F_spring_max);
+end
+max_muscle_force = [5,25];
+for i = 1:length(max_muscle_force)
+    musclearr(i)=hill_muscle_motor(unlatching_motor_muscle_length, max_muscle_force(i), v_max_unlatching_motor, unlatching_motor_r_activation);
+end
+figure
+hold on
+for val=1:2
+    subplot(2,2,val)
+    [sol,~]=solve_model(loading_motor,musclearr(1),load,latch,expospringarr(val),cleanDateString);
+    solu1=sol;
+    plot(solu1(:,1),load.mass*solu1(:,3).*gradient(solu1(:,3))./gradient(solu1(:,1)))
+end
+for val=1:2
+    subplot(2,2,val+2)
+    [sol,~]=solve_model(loading_motor,musclearr(val),load,latch,expospringarr(3),cleanDateString);
+    solu2=sol;
+    plot(solu2(:,1),load.mass*solu2(:,3).*gradient(solu2(:,3))./gradient(solu2(:,1)))
+end
+hold off
+
+
+
+
+
+%(1) 1D plot: power vs. stiffness in exponential spring model
+%   loop over k values  
+
+k_val=linspace(k_opt/5,k_opt*5,100);
+figure
+for i=1:length(k_val)
+    exspring=exponential_spring(k_val(i),characteristic_length, m_s, F_spring_max);
+    [sol,~]=solve_model(loading_motor,unlatching_motor2,load,latch,exspring,cleanDateString);
+    max_power(i)=max(load.mass*sol(:,3).*gradient(sol(:,3))./gradient(sol(:,1)));
+end
+plot(k_val,max_power,'.')
+hold off
+
+
+
+%(2) 1D plot: sweep through max muscle force
+muscle_max=linspace(1,40,100);
+figure
+for i=1:length(muscle_max)
+    motor=hill_muscle_motor(unlatching_motor_muscle_length, muscle_max(i), v_max_unlatching_motor, unlatching_motor_r_activation);
+    [sol,~]=solve_model(loading_motor,motor,load,latch,spring2,cleanDateString);
+    max_power(i)=max(load.mass*sol(:,3).*gradient(sol(:,3))./gradient(sol(:,1)));
+end
+plot(muscle_max,max_power,'.')
+hold off
+
+
+%(3) 2D plot: combining the two
+N=20;
+
+% setting x axis on the plot (Fmax of latch)
+xname = 'k val';
+xrange = [1 20];
+k_val = linspace(xrange(1),xrange(2),N);
+
+%setting y axis value on plot (Vmax of latch)
+yname = 'muscle max';
+yrange = [1 30];
+muscle_max_f = linspace(yrange(1),yrange(2),N);
+
+for ii=1:length(metrics)
+    outval{ii}=zeros(N);
+end
+for i=1:N
+    for j=1:N
+        motorarray(i)=hill_muscle_motor(unlatching_motor_muscle_length, muscle_max_f(i), v_max_unlatching_motor, unlatching_motor_r_activation);
+        springarray(j)=exponential_spring(k_val(j),characteristic_length, m_s, F_spring_max);
+        [sol,transition_times]=solve_model(loading_motor,motorarray(i),load,latch,springarray(j),cleanDateString);
+        met_dict=get_metrics(sol,transition_times,load ,metrics);
+        for ii=1:length(metrics)
+            outval{ii}(i,j)=met_dict(metrics{ii});
+        end 
+    end
+   disp(['row ' num2str(i) ' of ' num2str(N)]);
+end
+figure
+for ii=1:length(metrics)
+    imagesc(xrange,yrange,outval{ii});
+    set(gca,'YDir','normal');
+    xlabel(xname,'Interpreter', 'Latex');
+    ylabel(yname, 'Interpreter', 'Latex');
+    c = colorbar;
+    c.Label.String = metrics{ii};
+end
             
             
             
@@ -204,7 +292,7 @@ end
 figure 
 plotspot=1;
 
-for k = [k_opt/5,k_opt*2]
+for k = [k_opt/3,k_opt*2]
     lin_spring=linear_spring(k, m_s, F_spring_max);
     expo_spring=exponential_spring(k, characteristic_length, m_s,F_spring_max);
     [sol,~]=solve_model(loading_motor2,unlatching_motor2,load,latch,lin_spring,cleanDateString);
@@ -228,12 +316,13 @@ for k = [k_opt/5,k_opt*2]
     title("k="+k,"Interpreter","Latex");
     xlabel('disp.',"Interpreter","Latex");
     ylabel('F',"Interpreter","Latex");
-    plot(linsol(:,2),linspring(1:lin_range(1)),'r');
-    plot(exposol(:,2),expospring(1:expo_range(1)),'k');
-    for i = 1:exposz(1)
-        loadforce(i)=loading_motor2.Force(exposol(i,1),[exposol(i,2), exposol(i,3)]);
+    plot(loading_motor_muscle_length+linsol(:,2),linspring(1:lin_range(1)),'r');
+    plot(loading_motor_muscle_length+exposol(:,2),expospring(1:expo_range(1)),'k');
+    y=linspace(-7,3,1000);
+    for i = 1:length(y)
+        loadforce(i)=loading_motor2.Force(Inf,[y(i), 0]);
     end
-    plot(exposol(:,2),loadforce);
+    plot(loading_motor_muscle_length+y,loadforce);
     hold off
 %     lin_spring_work=trapz(linsol(:,2),linspring(1:lin_range(1)))
 %     expo_spring_work=trapz(exposol(:,2),expospring(1:expo_range(1)))

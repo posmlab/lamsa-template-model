@@ -29,6 +29,6 @@ function spring = exponential_spring(k_0,characteristic_length, varargin)
     end
     
     % model
-    spring.Force = @(t,x)characteristic_length*k_0*(exp(-x(1)/characteristic_length)-1).*(abs(characteristic_length*k_0*(exp(-x(1)/characteristic_length)-1))<F_spring_max);
+    spring.Force = @(t,x)-characteristic_length*k_0*(exp(abs(x(1))/characteristic_length)-1).*(abs(characteristic_length*k_0*(exp(x(1)/characteristic_length)-1))<F_spring_max);
     spring.mass = m_s;
 end

@@ -18,7 +18,7 @@ end
 y_guess_motor = -y_list(find(F_list>0,1,'last'));
 
 % initial guess based on initial spring stiffness
-y_guess_spring = loading_motor.Force(Inf,[0 0])/((spring.Force(0,10*eps)-spring.Force(0,0))/(10*eps));
+y_guess_spring = loading_motor.Force(Inf,[0 0])/((spring.Force(0,-100*eps)-spring.Force(0,0))/(100*eps));
 
 % use fzero to find when Fs=Fin does this work for exponential spring?
 y_guess = max([y_guess_motor, y_guess_spring]);
@@ -127,60 +127,60 @@ sol=[T Y xFinal fSpring];
 
 
 
-%% Establishing Parameters for .json output
-params = struct();
-
-params.m_L = latch.mass;
-
-params.m_eff = m_eff;
-
-params.v0 = latch.v_0;
-
-func_struct = functions(loading_motor.Force);
-params.loading_motor = rmfield(func_struct,{'file','type','within_file_path'});
-
-func_struct = functions(spring.Force);
-params.spring = rmfield(func_struct,{'file','type','within_file_path'});
-
-func_struct = functions(latch.y_L{1});
-params.latch_shape = rmfield(func_struct,{'file','type','within_file_path'});
-
-%% Making output directory
-if ~isdir(outputDirectory)
-    mkdir(outputDirectory)
-end
-
-timeStampString = string(datetime('now', 'TimeZone', 'local', 'Format', 'yyyy-MM-dd_HH-mm-ss-SSS'));
-
-%% Writing .json output
-pretty = prettyjson(['parameters: ' jsonencode(params)]);
-
-fileName = outputDirectory + sprintf("/parameters_%s.json", timeStampString);
-
-fileID = fopen(fileName, 'w');
-
-fwrite(fileID, pretty, 'char');
-fclose(fileID);
-
-%% save solution data to csv and json files
-
-
-
-%replace spaces with underscores
-dateString = string(datetime);
-cleanDateString = regexprep(dateString, " ", "_");
-cleanDateString = regexprep(cleanDateString, ":", "_");
-
-
-csvFilePath = outputDirectory + "/raw_data--" + timeStampString + ".csv";
-
-headers = ["Time", "y", "ydot", "x", "xdot", "normal force on latch x", ...
-    "normal force on load y", "frictional force on latch x", ...
-    "frictional force on load y", "spring force", ...
-    "unlatching motor force into"];
-
-writematrix(headers, csvFilePath);
-writematrix(sol, csvFilePath, 'WriteMode', 'append');
+% %% Establishing Parameters for .json output
+% params = struct();
+% 
+% params.m_L = latch.mass;
+% 
+% params.m_eff = m_eff;
+% 
+% params.v0 = latch.v_0;
+% 
+% func_struct = functions(loading_motor.Force);
+% params.loading_motor = rmfield(func_struct,{'file','type','within_file_path'});
+% 
+% func_struct = functions(spring.Force);
+% params.spring = rmfield(func_struct,{'file','type','within_file_path'});
+% 
+% func_struct = functions(latch.y_L{1});
+% params.latch_shape = rmfield(func_struct,{'file','type','within_file_path'});
+% 
+% %% Making output directory
+% if ~isdir(outputDirectory)
+%     mkdir(outputDirectory)
+% end
+% 
+% timeStampString = string(datetime('now', 'TimeZone', 'local', 'Format', 'yyyy-MM-dd_HH-mm-ss-SSS'));
+% 
+% %% Writing .json output
+% pretty = prettyjson(['parameters: ' jsonencode(params)]);
+% 
+% fileName = outputDirectory + sprintf("/parameters_%s.json", timeStampString);
+% 
+% fileID = fopen(fileName, 'w');
+% 
+% fwrite(fileID, pretty, 'char');
+% fclose(fileID);
+% 
+% %% save solution data to csv and json files
+% 
+% 
+% 
+% %replace spaces with underscores
+% dateString = string(datetime);
+% cleanDateString = regexprep(dateString, " ", "_");
+% cleanDateString = regexprep(cleanDateString, ":", "_");
+% 
+% 
+% csvFilePath = outputDirectory + "/raw_data--" + timeStampString + ".csv";
+% 
+% headers = ["Time", "y", "ydot", "x", "xdot", "normal force on latch x", ...
+%     "normal force on load y", "frictional force on latch x", ...
+%     "frictional force on load y", "spring force", ...
+%     "unlatching motor force into"];
+% 
+% writematrix(headers, csvFilePath);
+% writematrix(sol, csvFilePath, 'WriteMode', 'append');
 
 end
 
