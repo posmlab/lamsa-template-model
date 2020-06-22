@@ -1,16 +1,31 @@
-function spring = linear_spring(k,m_s,F_spring_max,t,x)
+%% linear_spring struct
+% arguments in required order:
+%     k - spring constant
+%     m_s - mass of the spring
+%     F_spring_max - maximum amount of force the spring can exert
+%     (optional)
+% min # arguments = 2
 
-if (nargin==2) % only k, m_s passed in, assume F_spring_max = inf, return function handle
-    spring.Force = @(t,x)-k*x(1);
-elseif (nargin==3) % if only (k, m_s,F_spring_max) passsed in, then return function handle
-    spring.Force = @(t,x)-k*x(1).*(abs(k*x(1))<F_spring_max);
-elseif (nargin==4) % only (k,m_s,t,x) passed in, assume F_spring_max = inf, return force value
-    spring.Force = -k*x(1);
-elseif (nargin==5) % else return value of force for a specicifc  
-    spring.Force = -k*x(1).*(abs(k*x(1))<F_spring_max);  
-else
-    error('Linear spring needs between one to four arguments');
+function spring = linear_spring(k,m_s,varargin)
+    % optional parameters
+    varargin_param_names = {'F_spring_max'};
+    varargin_default_values = {Inf};
+    
+    % check and assign optional parameters
+    if (nargin < 2)
+        error('Linear spring requires at least 2 arguments.');
+    end
+    if (length(varargin)>length(varargin_param_names))
+        error('Too many input parameters');
+    end
+    for i=1:length(varargin)
+        eval([varargin_param_names{i} '=varargin{i};'])
+    end
+    for i=(length(varargin)+1):length(varargin_param_names)
+        eval([varargin_param_names{i} '=varargin_default_values{i};'])
+    end
+    
+    % model
+    spring.Force = @(t,x)-k*x(1).*(abs(k*x(1))<F_spring_max);  
+    spring.mass = m_s;
 end
-spring.mass = m_s;
-end % end linear_spring
-

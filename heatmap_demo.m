@@ -62,7 +62,7 @@ loading_motor = hill_muscle_motor(loading_motor_muscle_length, F_max_loading_mot
 %% load mass
 
 % load mass parameters
-m=10;
+m=10000;
 
 % load mass struct initialization
 load = load_mass(m);
@@ -83,7 +83,7 @@ latch = rounded_latch(R, m_L, coeff_fric, v_0L);
 %% spring
 
 % spring paramters
-k = 6; % k or k_0 depending on linear or exponential spring
+k = 1; % k or k_0 depending on linear or exponential spring
 m_s=1;
 F_spring_max=1E4;
 
@@ -146,7 +146,7 @@ for i=1:N %iterate over y-axis-variable of plot
             hold on;
             ginput(1)
         end
-        met_dict=get_metrics(sol,transition_times,load, spring ,metrics);
+        met_dict=get_metrics(sol,transition_times,load ,metrics);
         for ii=1:length(metrics)
             outval{ii}(i,j)=met_dict(metrics{ii});
         end
@@ -157,15 +157,17 @@ end
 toc
 
 %% Plot the output data
-
+figure
+n=1;
 for ii=1:length(metrics)
-    figure();
+    subplot(2,4,n);
     imagesc(xrange,yrange,outval{ii});
     set(gca,'YDir','normal');
     xlabel(xname,'Interpreter', 'Latex');
     ylabel(yname, 'Interpreter', 'Latex');
     c = colorbar;
     c.Label.String = metrics{ii};
+    n=n+1;
 end
 
 %%Comparison
