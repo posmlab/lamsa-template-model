@@ -29,7 +29,7 @@ function spring = exponential_spring(k_0, m_s, characteristic_length, varargin)
     end
     
     % model
-
+`   % characteristic_length input is negative 
     spring.Force = @(t,x)characteristic_length*k_0*(exp(-x(1)/characteristic_length)-1).*(abs(characteristic_length*k_0*(exp(-x(1)/characteristic_length)-1))<F_spring_max);
     spring.mass = m_s;
 end
