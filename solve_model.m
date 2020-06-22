@@ -32,16 +32,16 @@ end
 
 
 F_friction = latch.coeff_fric*spring.Force(0,[y0,0]);
-if unlatching_motor.max_force <= F_friction
+if unlatching_motor.max_force < F_friction
     warning('latch cannot overcome friction force');
     sol = [0,0,0];
     transition_times = [0,0];
     return
-end 
+end
 
 
 [inst_check,~,~]=unlatching_end(0,[0,latch.v_0],m_eff,y0,latch,spring,unlatching_motor);
-inst_check = 1;
+
 if inst_check>0 
     unlatch_opts=odeset('Events',@(t,y) unlatching_end(t,y,m_eff,y0,latch,spring,unlatching_motor),'RelTol',1E-7,'AbsTol',1E-10);
     ode=@(t,y) unlatching_ode(t,y,m_eff,y0,latch,spring,unlatching_motor);
@@ -66,7 +66,6 @@ if inst_check>0
     % This ODE is for the latch x-coordinate, but we want the y-coordinate, so
     % convert
     y_unlatch=zeros(size(x_unlatch));
-    X = [x_unlatch(:,1), x_unlatch(:,2)];
     for i=1:length(y_unlatch)
         y_unlatch(i,1)=latch.y_L{1}(x_unlatch(i,1))+y0;
         y_unlatch(i,2)=x_unlatch(i,2)*latch.y_L{2}(x_unlatch(i,1));
@@ -78,20 +77,21 @@ if inst_check>0
 else % instantaneous unlatching
     y_unlatch=[y0,0]; %May cause a repeated time step and give NaNs on differentiation
     t_unlatch=[0];
+    x_unlatch = [0,0];
 end
 t_unlatch = real(t_unlatch);
 y_unlatch = real(y_unlatch);
 
 
 %% Solving for Normal Force in the unlatching phase
-for i=1:size(X, 1)% For derivation of this equation for F_n see Overleaf doc with LaMSA derivation
+for i=1:size(x_unlatch, 1)% For derivation of this equation for F_n see Overleaf doc with LaMSA derivation
     num1 = (latch.mass*spring.Force(t_unlatch(i), y_unlatch(i, :))) - ...
-        (m_eff*latch.y_L{3}(X(i,1))*(X(i,2)^2)*latch.mass) - ...
-        (unlatching_motor.Force(t_unlatch(i), X(i,:))*m_eff*latch.y_L{2}(X(i,1)));
-    rad = 1 + ((latch.y_L{2}(X(i,1)))^2);
+        (m_eff*latch.y_L{3}(x_unlatch(i,1))*(x_unlatch(i,2)^2)*latch.mass) - ...
+        (unlatching_motor.Force(t_unlatch(i), x_unlatch(i,:))*m_eff*latch.y_L{2}(x_unlatch(i,1)));
+    rad = 1 + ((latch.y_L{2}(x_unlatch(i,1)))^2);
     num2 = sqrt(rad);
-    den1 = m_eff*latch.y_L{2}(X(i,1))*(latch.y_L{2}(X(i,1)) - latch.coeff_fric);
-    den2 = latch.mass*(1+latch.coeff_fric*latch.y_L{2}(X(i,1)));
+    den1 = m_eff*latch.y_L{2}(x_unlatch(i,1))*(latch.y_L{2}(x_unlatch(i,1)) - latch.coeff_fric);
+    den2 = latch.mass*(1+latch.coeff_fric*latch.y_L{2}(x_unlatch(i,1)));
     F_n(i) =(num1*num2)/(den1 + den2);%filling in the F_n vector until unlatch time
 end
 F_n = F_n';%switching to a column vector so we can add it to sol
@@ -100,9 +100,9 @@ F_n = F_n';%switching to a column vector so we can add it to sol
 %% Components of Normal Force And Frictional Force
 % Currently not working, some trig or possibly t_L issues
 % Defining the geometric definitions of sine and cosine
-for i=1:size(X, 1)
-    den = sqrt(1 + (latch.y_L{2}(X(i, 1))^2));
-    sin_comp(i) = (latch.y_L{2}(X(i, 1)))/den;
+for i=1:size(x_unlatch, 1)
+    den = sqrt(1 + (latch.y_L{2}(x_unlatch(i, 1))^2));
+    sin_comp(i) = (latch.y_L{2}(x_unlatch(i, 1)))/den;
     cos_comp(i) = 1/den;
 end
 
@@ -110,7 +110,7 @@ sin_comp = sin_comp';
 cos_comp = cos_comp';
 
 %Calculating Normal and Frictional Force Components
-for i=1:size(X, 1);
+for i=1:size(x_unlatch, 1);
     F_nx(i) = F_n(i) .* sin_comp(i);
     F_ny(i) = F_n(i) .* cos_comp(i);
     F_fx(i) = F_nx(i) * latch.coeff_fric;
@@ -141,16 +141,17 @@ y0=y_unlatch(end,:)';
 %     Currently assuming instaneous stopping of latch
 
 %% Stitch together solutions
-transition_times=[t_unlatch(end),t_unlatch(end)+t_launch(end)];
 T=[t_unlatch;t_unlatch(end)+t_launch];
 Y=[y_unlatch;y_launch];
-fill = repmat([X(end, 1), 0],length(Y) - length(X), 1);%Makes X the right size to fit in sol
-fill2 = repmat([0 0 0 0],length(Y) - length(X), 1);%Makes F_%s the right size to fit in sol
-xFinal = [X;fill];
-%F_compFinal = [F_comp; fill];
+x_launch = repmat([x_unlatch(end, 1), 0], size(y_launch,1), 1);%Makes X the right size to fit in sol
+
+X=[x_unlatch;x_launch];
+
+transition_times=[t_unlatch(end),t_unlatch(end)+t_launch(end)];
+
 for i = 1:size(T)
     fSpring(i) = spring.Force(T(i), [Y(i,1), Y(i,2)]);%fill out the fSpring vector to add to sol
-    fUnlatchingMotor(i) = unlatching_motor.Force(T(i), [xFinal(i,1), xFinal(i,2)]);
+    fUnlatchingMotor(i) = unlatching_motor.Force(T(i), [X(i,:)]);
 end
 fSpring = fSpring';
 fUnlatchingMotor = fUnlatchingMotor';
@@ -159,11 +160,12 @@ fUnlatchingMotor = fUnlatchingMotor';
 % include forces during the ballistic phase. 
 % Adding zeros makes this matrix the right size for appending 
 % to the rest of the sol.
+
 F_comp = [F_comp; zeros(size(T,1)-size(F_comp,1),4)];
 
 % stitch together various numbers 
 % for one big matrix to write to csv file 
-sol=[T Y xFinal F_comp fSpring fUnlatchingMotor];
+sol=[T Y X F_comp fSpring fUnlatchingMotor];
 
 
 %% Establishing Parameters for .json output
