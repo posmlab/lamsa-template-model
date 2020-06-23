@@ -106,7 +106,7 @@ unlatching_motor2= linear_motor(F_max_unlatching_motor, v_max_unlatching_motor, 
 %performance metrics as function of time for given inputs 
 %compares 2 runs over every column of sol 
 %code for iterating over k_vals 
-k_val=[k_opt/2, k_opt*5];
+k_val=[k_opt/2];
 for i = 1:length(k_val)
       %linspringarr(i)=linear_spring(k_val(i), m_s, F_spring_max)
       nonlinspringarr(i)=exponential_spring(k_val(i),characteristic_length, m_s, F_spring_max);
@@ -140,7 +140,6 @@ for l = 1:length(nonlinspringarr)
 %         plot(solutionset1(:,1),solutionset1(:,i),"b")
         hold off
         title(columntitles(i),"Interpreter","latex");
-        legend("k$<$k$_{opt}$","k$>$k$_{opt}$","Interpreter","latex")
         ylabel(columntitles(i)+units(i),"Interpreter","latex");
         xlabel(columntitles(1)+units(1),"Interpreter","latex");
         n=n+2;
@@ -154,38 +153,35 @@ for l = 1:length(nonlinspringarr)
 %          plot(solutionset1(:,1),solutionset1(:,i),"b")
          hold off
          title(columntitles(i),"Interpreter","latex");
-         legend("k$<$k$_{opt}$","k$>$k$_{opt}$","Interpreter","latex")
          ylabel(columntitles(i)+units(i-2),"Interpreter","latex");
          xlabel(columntitles(1)+" [s]","Interpreter","latex");
          n=n+2;
     end
     col2=["Blue","Green","c","Red","m","k"];
-    p=[1 4];
+    p=1;
     for i=[6 8 11]
         %force plotting on x plot 
         subplot(3,2,6)
         set(gca,'TickLabelInterpreter','latex')
         hold on
-        plot(solutionset2(:,1),solutionset2(:,i),col2(p(l)))
-        p=p+1;
+        plot(solutionset2(:,1),solutionset2(:,i),col2(l*p))
+        p=p+2;
     end
     title("Force Components X","Interpreter","latex");
     ylabel("Force [N]","Interpreter","latex");
-    legend("normal force","friction","unlatching","normal force 2","friction 2","unlatching 2","interpreter",'latex')
     xlabel(columntitles(1)+" [s]","Interpreter","latex");
     hold off
-    q=[1 4];
+    q=1;
     for i=[7 9 10]
         %force plotting on y plot 
         subplot(3,2,5)
         set(gca,'TickLabelInterpreter','latex')
         hold on
-        plot(solutionset2(:,1),solutionset2(:,i),col2(q(l)));
+        plot(solutionset2(:,1),solutionset2(:,i),col2(l*q));
         q=q+1;
     end
     title("Force Components Y","Interpreter","latex");
     ylabel("Force [N]","Interpreter","latex");
-     legend("normal force","friction","spring","normal force 2","friction 2","spring 2","interpreter",'latex')
     xlabel(columntitles(1)+" [s]","Interpreter","latex");
     
     hold off
@@ -346,7 +342,7 @@ end
 figure 
 plotspot=1;
 
-for k = [k_opt/3,k_opt+k_opt/3]
+for k = [k_opt/3,k_opt+2]
     lin_spring=linear_spring(k, m_s, F_spring_max);
     expo_spring=exponential_spring(k, characteristic_length, m_s,F_spring_max);
     [sol,~]=solve_model(loading_motor2,unlatching_motor2,load,latch,lin_spring,cleanDateString);
