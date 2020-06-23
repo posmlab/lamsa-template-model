@@ -10,13 +10,12 @@ function [sol] = solve_direct_actuation(motor,load)
 %is there a drag force/gravity
 
 %% Ballistic phase:F motor only 
-launch_opts=odeset('Events',@(t,y) direct_actutation_end(t,y,motor));
-ode=@(t,y) direct_actuation_ode(t,y,load,motor);
+launch_opts=odeset('Events',@(t,x) direct_actutation_end(t,x,motor));
+ode=@(t,x) direct_actuation_ode(t,x,load,motor);
 tspan=linspace(0,10,1000);
-y0=0;
-[t,y]=ode45(ode,tspan,y0,launch_opts);
+x0=0;
+[t,x]=ode45(ode,tspan,x0,launch_opts);
 
 % Solve latch dynamics during Ballistic Phase
-%     Currently assuming instaneous stopping of latch
 
 end
