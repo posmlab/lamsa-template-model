@@ -61,8 +61,22 @@ if inst_check>0
         return
     end
     
-    tspan=linspace(0,t_L_guess*1000,1000000);%[0,t_L_guess]; Note 2nd and 3rd inputs are multiplied by 1000 for temporary fix
+    tspan=linspace(0,t_L_guess,1000);
     [t_unlatch,x_unlatch]=ode45(ode,tspan,[0 latch.v_0],unlatch_opts);
+    
+    % this while loop ensures that the system unlatches. 
+    % t_L_guess is a guess at the upper bound on the unlatching time.
+    % Usually, integrating from t=0 to t=t_L_guess is a long enough
+    % time interval to trigger the 'unlatching_end' event option. 
+    % However, when it's not, we simply try longer and longer time
+    % intervals until we get a long enough time interval that 
+    % t_unlatch(end) ~= tspan(end), which indicates that the 
+    % integration stopped early because we've activated 'unlatching_end'
+    while (t_unlatch(end) == tspan(end))
+        t_L_guess = 10 * t_L_guess;
+        tspan = linspace(0, t_L_guess,1000);
+        [t_unlatch,x_unlatch]=ode45(ode,tspan,[0 latch.v_0],unlatch_opts);
+    end
     % This ODE is for the latch x-coordinate, but we want the y-coordinate, so
     % convert
     y_unlatch=zeros(size(x_unlatch));
