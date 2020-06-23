@@ -14,6 +14,7 @@ launching_ode.m
 launching_end.m
 unlatching_ode.
 unlatching_end.m
+/components-library
 
 
 ### To do
@@ -23,6 +24,7 @@ unlatching_end.m
 - [ ] generate plots for paper showing trade-offs
 - [ ] generate LaMSA zone plots
 - [ ] write up model (including why y_L' = $\tan \theta$)
+- [ ] add recommended/Default parameters to GUI
 
 
 ## How to Use this Code
@@ -33,32 +35,40 @@ Congratulations, LaMSA person! You’ve volunteered for the coolest PoSM lab pro
 
 -Andres Cook ‘21
 
+P.S. from Jackson Castro:
+
+We've added some new features! As well as a ton of more ouputs to sol, we have also incorporated friction and reorganized a lot of stuff in the new /components-library. Further updates to this directory will allow for even easier calls to different types of system setups. As of this moment in time, the simulation seems to be working pretty well, but if for some reason something is giving an odd output, feel free to contact me at jcastro@g.hmc.edu or on Facebook messenger. Best of luck with the simulations!
+
+-Jackson Castro '22
+
+
+### /components-library
+The /components-library directory stores several structs used to call solve_model. In this directory, there are the subdirectories of /springs, /motors, /load-masses, and /latches. Within these subdirectories are structs for varying types of each of these parameters, such as specific latch shapes, varying motor and spring types, as well as a basic one for the load mass. These structs are then called in whatever specified combination in solve_model and heatmap_demo. In heatmap_demo there already exists code for each of these structs that can be commented out or commented back in to account for the various scenarios.
+
 ### How to Call the Model
 The main function to run one simulation is solve_model.m, which has the following argument syntax:
 
 ``` matlab
-[sol,transition_times]=solve_model(F_in,F_out,F_s,m_eff,m_L,t_L_guess,v_0L,y_L)
+[sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring, outputDirectory)
 ```
 
 ##### Input
 
-Name	|            Type           	| Description
------ | --------------------------- | -----------------
-F_in	| Function (num, 1x3) -> num	| Loading motor force
-F_out	| Function (num, 1x3) -> num	| Unlatching motor force
-F_s	  | Function (num, 1x3) -> num	| Spring force
-m_eff |           	num	            |   Load mass
-m_L	  |             num	            |  Latch mass
-t_L_guess |	        num	            | Upper bound on unlatching time
-v_0L  |	            num	            | Initial latch removal velocity
-y_L	  | 1x3 cell array of functions | y_L{1}	Latch shape y(x) <br> y_L{2} Latch slope y'(x) <br> y_L{3} Latch concavity y''(x)
+Name	           |         Type          | Description
+---------------- | --------------------- | -----------------
+loading_motor	   | struct with 5 fields	 | Loading motor Parameters
+unlatching_motor | struct with 5 fields  | Unlatching motor Parameters
+load             | struct with 1 field	 | Load mass
+latch            | struct with 5 fields	 | Latch Parameters
+spring           | struct with 2 fields  | mass and force function of spring
+outputDirectory  |         string        | Name of the output subdirectory <br> to export to or create
 
 ##### Output
 
 Name              |	Type      |	Description
----------------   | --------  | ---------------------------
+---------------   | --------  | -------------------
 transition_times	|  1x2	    | Unlatching and launch times
-sol	              |  many x3	| Time, position, and velocity column vectors
+sol	              |  manyx11  | t, y, ydot, x, xdot, <br> normal and frictional components, <br> spring force, and unlatching force <br> column vectors
 
 ##### Model Structure
 The main function solve_model is generally structured as follows
