@@ -27,7 +27,7 @@ if (imag(value))
 end
 
 if (( x(2) < 1E-3) && (xL_doubledot < 1E-3))
-    error('Latch gets stuck!')
+    error('Latch gets stuck!');
 end
 
 isterminal=1;
