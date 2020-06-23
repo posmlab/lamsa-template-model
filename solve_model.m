@@ -23,7 +23,7 @@ y_guess_spring = loading_motor.Force(Inf,[0 0])/((spring.Force(0,-100*eps)-sprin
 % use fzero to find when Fs=Fin does this work for exponential spring?
 y_guess = max([y_guess_motor, y_guess_spring]);
 options =  {};% optimset('Display','iter');
-[y0,~,exitflag]=fzero(@(y) (loading_motor.Force(Inf,[y 0])-spring.Force(0,[y 0])) - LARGE_NUM*((~loading_motor.Force(Inf,[y 0]))||(~spring.Force(0,[y 0])))+LARGE_NUM*(y>0),y_guess,options);
+[y0,~,exitflag]=fzero(@(y) (loading_motor.Force(Inf,[-y 0])-spring.Force(0,[y 0])) - LARGE_NUM*((~loading_motor.Force(Inf,[-y 0]))||(~spring.Force(0,[y 0])))+LARGE_NUM*(y>0),y_guess,options);
 if (exitflag<0)
     error('fzero failed');
 end
