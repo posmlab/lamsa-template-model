@@ -30,18 +30,15 @@ end
 
 %% Unlatching phase: Fs vs Flatch
 
-
-F_friction = latch.coeff_fric*spring.Force(0,[y0,0]);
-if unlatching_motor.max_force < F_friction
-    warning('latch cannot overcome friction force');
-    sol = [0,0,0];
-    transition_times = [0,0];
+try
+    [inst_check,~,~]=unlatching_end(0,[0,latch.v_0],m_eff,y0,latch,spring,unlatching_motor);
+catch ("Latch gets stuck!")
+    sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
+            latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
+            unlatching_motor.Force(0,[0,0])]
+    transition_times = [inf,inf]
     return
 end
-
-
-[inst_check,~,~]=unlatching_end(0,[0,latch.v_0],m_eff,y0,latch,spring,unlatching_motor);
-
 if inst_check>0 
     unlatch_opts=odeset('Events',@(t,y) unlatching_end(t,y,m_eff,y0,latch,spring,unlatching_motor),'RelTol',1E-7,'AbsTol',1E-10);
     ode=@(t,y) unlatching_ode(t,y,m_eff,y0,latch,spring,unlatching_motor);
@@ -53,7 +50,7 @@ if inst_check>0
         % and the following kinematic equation: R = (1/2)a*t^2 + v_0*t  
         t_L_guess = (((-1*latch.v_0) + sqrt((latch.v_0)^2  + (2*a_0L*latch.max_width)))/(a_0L));
     elseif (latch.v_0 ~= 0 )
-        t_L_guess = latch.max_width/latch.v_0;        
+        t_L_guess = latch.max_width/latch.v_0;
     else
         warning("The latch's initial velocity and acceleration are both zero.")
         sol = [0,0,0]
@@ -61,10 +58,20 @@ if inst_check>0
         return
     end
     
-    tspan=linspace(0,t_L_guess,1000);
-    [t_unlatch,x_unlatch]=ode45(ode,tspan,[0 latch.v_0],unlatch_opts);
+    try
+        tspan=linspace(0,t_L_guess,1000);
+        [t_unlatch,x_unlatch]=ode45(ode,tspan,[0 latch.v_0], unlatch_opts);
+    catch ("Latch gets stuck!")
+        % if the latch gets stuck, just give back
+        % the initial conditions
+        sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
+            latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
+            unlatching_motor.Force(0,[0,0])]
+        transition_times = [inf,inf]
+        return 
+    end
     
-    % this while loop ensures that the system unlatches. 
+    % this while loop ensures that the system unlatches.
     % t_L_guess is a guess at the upper bound on the unlatching time.
     % Usually, integrating from t=0 to t=t_L_guess is a long enough
     % time interval to trigger the 'unlatching_end' event option. 

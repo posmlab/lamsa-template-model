@@ -25,7 +25,7 @@ function metrics = get_metrics(sol,transition_times,load,met_names)
         metrics('tL')=transition_times(1);
     end
     if isKey(metrics,'yunlatch')
-        index=find(sol(:,1)==transition_times(1),1,"first");
+        index=find(sol(:,1)<=transition_times(1),1,"last");
         metrics('yunlatch')= sol(index, 2);
     end
 end
