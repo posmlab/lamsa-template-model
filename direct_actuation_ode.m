@@ -1,7 +1,6 @@
-function dx=direct_actuation_ode(t,x,load,motor)
+function dy=direct_actuation_ode(t,y,load,motor)
 %ODE for direct actuation: a=F/m
-dx=zeros(2,1);
-dx(1)=x(2,1);
-dx(2)=motor.Force(t,x)/load.mass;
-dx=dx';
+dy=zeros(2,1);
+dy(1)=y(2);
+dy(2)=motor.Force(t,y)/load.mass;
 end
