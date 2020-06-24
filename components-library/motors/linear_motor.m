@@ -12,4 +12,5 @@ function motor = linear_motor(F_motor_max, v_motor_max, range_of_motion)
         error('Linear motor requires 3 arguments.');
     end
     motor.max_force = F_motor_max;
+    motor.range=range_of_motion;
 end 
