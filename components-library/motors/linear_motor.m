@@ -13,4 +13,5 @@ function motor = linear_motor(F_motor_max, v_motor_max, range_of_motion)
     end
     motor.max_force = F_motor_max;
     motor.range=range_of_motion;
+    motor.max_velocity=v_motor_max;
 end 

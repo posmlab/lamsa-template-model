@@ -101,34 +101,34 @@ da_motor2 = hill_muscle_motor(da_muscle_length, da_F_max, da_V_max, da_r_activat
 %     science paper figure 
     
 
-%checking force is being calculated correctly
-da_sol = solve_direct_actuation(da_motor,load);
-sz=size(da_sol);
-for i = 1:sz(1)
-    force1(i)=da_motor.Force(da_sol(i,1),[da_sol(i,2) da_sol(i,3)]);
-    force2(i)=da_sol(i,4);    
-end
-figure
-hold on
-plot(da_sol(:,1),force1,'r')
-plot(da_sol(:,1),force2,'ko')
-hold off
-
-da_sol = solve_direct_actuation(da_motor,load_mass(1E3));
-sz=size(da_sol);
-figure
-hold on
-for i = 2:sz(2)
-    subplot(1,3,i-1)
-    plot(da_sol(:,1),da_sol(:,i))
-    title("column"+i)
-end
-hold off
+% %checking force is being calculated correctly
+% da_sol = solve_direct_actuation(da_motor,load);
+% sz=size(da_sol);
+% for i = 1:sz(1)
+%     force1(i)=da_motor.Force(da_sol(i,1),[da_sol(i,2) da_sol(i,3)]);
+%     force2(i)=da_sol(i,4);    
+% end
+% figure
+% hold on
+% plot(da_sol(:,1),force1,'r')
+% plot(da_sol(:,1),force2,'ko')
+% hold off
+% 
+% da_sol = solve_direct_actuation(da_motor,load_mass(1E3));
+% sz=size(da_sol);
+% figure
+% hold on
+% for i = 2:sz(2)
+%     subplot(1,3,i-1)
+%     plot(da_sol(:,1),da_sol(:,i))
+%     title("column"+i)
+% end
+% hold off
 
 
 
 %iterating over load mass vs max power
-mass=logspace(-3,3,350);
+mass=logspace(-3,3,100);
 %mass=linspace(.01,100);
 for m=1:length(mass)
     load_mass_arr(m)=load_mass(mass(m));
@@ -136,9 +136,9 @@ end
 figure
 hold on
 for l = 1:length(load_mass_arr)  
-    [sol,~]=solve_model(loading_motor,unlatching_motor,load_mass_arr(l),latch,spring,cleanDateString);
+    [sol,~]=solve_model(loading_motor2,unlatching_motor,load_mass_arr(l),latch,spring,cleanDateString);
     LaMSAsol=sol;
-    sol = solve_direct_actuation(da_motor,load_mass_arr(l));
+    sol = solve_direct_actuation(da_motor2,load_mass_arr(l));
     da_sol=sol;
     %da_max_power(l)=max(mass(l)*da_sol(:,3).*(da_sol(:,4)/mass(l)));
     da_max_power(l)=max(mass(l)*da_sol(:,3).*gradient(da_sol(:,3))./gradient(da_sol(:,1)));
@@ -158,21 +158,21 @@ hold off
 
 
 %size of solution vs load mass
-mass=logspace(-3,3,350);
+mass=logspace(-3,3,100);
 for m=1:length(mass)
     load_mass_arr(m)=load_mass(mass(m));
 end
 figure
 hold on
 for l = 1:length(load_mass_arr)  
-    sol = solve_direct_actuation(da_motor,load_mass_arr(l));
+    sol = solve_direct_actuation(da_motor2,load_mass_arr(l));
     sz(l)=length(sol);
 end
 plot(mass,sz)
 set(gca, 'XScale', 'log')
 hold off
 
-%iterating over load mass vs kinetic energy
+% %iterating over load mass vs kinetic energy
 % mass=logspace(-3,3,250);
 % %mass=linspace(.01,100);
 % for m=1:length(mass)
