@@ -62,13 +62,13 @@ if inst_check>0
     try
         tspan=linspace(0,t_L_guess,1000);
         [t_unlatch,x_unlatch]=ode45(ode,tspan,[0 latch.v_0], unlatch_opts);
-    catch ("Latch gets stuck!")
+    catch ("Latch gets stuck!");
         % if the latch gets stuck, just give back
         % the initial conditions
         sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
             latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
-            unlatching_motor.Force(0,[0,0])]
-        transition_times = [inf,inf]
+            unlatching_motor.Force(0,[0,0])];
+        transition_times = [inf,inf];
         writeInfoToFile(m_eff, transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
         return 
     end
