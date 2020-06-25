@@ -128,7 +128,7 @@ da_motor2 = hill_muscle_motor(da_muscle_length, da_F_max, da_V_max, da_r_activat
 
 
 %iterating over load mass vs max power
-mass=logspace(-3,3,100);
+mass=logspace(-3,3,300);
 %mass=linspace(.01,100);
 for m=1:length(mass)
     load_mass_arr(m)=load_mass(mass(m));
@@ -157,7 +157,7 @@ hold off
 
 
 %size of solution vs load mass
-mass=logspace(-3,3,100);
+mass=logspace(-3,3,300);
 for m=1:length(mass)
     load_mass_arr(m)=load_mass(mass(m));
 end
@@ -171,27 +171,27 @@ plot(mass,sz)
 set(gca, 'XScale', 'log')
 hold off
 
-% %iterating over load mass vs kinetic energy
-% mass=logspace(-3,3,250);
-% %mass=linspace(.01,100);
-% for m=1:length(mass)
-%     load_mass_arr(m)=load_mass(mass(m));
-% end
-% figure
-% hold on
-% for l = 1:length(load_mass_arr)  
-%     [sol,~]=solve_model(loading_motor,unlatching_motor,load_mass_arr(l),latch,spring,cleanDateString);
-%     LaMSAsol=sol;
-%     sol = solve_direct_actuation(da_motor,load_mass_arr(l));
-%     da_sol=sol;
-%     da_max_ke(l)=max((1/2)*mass(l)*da_sol(:,3).^2);
-%     LaMSA_ke(l)=max((1/2)*mass(l)*LaMSAsol(:,3).^2);
-% end
-% plot(mass,da_max_ke,'b')
-% plot(mass,LaMSA_ke,'m')
-% set(gca, 'XScale', 'log')
-% title("max ke vs. load mass","Interpreter","latex")
-% xlabel("load mass [kg]","interpreter","latex")
-% ylabel("max ke [J]","interpreter","latex")
-% set(gca,'TickLabelInterpreter','latex')
-% hold off
+
+%iterating over load mass vs kinetic energy
+mass=logspace(-5,5,300);
+for m=1:length(mass)
+    load_mass_arr(m)=load_mass(mass(m));
+end
+figure
+hold on
+for l = 1:length(load_mass_arr)  
+    [sol,~]=solve_model(loading_motor,unlatching_motor,load_mass_arr(l),latch,spring,cleanDateString);
+    LaMSAsol=sol;
+    sol = solve_direct_actuation(da_motor,load_mass_arr(l));
+    da_sol=sol;
+    da_max_ke(l)=max((1/2)*mass(l).*da_sol(:,3).^2);
+    LaMSA_ke(l)=max((1/2)*mass(l).*LaMSAsol(:,3).^2);
+end
+plot(mass,da_max_ke,'b.')
+plot(mass,LaMSA_ke,'m')
+set(gca, 'XScale', 'log')
+title("max ke vs. load mass","Interpreter","latex")
+xlabel("load mass [kg]","interpreter","latex")
+ylabel("max ke [J]","interpreter","latex")
+set(gca,'TickLabelInterpreter','latex')
+hold off

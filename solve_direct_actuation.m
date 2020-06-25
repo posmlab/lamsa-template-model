@@ -16,18 +16,21 @@ ode=@(t,y) direct_actuation_ode(t,y,load,motor);
 
 t_guess_v=(motor.velocity*load.mass)/motor.max_force;
 t_guess_pos=sqrt((2*motor.range*load.mass)/motor.max_force);
-% if load.mass>=1E-3
-%     t_guess_v=t_guess_v/100;
-% end
-% t_guess=max(t_guess_v,t_guess_pos);
 
-
-
+t_guess=max(t_guess_v,t_guess_pos);
 tspan=linspace(0,t_guess,1000);
 y0=[0,0];
 [t,y]=ode45(ode,tspan,y0,launch_opts);
+
+
+if (t(end) <= tspan(end))
+    t_guess = t(end);
+    tspan=linspace(0,t_guess,1000); 
+end
+[t,y]=ode45(ode,tspan,y0,launch_opts);
 T=[t];
 Y=[y];
+
 for i = 1:size(T)
     fMotor(i) = motor.Force(T(i), [Y(i,:)]);
 end
