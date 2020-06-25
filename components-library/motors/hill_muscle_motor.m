@@ -23,7 +23,7 @@ function motor = hill_muscle_motor(muscle_length,F_motor_max,v_motor_max,r_activ
     end
     for i=1:length(varargin)
         eval([varargin_param_names{i} '=varargin{i};'])
-    end
+    end;
     for i=(length(varargin)+1):length(varargin_param_names)
         eval([varargin_param_names{i} '=varargin_default_values{i};'])
     end
@@ -36,6 +36,8 @@ function motor = hill_muscle_motor(muscle_length,F_motor_max,v_motor_max,r_activ
     % ^ obtained from Rosario et al.
     motor.Force = @(t,x) (x(1)<=(L_initial-(0.7*muscle_length))) * (x(1)>=(L_initial-(1.3*muscle_length))) * F_motor_max * exp(-((abs(((((L_initial-x(1))/muscle_length)^b_L)-1)/s))^a_L)) * ((1-(abs(x(2))/v_motor_max))/(1+(abs(x(2))/(v_motor_max/4)))) .* (min(r_activation*t,1));
     motor.max_force = F_motor_max;
+    motor.range=muscle_length;
+    motor.velocity=v_motor_max;
 end  
 
 %% Citations
