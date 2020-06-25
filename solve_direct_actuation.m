@@ -1,4 +1,4 @@
-function sol = solve_direct_actuation(motor,load)
+function [sol, transition_times] = solve_direct_actuation(motor,load)
 %Solve differential equation launching phase of direction of direct
 %actuated motion usinf F=ma
 %motor struct
@@ -36,4 +36,5 @@ for i = 1:size(T)
 end
 fMotor = fMotor';
 
+transition_times = [T(1), T(end)];
 sol=[T,Y,fMotor];
