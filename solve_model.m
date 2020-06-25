@@ -18,7 +18,15 @@ end
 y_guess_motor = -y_list(find(F_list>0,1,'last'));
 
 % initial guess based on initial spring stiffness
-y_guess_spring = loading_motor.Force(Inf,[0 0])/((spring.Force(0,10*eps)-spring.Force(0,0))/(10*eps));
+y_guess_spring = Inf;
+delta = eps;
+while (y_guess_spring == Inf)
+    y_guess_spring = loading_motor.Force(Inf,[0 0])/((spring.Force(0,-delta)-spring.Force(0,0))/(delta));
+    delta = 10*delta;
+    if (delta > 1000000)
+        error('Unable to evaluate stiffness at 0 position')
+    end
+end
 
 % use fzero to find when Fs=Fin does this work for exponential spring?
 y_guess = max([y_guess_motor, y_guess_spring]);
