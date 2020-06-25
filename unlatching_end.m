@@ -26,6 +26,10 @@ if (imag(value))
     warning('Complex value of Normal Force. ODE step size might be too large near the end of the latch');
 end
 
+if (( x(2) < 1E-3) && (xL_doubledot < 1E-3))
+    error('Latch gets stuck!');
+end
+
 isterminal=1;
 direction=0;
 end

@@ -14,6 +14,7 @@ launching_ode.m
 launching_end.m
 unlatching_ode.
 unlatching_end.m
+writeInfoToFile.m
 /components-library
 
 
@@ -85,3 +86,5 @@ The main function solve_model is generally structured as follows
 + Launch
   + Essentially the same as loading, but using launching_ode.m and launching_end.m
 + Concatenate the solution arrays into one long one
++ Write output files using writeInfoToFile.m
+  + Create a .json parameter file and .csv output file to be stored in outputDirectory
