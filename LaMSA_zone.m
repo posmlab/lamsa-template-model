@@ -10,7 +10,7 @@ addpath(genpath(pwd)); % add all subdirectories to path to access the files in c
 %% edit the following parameters
 
 %% plot parameters 
-N=10; % determines resolution of heatplots
+N=25; % determines resolution of heatplots
 
 % setting x axis on the plot (Fmax of latch)
 %xname = 'Fmax';
@@ -21,9 +21,9 @@ ds = logspace(xrange(1),xrange(2),N);
 
 
 %setting y axis value on plot (Vmax of latch)
-yname = 'vmax';
+yname = 'load mass';
 yrange = [-2 2];
-v_maxs = logspace(yrange(1),yrange(2),N);
+loadmass = logspace(yrange(1),yrange(2),N);
 
 metrics = {'tto','vto','Pmax','ymax','tL','KEmax','yunlatch'};
 % hold on
@@ -102,12 +102,14 @@ spring = linear_spring(k, m_s, F_spring_max);
 
 % unlatching motor paramters for linear motor
 F_max_unlatching_motor = 20;
-unlatchinging_motor_range_of_motion = 3;
+unlatching_motor_range_of_motion = 3;
+v_max_unlatching_motor=10;
 
 % extra parameters for hill muscle motor
 unlatching_motor_muscle_length = 10;
 unlatching_motor_r_activation = Inf;
 
+unlatching_motor= linear_motor(F_max_unlatching_motor, v_max_unlatching_motor, unlatching_motor_range_of_motion);
 % unlatching motor struct initialization happens in next section
 %% end editable parameters
 
@@ -131,7 +133,7 @@ for i=1:N %iterate over y-axis-variable of plot
     for j=1:N %iterate over x-axis-variable of plot
         % unlatching motor struct initialization
         %unlatching_motor = hill_muscle_motor(unlatching_motor_muscle_length, Fmaxs(j), v_maxs(i),unlatching_motor_r_activation);
-        unlatching_motor = linear_motor(F_max_unlatching_motor,v_maxs(i), ds(j));
+        loading_motor = linear_motor(F_max_loading_motor,v_max_loading_motor, ds(j));
         %input structs for each component
 %         k = Es(j)*As(i)/L;
 %         F_spring_max= sigma_f*As(i);
@@ -139,8 +141,8 @@ for i=1:N %iterate over y-axis-variable of plot
 %         spring = linear_spring(k, m_s, F_spring_max);
 %         %spring=exponential_spring(k, characteristic_length, m_s,F_spring_max);
         % input structs for each component of LaMSA system into solve_model
-        [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring, cleanDateString);
-        [solDA, ttDA] = solve_direct_actuation(loading_motor, load);
+        [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load_mass(i),latch,spring, cleanDateString);
+        [solDA, ttDA] = solve_direct_actuation(loading_motor, load_mass(i));
         if (debug)
             figure(h1)
             plot(sol(:,1),sol(:,2),'.');
