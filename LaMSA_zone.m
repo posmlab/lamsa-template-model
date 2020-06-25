@@ -25,7 +25,7 @@ yname = 'load mass';
 yrange = [-2 2];
 loadmass = logspace(yrange(1),yrange(2),N);
 
-metrics = {'tto','vto','Pmax','ymax','tL','KEmax','yunlatch'};
+metrics = {'tto','vto','Pmax','KEmax'};
 % hold on
 % close all
 % clearvars
@@ -74,7 +74,7 @@ load = load_mass(m);
 %% latch
 
 % latch parameters
-R=2;
+R=.02;
 m_L= 100;
 
 coeff_fric = 0;
@@ -157,7 +157,7 @@ for i=1:N %iterate over y-axis-variable of plot
         for ii=1:length(metrics)
             outval{ii}(i,j)=(met_dict(metrics{ii}))/(met_dict_DA(metrics{ii}));
         end
-         
+        
     end
    disp(['row ' num2str(i) ' of ' num2str(N)]);
 end
@@ -167,13 +167,15 @@ toc
 figure
 n=1;
 for ii=1:length(metrics)
-    subplot(2,4,n);
+    subplot(2,2,n);
     imagesc(xrange,yrange,outval{ii});
     set(gca,'YDir','normal');
     xlabel(xname,'Interpreter', 'Latex');
     ylabel(yname, 'Interpreter', 'Latex');
     c = colorbar;
     c.Label.String = metrics{ii};
+    set(c,'TickLabelInterpreter','latex')
+    c.Label.Interpreter="latex";
     n=n+1;
 end
 

@@ -38,7 +38,7 @@ load = load_mass(m);
 %% latch
 
 % latch parameters
-R=1;
+R=5;
 m_L= 100;
 coeff_fric = 0;
 v_0L=5;
@@ -126,38 +126,38 @@ da_motor2 = hill_muscle_motor(da_muscle_length, da_F_max, da_V_max, da_r_activat
 % hold off
 
 
-
-%iterating over load mass vs max power
-mass=logspace(-3,3,300);
-%mass=linspace(.01,100);
-for m=1:length(mass)
-    load_mass_arr(m)=load_mass(mass(m));
-end
-figure
-hold on
-for l = 1:length(load_mass_arr)  
-    [sol,~]=solve_model(loading_motor2,unlatching_motor,load_mass_arr(l),latch,spring,cleanDateString);
-    LaMSAsol=sol;
-    sol = solve_direct_actuation(da_motor2,load_mass_arr(l));
-    da_sol=sol;
-    da_max_power(l)=max(mass(l)*da_sol(:,3).*gradient(da_sol(:,3))./gradient(da_sol(:,1)));
-    LaMSA_max_power(l)=max(mass(l)*LaMSAsol(:,3).*gradient(LaMSAsol(:,3))./gradient(LaMSAsol(:,1)));
-    da_max(l)=max(da_sol(:,4).*da_sol(:,3));
-end
-plot(mass,da_max_power,'b')
-plot(mass,LaMSA_max_power,'m')
-plot(mass,da_max,'g')
-set(gca, 'XScale', 'log')
-title("max power vs. load mass","Interpreter","latex")
-xlabel("load mass [kg]","interpreter","latex")
-ylabel("max power [W]","interpreter","latex")
-set(gca,'TickLabelInterpreter','latex')
-hold off
+% 
+% %iterating over load mass vs max power
+% mass=logspace(-3,3,300);
+% %mass=linspace(.01,100);
+% for m=1:length(mass)
+%     load_mass_arr(m)=load_mass(mass(m));
+% end
+% figure
+% hold on
+% for l = 1:length(load_mass_arr)  
+%     [sol,~]=solve_model(loading_motor2,unlatching_motor,load_mass_arr(l),latch,spring,cleanDateString);
+%     LaMSAsol=sol;
+%     sol = solve_direct_actuation(da_motor2,load_mass_arr(l));
+%     da_sol=sol;
+%     da_max_power(l)=max(mass(l)*da_sol(:,3).*gradient(da_sol(:,3))./gradient(da_sol(:,1)));
+%     LaMSA_max_power(l)=max(mass(l)*LaMSAsol(:,3).*gradient(LaMSAsol(:,3))./gradient(LaMSAsol(:,1)));
+%     da_max(l)=max(da_sol(:,4).*da_sol(:,3));
+% end
+% plot(mass,da_max_power,'b')
+% plot(mass,LaMSA_max_power,'m')
+% plot(mass,da_max,'g')
+% set(gca, 'XScale', 'log')
+% title("max power vs. load mass","Interpreter","latex")
+% xlabel("load mass [kg]","interpreter","latex")
+% ylabel("max power [W]","interpreter","latex")
+% set(gca,'TickLabelInterpreter','latex')
+% hold off
 
 
 
 %size of solution vs load mass
-mass=logspace(-3,3,300);
+mass=logspace(-3,3,70);
 for m=1:length(mass)
     load_mass_arr(m)=load_mass(mass(m));
 end
@@ -172,26 +172,75 @@ set(gca, 'XScale', 'log')
 hold off
 
 
-%iterating over load mass vs kinetic energy
-mass=logspace(-5,5,300);
-for m=1:length(mass)
-    load_mass_arr(m)=load_mass(mass(m));
+% %iterating over load mass vs kinetic energy
+% mass=logspace(-5,5,300);
+% for m=1:length(mass)
+%     load_mass_arr(m)=load_mass(mass(m));
+% end
+% figure
+% hold on
+% for l = 1:length(load_mass_arr)  
+%     [sol,~]=solve_model(loading_motor,unlatching_motor,load_mass_arr(l),latch,spring,cleanDateString);
+%     LaMSAsol=sol;
+%     sol = solve_direct_actuation(da_motor,load_mass_arr(l));
+%     da_sol=sol;
+%     da_max_ke(l)=max((1/2)*mass(l).*da_sol(:,3).^2);
+%     LaMSA_ke(l)=max((1/2)*mass(l).*LaMSAsol(:,3).^2);
+% end
+% plot(mass,da_max_ke,'b.')
+% plot(mass,LaMSA_ke,'m')
+% set(gca, 'XScale', 'log')
+% title("max ke vs. load mass","Interpreter","latex")
+% xlabel("load mass [kg]","interpreter","latex")
+% ylabel("max ke [J]","interpreter","latex")
+% set(gca,'TickLabelInterpreter','latex')
+% hold off
+% 
+
+
+
+
+% get metrics for 1 variable, change variable to loop through according to
+% comments
+metrics = {'tto','vto','Pmax','KEmax'};
+
+
+%edit range depending on parameter
+variable_range=logspace(-3,3,100);
+
+for i = 1:length(variable_range)
+    %put variable range(i) for whatever parameter you want to loop over 
+    load=load_mass(m);
+    unlatching_motor=linear_motor(F_max_unlatching_motor, v_max_unlatching_motor, unlatching_motor_range_of_motion);
+    loading_motor=hill_muscle_motor(variable_range(i), F_max_loading_motor, v_max_loading_motor, loading_motor_r_activation);
+    spring=linear_spring(k_opt);
+    [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring, cleanDateString);
+    [solDA, ttDA] = solve_direct_actuation(loading_motor, load);
+    met_dict=get_metrics(sol,transition_times,load ,metrics);
+    met_dict_DA = get_metrics(solDA, ttDA, load, metrics);
+        for ii=1:length(metrics)
+            outval{ii}(i)=met_dict(metrics{ii});
+            DAoutval{ii}(i)=met_dict_DA(metrics{ii});
+            ratiooutval{ii}(i)=(met_dict(metrics{ii}))/(met_dict_DA(metrics{ii}));
+        end
 end
 figure
-hold on
-for l = 1:length(load_mass_arr)  
-    [sol,~]=solve_model(loading_motor,unlatching_motor,load_mass_arr(l),latch,spring,cleanDateString);
-    LaMSAsol=sol;
-    sol = solve_direct_actuation(da_motor,load_mass_arr(l));
-    da_sol=sol;
-    da_max_ke(l)=max((1/2)*mass(l).*da_sol(:,3).^2);
-    LaMSA_ke(l)=max((1/2)*mass(l).*LaMSAsol(:,3).^2);
+n=1;
+for ii=1:length(metrics)
+    subplot(2,2,n);
+    hold on
+    plot(variable_range,outval{ii},"r");
+    plot(variable_range,DAoutval{ii},"k");
+    plot(variable_range,ratiooutval{ii},'g');
+    hold off
+    set(gca,'XScale','log');
+    title(metrics{ii});
+    n=n+1;
 end
-plot(mass,da_max_ke,'b.')
-plot(mass,LaMSA_ke,'m')
-set(gca, 'XScale', 'log')
-title("max ke vs. load mass","Interpreter","latex")
-xlabel("load mass [kg]","interpreter","latex")
-ylabel("max ke [J]","interpreter","latex")
-set(gca,'TickLabelInterpreter','latex')
-hold off
+
+    
+    
+    
+    
+    
+    
