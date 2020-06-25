@@ -170,6 +170,7 @@ for ii=1:length(metrics)
     subplot(2,2,n);
     imagesc(xrange,yrange,outval{ii});
     set(gca,'YDir','normal');
+    set(gca,'TickLabelInterpreter','latex')
     xlabel(xname,'Interpreter', 'Latex');
     ylabel(yname, 'Interpreter', 'Latex');
     c = colorbar;
