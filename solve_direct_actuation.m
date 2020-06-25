@@ -16,10 +16,10 @@ ode=@(t,y) direct_actuation_ode(t,y,load,motor);
 
 t_guess_v=(motor.velocity*load.mass)/motor.max_force;
 t_guess_pos=sqrt((2*motor.range*load.mass)/motor.max_force);
-if load.mass>=1E0
-    t_guess_v=t_guess_v/100;
-end
-t_guess=max(t_guess_v,t_guess_pos);
+% if load.mass>=1E-3
+%     t_guess_v=t_guess_v/100;
+% end
+% t_guess=max(t_guess_v,t_guess_pos);
 
 
 

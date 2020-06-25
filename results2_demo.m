@@ -50,7 +50,7 @@ latch = rounded_latch(R, m_L, coeff_fric, v_0L);
 
 % spring paramters
 k = 1; % k or k_0 depending on linear or exponential spring
-m_s=1;
+m_s=0;
 F_spring_max=1E4;
 k_opt=loading_motor.max_force/loading_motor_range_of_motion;
 
@@ -140,7 +140,6 @@ for l = 1:length(load_mass_arr)
     LaMSAsol=sol;
     sol = solve_direct_actuation(da_motor2,load_mass_arr(l));
     da_sol=sol;
-    %da_max_power(l)=max(mass(l)*da_sol(:,3).*(da_sol(:,4)/mass(l)));
     da_max_power(l)=max(mass(l)*da_sol(:,3).*gradient(da_sol(:,3))./gradient(da_sol(:,1)));
     LaMSA_max_power(l)=max(mass(l)*LaMSAsol(:,3).*gradient(LaMSAsol(:,3))./gradient(LaMSAsol(:,1)));
     da_max(l)=max(da_sol(:,4).*da_sol(:,3));
