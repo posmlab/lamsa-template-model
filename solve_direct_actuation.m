@@ -14,7 +14,7 @@ launch_opts=odeset('Events',@(t,y) direct_actuation_end(t,y,motor),'RelTol',1E-7
 ode=@(t,y) direct_actuation_ode(t,y,load,motor);
 
 
-t_guess_v=(motor.max_velocity*load.mass)/motor.max_force;
+t_guess_v=(motor.velocity*load.mass)/motor.max_force;
 t_guess_pos=sqrt((2*motor.range*load.mass)/motor.max_force);
 if load.mass>=1E0
     t_guess_v=t_guess_v/100;
