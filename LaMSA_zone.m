@@ -10,7 +10,7 @@ addpath(genpath(pwd)); % add all subdirectories to path to access the files in c
 %% edit the following parameters
 
 %% plot parameters 
-N=50; % determines resolution of heatplots
+N=20; % determines resolution of heatplots
 
 % setting x axis on the plot (Fmax of latch)
 xname = 'k value [N/m]';
@@ -64,8 +64,20 @@ loading_motor = hill_muscle_motor(loading_motor_muscle_length, F_max_loading_mot
 % load mass parameters
 m=.001;
 
+%trap jaw ant load mass
+% L = 1E-2;
+% rho = 10;
+% A = 1E-2;
+% E = 10;
+% where m_s = L*rho*A, k=(E*A)/L
+
+
+EMA = 1;
+m_rod = .1;
+m_end = .1;
+
 % load mass struct initialization
-load = load_mass(m);
+load = load_mass(m_end,m_rod,EMA);
 
 
 %% latch
