@@ -1,4 +1,3 @@
-
 %% exponential_spring struct
 
 % arguments in required order:
