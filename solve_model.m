@@ -142,7 +142,7 @@ sin_comp = sin_comp';
 cos_comp = cos_comp';
 
 %Calculating Normal and Frictional Force Components
-for i=1:size(x_unlatch, 1);
+for i=1:size(x_unlatch, 1)
     F_nx(i) = F_n(i) .* sin_comp(i);
     F_ny(i) = F_n(i) .* cos_comp(i);
     F_fx(i) = F_nx(i) * latch.coeff_fric;
