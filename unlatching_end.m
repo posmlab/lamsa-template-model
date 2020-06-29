@@ -26,8 +26,15 @@ if (imag(value))
     warning('Complex value of Normal Force. ODE step size might be too large near the end of the latch');
 end
 
-if (( x(2) < 1E-3) && (xL_doubledot < 1E-3))
-    error('Latch gets stuck!');
+stuck_threshold = 1E-3;
+if ((x(2) < stuck_threshold) && (xL_doubledot < stuck_threshold))
+    if (t==0 && spring.Force(0,[y0,0])*latch.coeff_fric > unlatching_motor.max_force)
+        error('Latch gets stuck!');
+    elseif (unlatching_motor.Force(t, x) >= unlatching_motor.Force(t + stuck_threshold,x))
+        error('Latch gets stuck!');
+    else
+        warning('System is moving slowly. Integration may take a long time.')
+    end
 end
 
 isterminal=1;

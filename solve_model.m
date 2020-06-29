@@ -40,7 +40,8 @@ end
 
 try
     [inst_check,~,~]=unlatching_end(0,[0,latch.v_0],m_eff,y0,latch,spring,unlatching_motor);
-catch ("Latch gets stuck!");
+catch ('Latch gets stuck!')
+    warning('Latch gets stuck!')
     sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
             latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
             unlatching_motor.Force(0,[0,0])];
