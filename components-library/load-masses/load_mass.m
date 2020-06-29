@@ -1,6 +1,8 @@
 %% load_mass struct
 % arguments:
 %     m_end - mass of the load
+%     m_rod - mass of lever arm
+%     EMA - effective mechnical advantage 
 % min # arguments = 1
 
 function load = load_mass(m_end,varargin)
@@ -20,4 +22,5 @@ function load = load_mass(m_end,varargin)
         eval([varargin_param_names{i} '=varargin_default_values{i};'])
     end
     load.mass= m_end/(EMA^2) + m_rod*( (1+1/EMA)^2 + 3*(1/EMA-1)^2 ) /12;
+    load.EMA=EMA;
 end 

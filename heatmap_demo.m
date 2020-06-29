@@ -10,7 +10,7 @@ addpath(genpath(pwd)); % add all subdirectories to path to access the files in c
 %% edit the following parameters
 
 %% plot parameters 
-N=1; % determines resolution of heatplots
+N=10; % determines resolution of heatplots
 
 % setting x axis on the plot (Fmax of latch)
 %xname = 'Fmax';
@@ -25,7 +25,7 @@ yname = 'vmax';
 yrange = [-2 2];
 v_maxs = logspace(yrange(1),yrange(2),N);
 
-metrics = {'tto','vto','Pmax','ymax','tL','KEmax','yunlatch'};
+metrics = {'tto','vto','Pmax','ymax','tL','KEmax','yunlatch','amax'};
 % hold on
 % close all
 % clearvars
@@ -50,12 +50,12 @@ load_time_constraint = Inf;
 %% loading motor
 
 % loading motor parameters for linear motor
-F_max_loading_motor = 20;
+F_max_loading_motor = 10E4;
 loading_motor_range_of_motion = 3;
 v_max_loading_motor = 10.0000;
 
 % extra parameters for hill muscle motor
-loading_motor_muscle_length = 10;
+loading_motor_muscle_length = 1.5*2.53E-4;
 loading_motor_r_activation = Inf;
 
 % loading motor struct initialization
@@ -65,16 +65,23 @@ loading_motor = hill_muscle_motor(loading_motor_muscle_length, F_max_loading_mot
 %% load mass
 
 % load mass parameters
-m=10000;
+%m=1;
+
+%trap jaw ant load mass
+%should we adjust EMA based on friction
+EMA = 1.13E-1;
+%EMA=1;
+m_rod = 4E-10;
+m_end = 0;
 
 % load mass struct initialization
-load = load_mass(m);
+load = load_mass(m_end,m_rod,EMA);
 
 
 %% latch
 
 % latch parameters
-R=2;
+R=.1;
 m_L= 100;
 
 coeff_fric = 0;
@@ -85,14 +92,20 @@ latch = rounded_latch(R, m_L, coeff_fric, v_0L);
 
 %% spring
 
-% spring paramters
-k = 1; % k or k_0 depending on linear or exponential spring
-m_s=1;
-F_spring_max=1E4;
-
 % extra parameters for exponential spring
 % should be a negative value
-characteristic_length = -5;
+characteristic_length = 5;
+
+%trap jaw ant spring parameters 
+ L = 2.53E-4;
+ rho = 1.59E3;
+ A = 1.64E-10;
+ E = 1.1E10;
+ sigma_f = 10E6;
+ m_s = L*rho*A;
+ k=(E*A)/L;
+ F_spring_max= sigma_f*A;
+ 
 
 % spring struct initialization
 spring = linear_spring(k, m_s, F_spring_max);
@@ -167,10 +180,13 @@ for ii=1:length(metrics)
     subplot(2,4,n);
     imagesc(xrange,yrange,outval{ii});
     set(gca,'YDir','normal');
+    set(gca,'TickLabelInterpreter','latex')
     xlabel(xname,'Interpreter', 'Latex');
     ylabel(yname, 'Interpreter', 'Latex');
     c = colorbar;
     c.Label.String = metrics{ii};
+    set(c,'TickLabelInterpreter','latex')
+    c.Label.Interpreter="latex";
     n=n+1;
 end
 
