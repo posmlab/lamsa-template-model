@@ -10,7 +10,7 @@ addpath(genpath(pwd)); % add all subdirectories to path to access the files in c
 %% edit the following parameters
 
 %% plot parameters 
-N=50; % determines resolution of heatplots
+N=20; % determines resolution of heatplots
 
 % setting x axis on the plot (Fmax of latch)
 xname = 'k value [N/m]';
