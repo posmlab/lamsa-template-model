@@ -174,29 +174,38 @@ toc
 figure
 n=1;
 for ii=1:length(metrics)
-    subplot(2,2,n);
+    name = {'ax1' 'ax2' 'ax3' 'ax4'};
+    name{ii} = subplot(2,2,n);
     imagesc(xrange,yrange,outval{ii});
     set(gca,'YDir','normal');
     set(gca,'TickLabelInterpreter','latex')
     xlabel(xname,'Interpreter', 'Latex');
     ylabel(yname, 'Interpreter', 'Latex');
     c = colorbar;
-    range = c.Limits;
-    white = 1 - range(1);
-    perc = white/(range(2) - range(1));
     map = linspecer(N);
-    nrow = size(map, 1);
-    ind = 1 + floor(nrow*perc);
-    %for i = (ind - 1):(ind + 1)
-     %   if i > 0
-    map(ind, :) = [1 1 1];
-     %   end
-    %end
-    colormap(map);
+    colormap(name{ii}, map);
     c.Label.String = metrics{ii};
     set(c,'TickLabelInterpreter','latex')
     c.Label.Interpreter="latex";
     n=n+1;
+    hold on
+    bndry = zeros(size(outval{ii}) + [2,2]);
+    bndry(2:end-1, 2:end-1) = outval{ii};
+    bndry(1,:) = bndry(2,:);
+    bndry(end,:) = bndry(end-1,:);
+    bndry(:,1) = bndry(:,2);
+    bndry(:,end) = bndry(:,end-1);
+    LaMSA = zeros(size(bndry));
+    index1 = find(bndry > 1);
+    LaMSA(index1) = 1;
+    B = bwboundaries(LaMSA);
+    for k = 1:length(B)
+        boundary = B{k}-1;
+        out_of_range = boundary<1|boundary>N;
+        out_of_range = out_of_range(:,1)|out_of_range(:,2);
+        boundary(out_of_range,:)=[];
+        plot(log10(ds(boundary(:,2))), log10(loadmass(boundary(:,1))), ':k', 'LineWidth', 3)
+    end
 end
 
 %%Comparison

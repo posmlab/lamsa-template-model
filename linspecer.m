@@ -256,6 +256,3 @@ function cmap = interpomap(n,cmapp)
     end
     cmap = (cmap/255); % flipud??
 end
-
-
-
