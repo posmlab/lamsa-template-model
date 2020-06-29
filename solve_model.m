@@ -32,8 +32,24 @@ end
 y_guess = max([y_guess_motor, y_guess_spring]);
 options =  {};% optimset('Display','iter');
 [y0,~,exitflag]=fzero(@(y) (loading_motor.Force(Inf,[-y 0])-spring.Force(0,[y 0])) - LARGE_NUM*((~loading_motor.Force(Inf,[-y 0]))||(~spring.Force(0,[y 0])))+LARGE_NUM*(y>0),y_guess,options);
+
 if (exitflag<0)
     error('fzero failed');
+end
+
+% checks latching distance conditions
+y0
+latch.min_latching_dist
+if (abs(y0) < latch.min_latching_dist)
+    warning('Loading failed. Does not fall within latching distance conditions.');
+    sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
+            latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
+            unlatching_motor.Force(0,[0,0])];
+    transition_times = [inf,inf];
+    writeInfoToFile(m_eff, transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
+    return
+elseif (y0 > latch.max_latching_dist)
+    y0 = latch.max_latching_dist;
 end
 
 %% Unlatching phase: Fs vs Flatch
