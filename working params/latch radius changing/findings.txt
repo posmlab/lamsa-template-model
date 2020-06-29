@@ -1,0 +1,3 @@
+latch radius:
+somewhere between 2 and 3 the unlatching motor force becomes not negative
+(negative at 3, not negative at 2)

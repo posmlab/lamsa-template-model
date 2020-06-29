@@ -30,16 +30,15 @@ end
 
 % use fzero to find when Fs=Fin 
 y_guess = max([y_guess_motor, y_guess_spring]);
-options =  {};% optimset('Display','iter');
-[y0,~,exitflag]=fzero(@(y) (loading_motor.Force(Inf,[-y 0])-spring.Force(0,[y 0])) - LARGE_NUM*((~loading_motor.Force(Inf,[-y 0]))||(~spring.Force(0,[y 0])))+LARGE_NUM*(y>0),y_guess,options);
+options =  {};
+options = optimset('Display','iter');
+[y0,~,exitflag]=fzero(@(y) (loading_motor.Force(Inf,[-y 0])-spring.Force(0,[y 0])) - LARGE_NUM*((~loading_motor.Force(Inf,[-y 0]))||(~spring.Force(0,[y 0])))+LARGE_NUM*(y>0),y_guess,options)
 
 if (exitflag<0)
     error('fzero failed');
 end
 
 % checks latching distance conditions
-y0
-latch.min_latching_dist
 if (abs(y0) < latch.min_latching_dist)
     warning('Loading failed. Does not fall within latching distance conditions.');
     sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
