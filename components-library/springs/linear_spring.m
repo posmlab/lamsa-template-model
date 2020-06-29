@@ -27,6 +27,10 @@ function spring = linear_spring(k,varargin)
     end
     
     % model
-    spring.Force = @(t,x)-k*x(1).*(abs(k*x(1))<F_spring_max);  
+    if (F_spring_max == Inf)
+        F_spring_max = realmax;
+    end
+    % only works for compressing the spring
+    spring.Force = @(t,x) min(realmax,-k*x(1)) .* (abs(k*x(1))<F_spring_max);  
     spring.mass = m_s;
 end

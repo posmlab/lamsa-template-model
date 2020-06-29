@@ -15,7 +15,7 @@ F_list = zeros(size(y_list));
 for i = 1:length(y_list)
     F_list(i) = loading_motor.Force(Inf,[y_list(i) 0]);
 end
-y_guess_motor = -y_list(find(F_list>0,1,'last'));
+y_guess_motor = -y_list(find(F_list>0,1,'last'))
 
 % initial guess based on initial spring stiffness
 y_guess_spring = -Inf;
@@ -29,7 +29,8 @@ while (y_guess_spring == -Inf)
 end
 
 % use fzero to find when Fs=Fin 
-y_guess = max([y_guess_motor, y_guess_spring]);
+y_guess = max([y_guess_motor, y_guess_spring])
+spring.Force(0,[y_guess,0])
 options =  {};
 options = optimset('Display','iter');
 [y0,~,exitflag]=fzero(@(y) (loading_motor.Force(Inf,[-y 0])-spring.Force(0,[y 0])) - LARGE_NUM*((~loading_motor.Force(Inf,[-y 0]))||(~spring.Force(0,[y 0])))+LARGE_NUM*(y>0),y_guess,options)
