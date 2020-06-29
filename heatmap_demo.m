@@ -10,20 +10,19 @@ addpath(genpath(pwd)); % add all subdirectories to path to access the files in c
 %% edit the following parameters
 
 %% plot parameters 
-N=10; % determines resolution of heatplots
+N=20; % determines resolution of heatplots
 
-% setting x axis on the plot (Fmax of latch)
-%xname = 'Fmax';
-xname = 'range of motion';
-xrange = [-1 3];
+% setting x axis on the plot 
+xname = 'mandible mass';
+xrange = [-3 -1];
 %Fmaxs = logspace(xrange(1),xrange(2),N);
-ds = logspace(xrange(1),xrange(2),N);
+m_m = logspace(xrange(1),xrange(2),N);
 
 
-%setting y axis value on plot (Vmax of latch)
-yname = 'vmax';
-yrange = [-2 2];
-v_maxs = logspace(yrange(1),yrange(2),N);
+%setting y axis value on plot 
+yname = 'ema';
+yrange = [-2 0];
+ema = logspace(yrange(1),yrange(2),N);
 
 metrics = {'tto','vto','Pmax','ymax','tL','KEmax','yunlatch','amax'};
 % hold on
@@ -50,12 +49,12 @@ load_time_constraint = Inf;
 %% loading motor
 
 % loading motor parameters for linear motor
-F_max_loading_motor = 10E4;
+F_max_loading_motor = 4.72E-6;
 loading_motor_range_of_motion = 3;
 v_max_loading_motor = 10.0000;
 
 % extra parameters for hill muscle motor
-loading_motor_muscle_length = 1.5*2.53E-4;
+loading_motor_muscle_length = 1.5*1;
 loading_motor_r_activation = Inf;
 
 % loading motor struct initialization
@@ -69,9 +68,9 @@ loading_motor = hill_muscle_motor(loading_motor_muscle_length, F_max_loading_mot
 
 %trap jaw ant load mass
 %should we adjust EMA based on friction
-EMA = 1.13E-1;
+EMA = 1.16E-1;
 %EMA=1;
-m_rod = 4E-10;
+m_rod = 1.56E-2;
 m_end = 0;
 
 % load mass struct initialization
@@ -81,11 +80,11 @@ load = load_mass(m_end,m_rod,EMA);
 %% latch
 
 % latch parameters
-R=.1;
-m_L= 100;
+R=3.96E-1;
+m_L= .01;
 
 coeff_fric = 0;
-v_0L=0;
+v_0L=1;
 
 % latch struct initialization
 latch = rounded_latch(R, m_L, coeff_fric, v_0L);
@@ -94,14 +93,14 @@ latch = rounded_latch(R, m_L, coeff_fric, v_0L);
 
 % extra parameters for exponential spring
 % should be a negative value
-characteristic_length = 5;
+characteristic_length = 1;
 
 %trap jaw ant spring parameters 
- L = 2.53E-4;
+ L = 1;
  rho = 1.59E3;
- A = 1.64E-10;
- E = 1.1E10;
- sigma_f = 10E6;
+ A = 2.56E-3;
+ E = 1;
+ sigma_f = 3.18E-1;
  m_s = L*rho*A;
  k=(E*A)/L;
  F_spring_max= sigma_f*A;
@@ -114,14 +113,15 @@ spring = linear_spring(k, m_s, F_spring_max);
 %% unlatching motor
 
 % unlatching motor paramters for linear motor
-F_max_unlatching_motor = 20;
-unlatchinging_motor_range_of_motion = 3;
+F_max_unlatching_motor = 0;
+unlatchinging_motor_range_of_motion = Inf;
 
 % extra parameters for hill muscle motor
-unlatching_motor_muscle_length = 10;
+unlatching_motor_muscle_length = 0;
 unlatching_motor_r_activation = Inf;
 
 % unlatching motor struct initialization happens in next section
+unlatching_motor =linear_motor(0,0,0);
 %% end editable parameters
 
 % make a directory for every run
@@ -142,16 +142,7 @@ if (debug)
 end
 for i=1:N %iterate over y-axis-variable of plot
     for j=1:N %iterate over x-axis-variable of plot
-        % unlatching motor struct initialization
-        %unlatching_motor = hill_muscle_motor(unlatching_motor_muscle_length, Fmaxs(j), v_maxs(i),unlatching_motor_r_activation);
-        unlatching_motor = linear_motor(F_max_unlatching_motor,v_maxs(i), ds(j));
-        %input structs for each component
-%         k = Es(j)*As(i)/L;
-%         F_spring_max= sigma_f*As(i);
-%         m_s=As(i)*L*rho;
-%         spring = linear_spring(k, m_s, F_spring_max);
-%         %spring=exponential_spring(k, characteristic_length, m_s,F_spring_max);
-        % input structs for each component of LaMSA system into solve_model
+        load = load_mass(0,m_m(j),ema(i));
         [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring, cleanDateString);
 
         if (debug)
