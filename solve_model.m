@@ -40,7 +40,8 @@ end
 
 try
     [inst_check,~,~]=unlatching_end(0,[0,latch.v_0],m_eff,y0,latch,spring,unlatching_motor);
-catch ("Latch gets stuck!");
+catch ('Latch gets stuck!');
+    warning('Latch gets stuck!')
     sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
             latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
             unlatching_motor.Force(0,[0,0])];
@@ -142,7 +143,7 @@ sin_comp = sin_comp';
 cos_comp = cos_comp';
 
 %Calculating Normal and Frictional Force Components
-for i=1:size(x_unlatch, 1);
+for i=1:size(x_unlatch, 1)
     F_nx(i) = F_n(i) .* sin_comp(i);
     F_ny(i) = F_n(i) .* cos_comp(i);
     F_fx(i) = F_nx(i) * latch.coeff_fric;
