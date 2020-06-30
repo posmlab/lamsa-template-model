@@ -85,6 +85,7 @@ if inst_check>0
         tspan=linspace(0,t_L_guess,1000);
         [t_unlatch,x_unlatch]=ode45(ode,tspan,[0 latch.v_0], unlatch_opts);
     catch ("Latch gets stuck!");
+        warning('Latch gets stuck!')
         % if the latch gets stuck, just give back
         % the initial conditions
         sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
