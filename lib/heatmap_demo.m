@@ -5,7 +5,7 @@ close all
 clearvars
 tic
 debug = false;
-addpath(genpath(pwd)); % add all subdirectories to path to access the files in components-library
+addpath(genpath(fullfile(pwd,'..'))); % add all subdirectories to path to access the files in components-library
 
 %% edit the following parameters
 
@@ -123,9 +123,7 @@ unlatching_motor =linear_motor(0,0,0);
 %% end editable parameters
 
 % make a directory for every run
-dateString = string(datetime);
-cleanDateString = regexprep(dateString, " ", "_");
-cleanDateString = regexprep(cleanDateString, ":", "_");
+output_directory = create_output_directory();
         
 
 

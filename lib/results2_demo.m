@@ -4,9 +4,7 @@ tic
 debug = false;
 addpath(genpath(pwd));
 
-dateString = string(datetime);
-cleanDateString = regexprep(dateString, " ", "_");
-cleanDateString = regexprep(cleanDateString, ":", "_");
+output_directory = create_output_directory();
         
 load_time_constraint=Inf;
 
@@ -136,7 +134,7 @@ da_motor2 = hill_muscle_motor(da_muscle_length, da_F_max, da_V_max, da_r_activat
 % figure
 % hold on
 % for l = 1:length(load_mass_arr)  
-%     [sol,~]=solve_model(loading_motor2,unlatching_motor,load_mass_arr(l),latch,spring,cleanDateString);
+%     [sol,~]=solve_model(loading_motor2,unlatching_motor,load_mass_arr(l),latch,spring,output_directory);
 %     LaMSAsol=sol;
 %     sol = solve_direct_actuation(da_motor2,load_mass_arr(l));
 %     da_sol=sol;
@@ -180,7 +178,7 @@ hold off
 % figure
 % hold on
 % for l = 1:length(load_mass_arr)  
-%     [sol,~]=solve_model(loading_motor,unlatching_motor,load_mass_arr(l),latch,spring,cleanDateString);
+%     [sol,~]=solve_model(loading_motor,unlatching_motor,load_mass_arr(l),latch,spring,output_directory);
 %     LaMSAsol=sol;
 %     sol = solve_direct_actuation(da_motor,load_mass_arr(l));
 %     da_sol=sol;
@@ -214,7 +212,7 @@ for i = 1:length(variable_range)
     unlatching_motor=linear_motor(F_max_unlatching_motor, v_max_unlatching_motor, unlatching_motor_range_of_motion);
     loading_motor=hill_muscle_motor(variable_range(i), F_max_loading_motor, v_max_loading_motor, loading_motor_r_activation);
     spring=linear_spring(k_opt);
-    [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring, cleanDateString);
+    [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring, output_directory);
     [solDA, ttDA] = solve_direct_actuation(loading_motor, load);
     met_dict=get_metrics(sol,transition_times,load ,metrics);
     met_dict_DA = get_metrics(solDA, ttDA, load, metrics);
