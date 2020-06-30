@@ -134,7 +134,7 @@ for i=1:N %iterate over y-axis-variable of plot
         loading_motor=hill_muscle_motor(loading_motor_muscle_length, muscle_max_f(i), v_max_loading_motor, loading_motor_r_activation);
         spring=exponential_spring(k_val(j),characteristic_length, m_s, F_spring_max);
         % input structs for each component of LaMSA system into solve_model
-        [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring, output_directory);
+        [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring);%Add 6th input to write csv files with data: output_directory
         [solDA, ttDA] = solve_direct_actuation(loading_motor, load);
         if (debug)
             figure(h1)
@@ -157,7 +157,7 @@ end
 toc
 
 %% Plot the output data
-figure
+lPlot = figure;
 n=1;
 for ii=1:length(metrics)
     name = {'ax1' 'ax2' 'ax3' 'ax4'};
@@ -193,3 +193,7 @@ for ii=1:length(metrics)
         plot(log10(k_val(boundary(:,2))), log10(muscle_max_f(boundary(:,1))), '.k', 'LineWidth', 3)
     end
 end
+prompt = sprintf('Please enter a name for the LaMSA Zone plot:\n');
+str = input(prompt, 's');
+saveas(lPlot, strcat(str, '.fig'));
+

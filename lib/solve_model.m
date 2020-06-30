@@ -43,7 +43,9 @@ if (abs(y0) < latch.min_latching_dist)
             latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
             unlatching_motor.Force(0,[0,0])];
     transition_times = [inf,inf];
+    if (nargin >= 6)
     writeInfoToFile(m_eff, transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
+    end
     return
 elseif (y0 > latch.max_latching_dist)
     y0 = latch.max_latching_dist;
@@ -59,7 +61,9 @@ catch ('Latch gets stuck!');
             latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
             unlatching_motor.Force(0,[0,0])];
     transition_times = [inf,inf];
+    if (nargin >= 6)
     writeInfoToFile(m_eff, transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
+    end
     return
 end
 if inst_check>0 
@@ -92,7 +96,9 @@ if inst_check>0
             latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
             unlatching_motor.Force(0,[0,0])];
         transition_times = [inf,inf];
+        if (nargin >= 6)
         writeInfoToFile(m_eff, transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
+        end
         return 
     end
     
@@ -216,7 +222,8 @@ sol=[T Y X F_comp fSpring fUnlatchingMotor];
 
 
 %% Establishing Parameters for .json output
-
+if (nargin >= 6)
 writeInfoToFile(m_eff, transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
+end
 end
 

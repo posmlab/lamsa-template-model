@@ -137,7 +137,7 @@ for i=1:N %iterate over y-axis-variable of plot
 %         spring = linear_spring(k, m_s, F_spring_max);
 %         %spring=exponential_spring(k, characteristic_length, m_s,F_spring_max);
         % input structs for each component of LaMSA system into solve_model
-        [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring, output_directory);
+        [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring, output_directory);%Add 6th input to write csv files with data: output_directory
 
         if (debug)
             figure(h1)
@@ -159,7 +159,7 @@ end
 toc
 
 %% Plot the output data
-figure
+hmap = figure;
 n=1;
 for ii=1:length(metrics)
     subplot(2,4,n);
@@ -171,6 +171,9 @@ for ii=1:length(metrics)
     c.Label.String = metrics{ii};
     n=n+1;
 end
+prompt = sprintf('Please enter a name for the heatmap figure:\n');
+str = input(prompt, 's');
+saveas(hmap, strcat(str, '.fig'));
 
 %%Comparison
 %big_Diff=max(max(outval{1}-old))
