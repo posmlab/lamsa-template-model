@@ -190,7 +190,7 @@ for ii=1:length(metrics)
         out_of_range = boundary<1|boundary>N;
         out_of_range = out_of_range(:,1)|out_of_range(:,2);
         boundary(out_of_range,:)=[];
-        plot(log10(ds(boundary(:,2))), log10(loadmass(boundary(:,1))), ':k', 'LineWidth', 3)
+        plot(log10(k_val(boundary(:,2))), log10(muscle_max_f(boundary(:,1))), '.k', 'LineWidth', 3)
     end
 end
 

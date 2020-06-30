@@ -72,7 +72,7 @@ transition_times	|  1x2	    | Unlatching and launch times
 sol	              |  manyx11  | t, y, ydot, x, xdot, <br> normal and frictional components, <br> spring force, and unlatching force <br> column vectors
 
 ### Output Files
-Currently, solve_model will create two output files eveytime it is run. One is a .json file that contains the parameters used for this specific call as well as the transition_times. It also outputs a .csv file with all of the data found in sol. Both of these files can be found in the outputDirectory specified in the call, and both the file names and the outputDirectory are organized with a timestamp. However, when heatmap_demo is run, a single output directory is created at the time heatmap_demo is called, and then all of the output from the looping solve_model calls are stored in this directory.
+Currently, solve_model will create two output files every time it is run. One is a .json file that contains the parameters used for this specific call as well as the transition_times. It also outputs a .csv file with all of the data found in sol. Both of these files can be found in the outputDirectory specified in the call, and both the file names and the outputDirectory are organized with a timestamp. However, when heatmap_demo is run, a single output directory is created at the time heatmap_demo is called, and then all of the output from the looping solve_model calls are stored in this directory.
 
 ##### Model Structure
 The main function solve_model is generally structured as follows
