@@ -10,17 +10,17 @@ addpath(genpath(fullfile(pwd,'..'))); % add all subdirectories to path to access
 %% edit the following parameters
 
 %% plot parameters 
-N=20; % determines resolution of heatplots
+N=256; % determines resolution of heatplots
 
 % setting x axis on the plot (Fmax of latch)
 xname = 'k value [N/m]';
-xrange = [-1 3];
-k_val = logspace(xrange(1),xrange(2),N);
+xrange = [100 10000];
+k_val = linspace(xrange(1),xrange(2),N);
 
 %setting y axis value on plot (Vmax of latch)
 yname = 'muscle max force [N]';
-yrange = [-1 2];
-muscle_max_f = logspace(yrange(1),yrange(2),N);
+yrange = [0 15];
+muscle_max_f = linspace(yrange(1),yrange(2),N);
 
 metrics = {'tto','vto','Pmax','KEmax'};
 % hold on
@@ -47,12 +47,12 @@ load_time_constraint = Inf;
 %% loading motor
 
 % loading motor parameters for linear motor
-F_max_loading_motor = 20;
+F_max_loading_motor = 10;
 loading_motor_range_of_motion = 5;
-v_max_loading_motor = 100.0000;
+v_max_loading_motor = 5;
 
 % extra parameters for hill muscle motor
-loading_motor_muscle_length = 10;
+loading_motor_muscle_length = 10E-3;
 loading_motor_r_activation = Inf;
 
 % loading motor struct initialization
@@ -62,7 +62,7 @@ loading_motor = hill_muscle_motor(loading_motor_muscle_length, F_max_loading_mot
 %% load mass
 
 % load mass parameters
-m=.001;
+m=100E-3;
 
 % load mass struct initialization
 load = load_mass(m);
@@ -71,8 +71,8 @@ load = load_mass(m);
 %% latch
 
 % latch parameters
-R=.01;
-m_L= 1000;
+R=5E-3;
+m_L= 10E-3;
 
 coeff_fric = 0;
 v_0L=0;
@@ -84,12 +84,12 @@ latch = rounded_latch(R, m_L, coeff_fric, v_0L);
 
 % spring paramters
 k = 1; % k or k_0 depending on linear or exponential spring
-m_s=0;
-F_spring_max=1E4;
+m_s=10E-3;
+F_spring_max=20;
 
 % extra parameters for exponential spring
 % should be a negative value
-characteristic_length = 5;
+characteristic_length = 1E-3;
 
 % spring struct initialization
 spring = linear_spring(k, m_s, F_spring_max);
@@ -98,9 +98,9 @@ spring = linear_spring(k, m_s, F_spring_max);
 %% unlatching motor
 
 % unlatching motor paramters for linear motor
-F_max_unlatching_motor = 100;
-unlatching_motor_range_of_motion = 50;
-v_max_unlatching_motor=50;
+F_max_unlatching_motor = 1;
+unlatching_motor_range_of_motion = 5E-3;
+v_max_unlatching_motor=5;
 
 % extra parameters for hill muscle motor
 unlatching_motor_muscle_length = 10;
@@ -193,6 +193,3 @@ for ii=1:length(metrics)
         plot(log10(k_val(boundary(:,2))), log10(muscle_max_f(boundary(:,1))), '.k', 'LineWidth', 3)
     end
 end
-
-%%Comparison
-%big_Diff=max(max(outval{1}-old))
