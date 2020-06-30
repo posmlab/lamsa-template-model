@@ -67,9 +67,7 @@ loading_motor = hill_muscle_motor(loading_motor_muscle_length, F_max_loading_mot
 %m=1;
 
 %trap jaw ant load mass
-%should we adjust EMA based on friction
 EMA = 1.16E-1;
-%EMA=1;
 m_rod = 1.56E-2;
 m_end = 0;
 
@@ -81,7 +79,7 @@ load = load_mass(m_end,m_rod,EMA);
 
 % latch parameters
 R=3.96E-1;
-m_L= .01;
+m_L= 1;
 
 coeff_fric = 0;
 v_0L=1;
