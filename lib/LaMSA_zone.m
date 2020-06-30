@@ -5,7 +5,7 @@ close all
 clearvars
 tic
 debug = false;
-addpath(genpath(pwd)); % add all subdirectories to path to access the files in components-library
+addpath(genpath(fullfile(pwd,'..'))); % add all subdirectories to path to access the files in components-library
 
 %% edit the following parameters
 
@@ -110,9 +110,7 @@ unlatching_motor= linear_motor(F_max_unlatching_motor, v_max_unlatching_motor, u
 %% end editable parameters
 
 % make a directory for every run
-dateString = string(datetime);
-cleanDateString = regexprep(dateString, " ", "_");
-cleanDateString = regexprep(cleanDateString, ":", "_");
+output_directory = create_output_directory();
         
 
 
@@ -136,7 +134,7 @@ for i=1:N %iterate over y-axis-variable of plot
         loading_motor=hill_muscle_motor(loading_motor_muscle_length, muscle_max_f(i), v_max_loading_motor, loading_motor_r_activation);
         spring=exponential_spring(k_val(j),characteristic_length, m_s, F_spring_max);
         % input structs for each component of LaMSA system into solve_model
-        [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring, cleanDateString);
+        [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring, output_directory);
         [solDA, ttDA] = solve_direct_actuation(loading_motor, load);
         if (debug)
             figure(h1)
