@@ -138,9 +138,9 @@ if (debug)
 end
 for i=1:N %iterate over y-axis-variable of plot
     for j=1:N %iterate over x-axis-variable of plot
+
         load = load_mass(0,m_m(j),ema(i));
         [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring, cleanDateString);
-
         if (debug)
             figure(h1)
             plot(sol(:,1),sol(:,2),'.');
@@ -161,7 +161,7 @@ end
 toc
 
 %% Plot the output data
-figure
+hmap = figure;
 n=1;
 for ii=1:length(metrics)
     subplot(2,4,n);
@@ -176,6 +176,9 @@ for ii=1:length(metrics)
     c.Label.Interpreter="latex";
     n=n+1;
 end
+prompt = sprintf('Please enter a name for the heatmap figure:\n');
+str = input(prompt, 's');
+saveas(hmap, strcat(str, '.fig'));
 
 %%Comparison
 %big_Diff=max(max(outval{1}-old))
