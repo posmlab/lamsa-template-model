@@ -10,7 +10,7 @@ addpath(genpath(fullfile(pwd,'..'))); % add all subdirectories to path to access
 %% edit the following parameters
 
 %% plot parameters 
-N=256; % determines resolution of heatplots
+N=20; % determines resolution of heatplots
 
 % setting x axis on the plot (Fmax of latch)
 xname = 'k value [N/m]';
@@ -19,7 +19,7 @@ k_val = linspace(xrange(1),xrange(2),N);
 
 %setting y axis value on plot (Vmax of latch)
 yname = 'muscle max force [N]';
-yrange = [0 15];
+yrange = [1E-1 10];
 muscle_max_f = linspace(yrange(1),yrange(2),N);
 
 metrics = {'tto','vto','Pmax','KEmax'};
@@ -47,9 +47,9 @@ load_time_constraint = Inf;
 %% loading motor
 
 % loading motor parameters for linear motor
-F_max_loading_motor = 10;
+F_max_loading_motor = 4;
 loading_motor_range_of_motion = 5;
-v_max_loading_motor = 5;
+v_max_loading_motor = 1;
 
 % extra parameters for hill muscle motor
 loading_motor_muscle_length = 10E-3;
@@ -62,7 +62,7 @@ loading_motor = hill_muscle_motor(loading_motor_muscle_length, F_max_loading_mot
 %% load mass
 
 % load mass parameters
-m=100E-3;
+m=25E-3;
 
 %trap jaw ant load mass
 % L = 1E-2;
@@ -77,14 +77,15 @@ m_rod = .1;
 m_end = .1;
 
 % load mass struct initialization
-load = load_mass(m_end,m_rod,EMA);
+% load = load_mass(m_end,m_rod,EMA);
+load = load_mass(m);
 
 
 %% latch
 
 % latch parameters
 R=5E-3;
-m_L= 10E-3;
+m_L= 3E-3;
 
 coeff_fric = 0;
 v_0L=0;
@@ -96,7 +97,7 @@ latch = rounded_latch(R, m_L, coeff_fric, v_0L);
 
 % spring paramters
 k = 1; % k or k_0 depending on linear or exponential spring
-m_s=10E-3;
+m_s=2E-3;
 F_spring_max=20;
 
 % extra parameters for exponential spring
@@ -110,9 +111,9 @@ spring = linear_spring(k, m_s, F_spring_max);
 %% unlatching motor
 
 % unlatching motor paramters for linear motor
-F_max_unlatching_motor = 1;
+F_max_unlatching_motor = .25;
 unlatching_motor_range_of_motion = 5E-3;
-v_max_unlatching_motor=5;
+v_max_unlatching_motor=1;
 
 % extra parameters for hill muscle motor
 unlatching_motor_muscle_length = 10;
