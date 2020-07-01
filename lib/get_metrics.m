@@ -29,4 +29,7 @@ function metrics = get_metrics(sol,transition_times,load,met_names)
         index=find(sol(:,1)<=transition_times(1),1,"last");
         metrics('yunlatch')= sol(index, 2);
     end
+    if isKey(metrics,'minumforce')
+        metrics('minumforce')= min(sol(:,11));
+    end
 end
