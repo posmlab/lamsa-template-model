@@ -10,7 +10,7 @@ addpath(genpath(fullfile(pwd,'..'))); % add all subdirectories to path to access
 %% edit the following parameters
 
 %% plot parameters 
-N=20; % determines resolution of heatplots
+N=256; % determines resolution of heatplots
 
 % setting x axis on the plot (Fmax of latch)
 xname = 'k value [N/m]';
@@ -203,7 +203,8 @@ for ii=1:length(metrics)
         out_of_range = boundary<1|boundary>N;
         out_of_range = out_of_range(:,1)|out_of_range(:,2);
         boundary(out_of_range,:)=[];
-        plot(log10(k_val(boundary(:,2))), log10(muscle_max_f(boundary(:,1))), '.k', 'LineWidth', 3)
+        plot(k_val(boundary(:,2)), muscle_max_f(boundary(:,1)), '.k', 'LineWidth', 3)
+        hold on
     end
 end
 prompt = sprintf('Please enter a name for the LaMSA Zone plot:\n');
