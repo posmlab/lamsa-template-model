@@ -37,23 +37,43 @@ load = load_mass(m);
 %% latch
 R = .1;
 %R=0.0032; % guesses based on height of jumping robot from slides
-m_L= m/100000;
+m_L= m/15
 coeff_fric = 0;
 v_0L=0;
-latch = rounded_latch(R, m_L, coeff_fric, v_0L);
+latch = rounded_latch(R,m_L);
 
 
-negativeArray = zeros(3,3);
-%% call solve_model
-% make a directory for the current run
-dateString = string(datetime);wel
-cleanDateString = regexprep(dateString, " ", "_");
-cleanDateString = regexprep(cleanDateString, ":", "_");
-cleanDateString = "negative_force_tests_" + cleanDateString;
-for motorIndex=1:length(motors)
-    for springIndex=1:length(springs)
-        [sol, transition_times] = solve_model(motors(motorIndex),motors(motorIndex), load, ... 
-        latch, springs(springIndex),cleanDateString);
-        negativeArray(motorIndex, springIndex) = any(sol(:,11) < 0)
-    end
+spring_k=logspace(2,4,40);
+figure
+disp('starting')
+max_compression = 0.00844;
+for i=1:length(spring_k)
+    linspring=linear_spring(spring_k(i),0,spring_k(i)*max_compression);
+    %exspring=linear_spring(k_val(i),m_s,F_spring_max);
+    [sol,~]=solve_model(motors(1),motors(1),load,latch,linspring);
+    um_force(i)=min(sol(:,11));
+    disp(['row ' num2str(i) ' of ' num2str(length(spring_k))]);
 end
+plot(spring_k,um_force,'.')
+title("spring k vs um force","Interpreter","latex")
+xlabel("spring k","interpreter","latex")
+ylabel("min um force","interpreter","latex")
+set(gca,'TickLabelInterpreter','latex')
+hold off
+
+
+
+% negativeArray = zeros(3,3);
+% %% call solve_model
+% % make a directory for the current run
+% dateString = string(datetime);wel
+% cleanDateString = regexprep(dateString, " ", "_");
+% cleanDateString = regexprep(cleanDateString, ":", "_");
+% cleanDateString = "negative_force_tests_" + cleanDateString;
+% for motorIndex=1:length(motors)
+%     for springIndex=1:length(springs)
+%         [sol, transition_times] = solve_model(motors(motorIndex),motors(motorIndex), load, ... 
+%         latch, springs(springIndex),cleanDateString);
+%         negativeArray(motorIndex, springIndex) = any(sol(:,11) < 0)
+%     end
+% end
