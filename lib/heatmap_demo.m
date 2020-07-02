@@ -140,7 +140,7 @@ for i=1:N %iterate over y-axis-variable of plot
     for j=1:N %iterate over x-axis-variable of plot
 
         load = load_mass(0,m_m(j),ema(i));
-        [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring, output_directory);
+        [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring);
         if (debug)
             figure(h1)
             plot(sol(:,1),sol(:,2),'.');
@@ -150,7 +150,7 @@ for i=1:N %iterate over y-axis-variable of plot
             hold on;
             ginput(1)
         end
-        met_dict=get_metrics(sol,transition_times,load ,metrics);
+        met_dict=get_metrics(sol,transition_times,load,metrics);
         for ii=1:length(metrics)
             outval{ii}(i,j)=met_dict(metrics{ii});
         end
