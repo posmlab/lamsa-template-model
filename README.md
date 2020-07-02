@@ -42,6 +42,12 @@ We've added some new features! As well as a ton of more ouputs to sol, we have a
 
 -Jackson Castro '22
 
+P.P.S from Kaanthi Pandhigunta
+
+We now added a graphical user interface, so you don't have to go digging through our trash heap that we call code! The GUI works pretty well, but we have not tested it extensively. If the program throws an error, something catastrphic probably happened, so please let us know if that occurs. Other than that, the GUI will hopefully allow you to play with the LaMSA model even if you are not familiar with MATLAB. If you find an bug in the GUI or something else I messed up, please email me at kpandhigunta@hmc.edu. Have fun!
+
+-Kaanthi Pandhigunta '23
+
 
 ### /components-library
 The /components-library directory stores several structs used to call solve_model. In this directory, there are the subdirectories of /springs, /motors, /load-masses, and /latches. Within these subdirectories are structs for varying types of each of these parameters, such as specific latch shapes, varying motor and spring types, as well as a basic one for the load mass. These structs are then called in whatever specified combination in solve_model and heatmap_demo. In heatmap_demo there already exists code for each of these structs that can be commented out or commented back in to account for the various scenarios.
@@ -88,3 +94,14 @@ The main function solve_model is generally structured as follows
 + Concatenate the solution arrays into one long one
 + Write output files using writeInfoToFile.m
   + Create a .json parameter file and .csv output file to be stored in outputDirectory
+
+##### Graphical User Interface
+Simply double click the file plot_app.mlapp located in the \app folder to access the app, or open the file in MATLAB App Designer and click Run. Some good starting values are already filled in. Just click the Graph! button, and you will see some plots. If you want to do some more customization, follow these steps.
+
+Step 1: Choose your components. There is only 1 type of load and 1 type of latch. There are 3 types of springs, and 2 types of motors. Select the tab with your preferred type of spring, and your preferred motor for both the loading and unlatching motor.
+
+Step 2: There are clearly marked required and optional fields for each component. You must fill in the required fields. The optional fields already have the recommended default values filled in.
+
+Step 3: Select the two independent variables you want to vary over in the Graphing Corner. Fill in the range that you want to vary over for each variable. Pick the resolution that you want your plots in. Keep in mind that the higher the resolution, the longer it takes for the program to run.
+
+Step 4: Hit Graph! and enjoy your plots.
