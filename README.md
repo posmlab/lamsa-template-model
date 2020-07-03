@@ -1,5 +1,7 @@
 # MATLAB LaMSA Model
 
+Testing subtree MI
+
 LaMSA toy model implemented in MATLAB. 
 
 Run heatmap_demo.m for an example of usage.
