@@ -1,7 +1,5 @@
 # MATLAB LaMSA Model
 
-Testing subtree MI - update from bow and arrow
-
 LaMSA toy model implemented in MATLAB. 
 
 Run heatmap_demo.m for an example of usage.
