@@ -1,6 +1,6 @@
 # MATLAB LaMSA Model
 
-Testing subtree MI - can it be pushed?
+Testing subtree MI - update submodule?
 
 LaMSA toy model implemented in MATLAB. 
 
