@@ -30,7 +30,8 @@ end
 
 % use fzero to find when Fs=Fin 
 y_guess = max([y_guess_motor, y_guess_spring]);
-options = optimset('Display','iter');
+% options = optimset('Display','iter');
+options = {};
 [y0,~,exitflag]=fzero(@(y) (loading_motor.Force(Inf,[-y 0])-spring.Force(0,[y 0])) - LARGE_NUM*((~loading_motor.Force(Inf,[-y 0]))||(~spring.Force(0,[y 0])))+LARGE_NUM*(y>0),y_guess,options);
 if (exitflag<0)
     error('fzero failed');
@@ -64,7 +65,6 @@ if (unlatching_motor.max_force==0 && latch.v_0 == 0)
 end
 try
     [inst_check,~,~]=unlatching_end(0,[0,latch.v_0],m_eff,y0,latch,spring,unlatching_motor);
-inst_check
 catch ('Latch gets stuck!');
     warning('Latch gets stuck!')
     sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
