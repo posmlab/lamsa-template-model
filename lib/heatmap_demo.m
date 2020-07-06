@@ -119,7 +119,7 @@ unlatching_motor_muscle_length = 0;
 unlatching_motor_r_activation = Inf;
 
 % unlatching motor struct initialization happens in next section
-unlatching_motor =linear_motor(0,0,0);
+unlatching_motor = linear_motor(0,0,0);
 %% end editable parameters
 
 % make a directory for every run
