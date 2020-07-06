@@ -40,4 +40,7 @@ function metrics = get_metrics(sol,transition_times,load,met_names)
     if isKey(metrics,'amax')
         metrics("amax")=max(acceleration);
     end
+    if isKey(metrics,'minumforce')
+        metrics('minumforce')= min(sol(:,11));
+    end
 end
