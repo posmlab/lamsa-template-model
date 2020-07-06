@@ -6,6 +6,10 @@
 % min # arguments = 3
 
 function motor = linear_motor(F_motor_max, v_motor_max, range_of_motion)
+    if (v_motor_max == 0)
+        v_motor_max = Inf;
+        warning("v_max argument must be nonzero, setting to Inf")
+    end
     if (nargin == 3)
         motor.Force = @(t,x) (F_motor_max*(1-x(2)/v_motor_max)) .* (abs(x(1))<=range_of_motion);
     else
