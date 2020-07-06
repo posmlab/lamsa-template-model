@@ -23,7 +23,7 @@ function motor = hill_muscle_motor(muscle_length,F_motor_max,v_motor_max,r_activ
     end
     for i=1:length(varargin)
         eval([varargin_param_names{i} '=varargin{i};'])
-    end;
+    end
     for i=(length(varargin)+1):length(varargin_param_names)
         eval([varargin_param_names{i} '=varargin_default_values{i};'])
     end
