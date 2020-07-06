@@ -42,5 +42,6 @@ function motor = linear_motor(F_motor_max, v_motor_max, range_of_motion,varargin
     motor.range = range_of_motion;
     motor.velocity = voltage_fraction*v_motor_max;
 
-    motor.Force = @(t,x)(motor.max_force*(1-x(2)/motor.velocity)) .* (abs(x(1))<=range_of_motion);
+    motor.Force = @(t,x)max((motor.max_force*(1-x(2)/motor.velocity)) .* (abs(x(1))<=range_of_motion), 0);
+    % if the force expression comes out negative, sets it to 0
 end 
