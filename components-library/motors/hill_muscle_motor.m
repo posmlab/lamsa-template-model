@@ -13,7 +13,7 @@ function motor = hill_muscle_motor(muscle_length,F_motor_max,v_motor_max,r_activ
     % optional parameters
     varargin_param_names = {'L_initial','a_L','b_L','s'};
     varargin_default_values = {muscle_length,2.08,-2.89,-0.75};
-    
+
     % check and assign optional parameters
     if (nargin < 4)
         error('Hill muscle motor requires at least 4 arguments.');
@@ -27,7 +27,10 @@ function motor = hill_muscle_motor(muscle_length,F_motor_max,v_motor_max,r_activ
     for i=(length(varargin)+1):length(varargin_param_names)
         eval([varargin_param_names{i} '=varargin_default_values{i};'])
     end
-    
+        if (v_motor_max == 0)
+        v_motor_max = Inf;
+        warning("v_max argument must be nonzero, setting to Inf")
+    end
     % model
     % motor.Force = F_motor_max * F_length * F_velocity * F_activation such that:
     motor.F_length=@(t,x) (x(1)<=(L_initial-(0.7*muscle_length)))*(x(1)>=(L_initial-(1.3*muscle_length)))* exp(-((abs(((((L_initial-x(1))/muscle_length)^b_L)-1)/s))^a_L));
