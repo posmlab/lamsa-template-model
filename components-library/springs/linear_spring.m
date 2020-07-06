@@ -25,8 +25,13 @@ function spring = linear_spring(k,varargin)
     for i=(length(varargin)+1):length(varargin_param_names)
         eval([varargin_param_names{i} '=varargin_default_values{i};'])
     end
+    % model 
+    if (F_spring_max == Inf)
+        F_spring_max = realmax;
+    end
     
-    % model
-    spring.Force = @(t,x)-k*x(1).*(abs(k*x(1))<F_spring_max);  
+    
+    % only works for compressing the spring 
+    spring.Force = @(t,x) min(realmax,-k*x(1)) .* (abs(k*x(1))<F_spring_max); 
     spring.mass = m_s;
 end
