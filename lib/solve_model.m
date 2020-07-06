@@ -36,6 +36,7 @@ if (exitflag<0)
     error('fzero failed');
 end
 
+
 % checks latching distance conditions
 if (abs(y0) < latch.min_latching_dist)
     warning('Loading failed. Does not fall within latching distance conditions.');
@@ -53,8 +54,17 @@ end
 
 %% Unlatching phase: Fs vs Flatch
 
+if (unlatching_motor.max_force==0 && latch.v_0 == 0)
+    warning('Latch gets stuck!');
+     sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
+            latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
+            unlatching_motor.Force(0,[0,0])];
+    transition_times = [inf,inf];
+    return
+end
 try
     [inst_check,~,~]=unlatching_end(0,[0,latch.v_0],m_eff,y0,latch,spring,unlatching_motor);
+inst_check
 catch ('Latch gets stuck!');
     warning('Latch gets stuck!')
     sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
