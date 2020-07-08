@@ -38,6 +38,7 @@ if (exitflag<0)
 end
 
 
+
 % checks latching distance conditions
 if (abs(y0) < latch.min_latching_dist)
     warning('Loading failed. Does not fall within latching distance conditions.');
@@ -229,7 +230,6 @@ F_comp = [F_comp; zeros(size(T,1)-size(F_comp,1),4)];
 % stitch together various numbers 
 % for one big matrix to write to csv file 
 sol=[T Y X F_comp fSpring fUnlatchingMotor];
-
 
 %% Establishing Parameters for .json output
 if (nargin >= 6)
