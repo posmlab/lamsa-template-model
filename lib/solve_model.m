@@ -38,6 +38,7 @@ end
 
 
 % checks latching distance conditions
+y0
 if (abs(y0) < latch.min_latching_dist)
     warning('Loading failed. Does not fall within latching distance conditions.');
     sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
@@ -48,8 +49,8 @@ if (abs(y0) < latch.min_latching_dist)
     writeInfoToFile(m_eff, transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
     end
     return
-elseif (y0 > latch.max_latching_dist)
-    y0 = latch.max_latching_dist;
+elseif (abs(y0) > latch.max_latching_dist)
+    y0 = -latch.max_latching_dist;
 end
 
 %% Unlatching phase: Fs vs Flatch
@@ -64,7 +65,7 @@ if (unlatching_motor.max_force==0 && latch.v_0 == 0)
 end
 try
     [inst_check,~,~]=unlatching_end(0,[0,latch.v_0],m_eff,y0,latch,spring,unlatching_motor);
-inst_check
+%inst_check
 catch ('Latch gets stuck!');
     warning('Latch gets stuck!')
     sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
