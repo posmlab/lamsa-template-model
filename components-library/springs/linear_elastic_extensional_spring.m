@@ -32,4 +32,5 @@ function spring = linear_elastic_extensional_spring(E,A,L,varargin)
     
     spring.Force = lin_spring.Force;  
     spring.mass = m;
+    spring.range=F_spring_max/k;
 end

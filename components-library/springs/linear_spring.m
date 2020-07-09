@@ -34,4 +34,5 @@ function spring = linear_spring(k,varargin)
     % only works for compressing the spring 
     spring.Force = @(t,x) min(realmax,-k*x(1)) .* (abs(k*x(1))<F_spring_max); 
     spring.mass = m_s;
+    spring.range = F_spring_max/k;
 end
