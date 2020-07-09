@@ -67,10 +67,6 @@ if (unlatching_motor.max_force==0 && latch.v_0 == 0)
 end
 try
     [inst_check,~,~]=unlatching_end(0,[0,latch.v_0],m_eff,y0,latch,spring,unlatching_motor);
-<<<<<<< HEAD
-=======
-%inst_check
->>>>>>> e81fc15ddd616dab593d18168930d38d9e89e4f7
 catch ('Latch gets stuck!');
     warning('Latch gets stuck!')
     sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
