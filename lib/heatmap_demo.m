@@ -112,7 +112,7 @@ spring = linear_spring(k, m_s, F_spring_max);
 
 % unlatching motor paramters for linear motor
 F_max_unlatching_motor = 0;
-unlatchinging_motor_range_of_motion = Inf;
+unlatching_motor_range_of_motion = Inf;
 
 % extra parameters for hill muscle motor
 unlatching_motor_muscle_length = 0;
