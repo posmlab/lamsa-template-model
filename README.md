@@ -1,8 +1,11 @@
 # MATLAB LaMSA Model
 
-LaMSA toy model implemented in MATLAB. 
+LaMSA model implemented in MATLAB. 
 
-Run heatmap_demo.m for an example of usage.
+**Open app/plot_app.mlapp in MATLAB for a graphical user interface to run the model.**
+
+
+## Code details
 
 get_metrics.m is a helper function to extract kinematic metrics (e.g. vmax, amax) from the solution (t,x,v)
 
@@ -17,18 +20,6 @@ unlatching_end.m
 writeInfoToFile.m
 /components-library
 
-
-### To do
-
-- [ ] perform sensitivity analysis with code Andres sent
-- [ ] add in friction
-- [ ] generate plots for paper showing trade-offs
-- [ ] generate LaMSA zone plots
-- [ ] write up model (including why y_L' = $\tan \theta$)
-- [ ] add recommended/Default parameters to GUI
-
-
-## How to Use this Code
 
 Message from Andres Cook:
 
