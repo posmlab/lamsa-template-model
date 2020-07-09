@@ -38,7 +38,7 @@ end
 
 
 % checks latching distance conditions
-y0
+
 if (abs(y0) < latch.min_latching_dist)
     warning('Loading failed. Does not fall within latching distance conditions.');
     sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
