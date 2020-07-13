@@ -1,4 +1,3 @@
-
 function [sol,transition_times] = solve_model(loading_motor,unlatching_motor,load,latch,spring, outputDirectory)
 %Solve set of differential equations for loading, unlatching, and launching
 %   phases of LAMSA motion
@@ -8,14 +7,26 @@ m_eff = load.mass + spring.mass/3;
 
 %% Loading phase: Fs vs. Fin
 
-y_range=linspace(-eps,-loading_motor.range,100);
+N_points = 1000;
+
+rangeBound = min([latch.max_latching_dist, spring.range, loading_motor.range, 0.1*realmax]);
+
+% this is the range of y values where we are looking for Fspring =
+% Floading_motor.
+% We want to sweep over a wide range of values initially, 
+% to get a rough sense of the order-of-magnitude y-value where
+% the forces are equal 
+y_range=-logspace(log10(eps), log10(rangeBound),N_points);
+
+
+
 fmotor = zeros(size(y_range));
 fspring = zeros(size(y_range));
 for i=1:length(y_range)
     fmotor(i)=loading_motor.Force(Inf,[-y_range(i) 0]);
-    fspring(i)=spring.Force(0,[y_range(i) 0]);
+    fspring(i)=spring.Force(0,[y_range(i), 0]);
 end
-fdiff=fmotor-fspring;
+fdiff = fmotor - fspring;
 index=find(fdiff<0,1,"first");
 if index == 1
     y0=0;
@@ -24,7 +35,7 @@ elseif isempty(index)
     if ind == length(y_range)
         y0=y_range(end);
     else
-        y_range=linspace(y_range(ind),y_range(ind+1),100);
+        y_range=linspace(y_range(ind),y_range(ind+1),N_points);
         fspring=zeros(size(y_range));
         for i=1:length(y_range)
             fspring(i)=spring.Force(0,[y_range(i) 0]);
@@ -33,7 +44,7 @@ elseif isempty(index)
         y0=y_range(ind);
     end
 else 
-    y_range=linspace(y_range(index-1),y_range(index),100);
+    y_range=linspace(y_range(index-1),y_range(index),N_points);
     fdiff = zeros(size(y_range));
     for i=1:length(y_range)
         fdiff(i)=loading_motor.Force(Inf,[-y_range(i) 0])-spring.Force(0,[y_range(i) 0]);
@@ -41,6 +52,9 @@ else
     index=find(fdiff<0,1,"first");
     y0=y_range(index);
 end
+
+
+
 
 
 % checks latching distance conditions
