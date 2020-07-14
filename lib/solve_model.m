@@ -196,8 +196,8 @@ cos_comp = cos_comp';
 for i=1:size(x_unlatch, 1)
     F_nx(i) = F_n(i) .* sin_comp(i);
     F_ny(i) = F_n(i) .* cos_comp(i);
-    F_fx(i) = F_nx(i) * latch.coeff_fric;
-    F_fy(i) = F_ny(i) * latch.coeff_fric;
+    F_fx(i) = -1*F_ny(i) * latch.coeff_fric;
+    F_fy(i) = -1*F_nx(i) * latch.coeff_fric;
 end
 F_nx = F_nx';
 F_ny = F_ny';
@@ -234,7 +234,12 @@ transition_times=[t_unlatch(end),t_unlatch(end)+t_launch(end)];
 
 for i = 1:size(T)
     fSpring(i) = spring.Force(T(i), [Y(i,1), Y(i,2)]);%fill out the fSpring vector to add to sol
-    fUnlatchingMotor(i) = unlatching_motor.Force(T(i), [X(i,:)]);
+    if (T(i) < t_unlatch(end))
+        fUnlatchingMotor(i) = unlatching_motor.Force(T(i), [X(i,:)]);
+    else
+        fUnlatchingMotor(i) = 0;
+    end
+    
 end
 fSpring = fSpring';
 fUnlatchingMotor = fUnlatchingMotor';
