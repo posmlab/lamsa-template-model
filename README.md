@@ -54,11 +54,11 @@ The main function to run one simulation is solve_model.m, which has the followin
 
 Name	           |         Type          | Description
 ---------------- | --------------------- | -----------------
-loading_motor	   | struct with 5 fields	 | Loading motor Parameters
-unlatching_motor | struct with 5 fields  | Unlatching motor Parameters
-load             | struct with 1 field	 | Load mass
-latch            | struct with 5 fields	 | Latch Parameters
-spring           | struct with 2 fields  | mass and force function of spring
+loading_motor	   | struct with 4 fields	 | Motor that compresses spring, thereby 'loading' the LaMSA system.
+unlatching_motor | struct with 4 fields  | Motor that pulls the latch out of the way, allowing the LaMSA system to launch.
+load             | struct with 2 field	 | The thing that gets launched
+latch            | struct with 7 fields	 | The object that sits above the load, preventing the spring from pushing the load up, until it is pulled out of the way. 
+spring           | struct with 4 fields  | The spring that pushes the load up (can be non-linear)
 outputDirectory  |         string        | Name of the output subdirectory <br> to export to or create
 
 ##### Output
@@ -66,7 +66,25 @@ outputDirectory  |         string        | Name of the output subdirectory <br> 
 Name              |	Type      |	Description
 ---------------   | --------  | -------------------
 transition_times	|  1x2	    | Unlatching and launch times
-sol	              |  manyx11  | t, y, ydot, x, xdot, <br> normal and frictional components, <br> spring force, and unlatching force <br> column vectors
+sol	              |  manyx11  | t, y, ydot, x, xdot, <br> normal force on latch x, normal force on load y, <br> friction force on latch x, friction force on load y <br> spring force, and unlatching motor force
+
+As indicated above, sol is a matrix with 11 columns and many rows - each row represents the state of the system at a given moment in time, and each column represents one quantity as a function of time.
+
+Note that this code keeps track of the position, velocities, and forces on TWO objects as a function of time: the **load** being launched, and the **latch** being pulled away.
+
+ALSO NOTE we only keep track of the motion of the **latch** in the x-direction, and the motion of the **load** in the y-direction. This is because we have set up our problem such that the latch only moves in the x direction, and the load only moves in the y-direction. A consequence of this is that 'y' forces in the 'sol' refer to forces acting on the load, and 'x' forces in the 'sol' refer to forces acting on the latch. 
+
++ The 't' column is the series of timesteps that the numerical solver computes the LaMSA system dynamics at.
++ The 'y' column is the y coordinate of the **load** as a function of time. 
++ The 'ydot' column is the vertical velocity of the **load** as a function of time. (derivative of y w.r.t time)
++ The 'x' column is the x coordinate of the **latch** as a function of time. 
++ The 'xdot' coulmn is the horizontal velocity of the **latch** as a function of time. (derivative of x w.r.t time)
++ The 'normal force on latch x' is the force in the x-direction exerted on the latch by the load. 
++ The 'normal force on load y' is the force in the y-direction exerted on the load by the latch. 
++ The 'friction force on latch x' is the force in the x-direction exerted on the latch by the load. 
++ The 'friction force on load y' is the force in the y-direction exerted on the load by the latch. 
++ The 'spring force' is the force that the spring exerts on the load as it pushes the load upwards. (y direction)
++ The 'unlatching motor force' is the force that the unlatching motor exerts on the latch as it pulls the latch out of the way, horizontally. (x direction)
 
 ### Output Files
 Currently, solve_model will create two output files every time it is run. One is a .json file that contains the parameters used for this specific call as well as the transition_times. It also outputs a .csv file with all of the data found in sol. Both of these files can be found in the outputDirectory specified in the call, and both the file names and the outputDirectory are organized with a timestamp. However, when heatmap_demo is run, a single output directory is created at the time heatmap_demo is called, and then all of the output from the looping solve_model calls are stored in this directory.
@@ -84,7 +102,7 @@ The main function solve_model is generally structured as follows
   + Essentially the same as loading, but using launching_ode.m and launching_end.m
 + Concatenate the solution arrays into one long one
 + Write output files using writeInfoToFile.m
-  + Create a .json parameter file and .csv output file to be stored in outputDirectory
+  + Create a .json parameter file and .csv output file to be stored in outputDirectory. The .json file is a structured way of saving the parameters used when solve_model was called. The .csv output file actually stores all the numerical solution information (the various quantities as a function of time.)
 
 ##### Graphical User Interface
 Simply double click the file plot_app.mlapp located in the \app folder to access the app, or open the file in MATLAB App Designer and click Run. Some good starting values are already filled in. Just click the Graph! button, and you will see some plots. If you want to do some more customization, follow these steps.
