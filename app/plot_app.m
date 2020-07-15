@@ -187,6 +187,7 @@ classdef plot_app < matlab.apps.AppBase
         OD_xmin                        matlab.ui.control.NumericEditField
         xmaxEditFieldLabel_2           matlab.ui.control.Label
         OD_xmax                        matlab.ui.control.NumericEditField
+        graphing_corner_kinematics     matlab.ui.container.Tab
         go                             matlab.ui.control.Button
     end
 
@@ -226,10 +227,7 @@ classdef plot_app < matlab.apps.AppBase
             % output directory initialization
             output_directory = create_output_directory();
             
-            
             %% plot parameters
-            
-           
 
             % setting x axis on the plot
             xname = app.dropdown_items_opposite_dict(app.IV1DropDown.Value);
@@ -442,10 +440,7 @@ classdef plot_app < matlab.apps.AppBase
             % output directory initialization
             output_directory = create_output_directory();
             
-            
             %% plot parameters
-            
-           
 
             % setting x axis on the plot
             xname = app.dropdown_items_opposite_dict(app.OD_IV1DropDown.Value);
@@ -596,6 +591,105 @@ classdef plot_app < matlab.apps.AppBase
             end
             
         end
+        
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        function kinematics(app)
+            % initializing output directory
+            output_directory = create_output_directory();
+            
+            %% initializing LaMSA component structs
+            
+            % load mass struct initialization
+            load = load_mass(app.load_mass_mass.Value,app.load_m_rod.Value,app.load_EMA.Value);
+            
+            % latch struct initialization
+            latch = rounded_latch(app.latch_radius.Value,app.latch_mass.Value,app.latch_coeff_fric.Value, app.latch_v_0.Value, app.min_latching_dist.Value, app.max_latching_dist.Value);
+            
+            % spring struct initialization
+            if (app.spring.SelectedTab == app.linear_spring)
+                spring = linear_spring(app.linear_spring_k.Value,app.linear_spring_mass.Value,app.linear_spring_Fmax.Value);
+            elseif (app.spring.SelectedTab == app.exponential_spring)
+                spring = exponential_spring(app.exp_spring_k.Value,app.exp_spring_char_len.Value,app.exp_spring_mass.Value,app.exp_spring_Fmax.Value);
+            elseif (app.spring.SelectedTab == app.linear_elastic_extensional_spring)
+                spring = linear_elastic_extensional_spring(app.lee_spring_E.Value,app.lee_spring_A.Value,app.lee_spring_L.Value,app.lee_spring_rho.Value,app.lee_spring_sigma_f.Value);
+            end
+            
+            % loading motor struct initialization
+            if (app.loading_motor.SelectedTab == app.lm_linear_motor)
+                loading_motor = linear_motor(app.lm_linear_motor_Fmax.Value,app.lm_linear_motor_Vmax.Value,app.lm_linear_motor_range_of_motion.Value,app.lm_linear_motor_voltage_frac.Value);
+            elseif (app.loading_motor.SelectedTab == app.lm_hill_muscle_motor)
+                loading_motor = hill_muscle_motor(app.lm_hill_motor_muscle_length.Value,app.lm_hill_motor_Fmax.Value,app.lm_hill_motor_Vmax.Value,app.lm_hill_motor_rate_of_activation.Value,app.lm_hill_motor_L_i.Value,app.lm_hill_motor_a_L.Value,app.lm_hill_motor_b_L.Value,app.lm_hill_motor_s.Value);
+            end
+            
+            % unlatching motor struct initialization
+            if (app.unlatching_motor.SelectedTab == app.um_linear_motor)
+                unlatching_motor = linear_motor(app.um_linear_motor_Fmax.Value,app.um_linear_motor_Vmax.Value,app.um_linear_motor_range_of_motion.Value,app.um_linear_motor_voltage_frac.Value);
+            elseif (app.unlatching_motor.SelectedTab == app.um_hill_muscle_motor)
+                unlatching_motor = hill_muscle_motor(app.um_hill_motor_muscle_length.Value,app.um_hill_motor_Fmax.Value,app.um_hill_motor_Vmax.Value,app.um_hill_motor_rate_of_activation.Value,app.um_hill_motor_L_i.Value,app.um_hill_motor_a_L.Value,app.um_hill_motor_b_L.Value,app.um_hill_motor_s.Value);
+            end
+        
+            [sol,transition_times] = solve_model(loading_motor,unlatching_motor,load,latch,spring,output_directory);
+            columntitles=["Time", "y postition", "y velocity", "x position", "x velocity", "normal force on latch x", ...
+                "normal force on load y", "frictional force on latch x", ...
+                "frictional force on load y", "spring force", ...
+                "unlatching motor force into"];
+            units=[" [s]"," [m]"," [m/s]"];
+            
+            % latch kinematics
+            figure
+            for i = 4:5
+                subplot(3,1,i-3)
+                box on
+                set(gca,'TickLabelInterpreter','latex')
+                hold on
+                plot(sol(:,1),sol(:,i));
+                hold off
+                title(columntitles(i),"Interpreter","latex");
+                ylabel(columntitles(i)+units(i-2),"Interpreter","latex");
+                xlabel(columntitles(1)+units(1),"Interpreter","latex");
+            end
+            
+            for i = [6 8 11]
+                subplot(3,1,3)
+                box on
+                set(gca,'TickLabelInterpreter','latex')
+                hold on
+                plot(sol(:,1),sol(:,i),"DisplayName",columntitles(i))
+            end
+            title("Latch Force Components","Interpreter","latex");
+            ylabel("Force [N]","Interpreter","latex");
+            xlabel(columntitles(1)+" [s]","Interpreter","latex");
+            legend("show")
+            hold off
+            
+            % load kinematics
+            figure
+            for i = 2:3
+                subplot(3,1,i-1)
+                box on
+                set(gca,'TickLabelInterpreter','latex')
+                hold on
+                plot(sol(:,1),sol(:,i));
+                hold off
+                title(columntitles(i),"Interpreter","latex");
+                ylabel(columntitles(i)+units(i),"Interpreter","latex");
+                xlabel(columntitles(1)+units(1),"Interpreter","latex");
+            end
+            
+            for i = [7 9 10]
+                subplot(3,1,3)
+                box on
+                set(gca,'TickLabelInterpreter','latex')
+                hold on
+                plot(sol(:,1),sol(:,i),"DisplayName",columntitles(i))
+            end
+            title("Load Force Components","Interpreter","latex");
+            ylabel("Force [N]","Interpreter","latex");
+            xlabel(columntitles(1)+" [s]","Interpreter","latex");
+            legend("show")
+            hold off
+        end
     end
     
 
@@ -604,6 +698,8 @@ classdef plot_app < matlab.apps.AppBase
 
         % Code that executes after component creation
         function startupFcn(app)
+            
+            % makes comparing changes in the app in github easier
             pathname = char(which("plot_app.mlapp"));
             lastIndex = strlength(pathname);
             nameLength = strlength("plot_app.mlapp");
@@ -612,6 +708,7 @@ classdef plot_app < matlab.apps.AppBase
             pathname = pathname +"/../ext";
             addpath(fullfile(pathname))
             mlapp2classdef("plot_app.mlapp")
+            
             varnames = {'load_mass_mass',...
                 'latch_mass','latch_coeff_fric','latch_radius','latch_v_0','min_latching_dist','max_latching_dist',...
                 'linear_spring_k','linear_spring_mass','linear_spring_Fmax',...
@@ -664,6 +761,8 @@ classdef plot_app < matlab.apps.AppBase
                 heatmap(app);
             elseif (app.graphing_corner.SelectedTab == app.graphing_corner_one_D)
                 one_D_plot(app);
+            elseif (app.graphing_corner.SelectedTab == app.graphing_corner_kinematics)
+                kinematics(app);
             end
         end
 
@@ -1855,6 +1954,10 @@ classdef plot_app < matlab.apps.AppBase
             app.OD_xmax = uieditfield(app.graphing_corner_one_D, 'numeric');
             app.OD_xmax.Position = [169 364 40 22];
             app.OD_xmax.Value = 9;
+
+            % Create graphing_corner_kinematics
+            app.graphing_corner_kinematics = uitab(app.graphing_corner);
+            app.graphing_corner_kinematics.Title = 'Kinematics';
 
             % Create go
             app.go = uibutton(app.UIFigure, 'push');
