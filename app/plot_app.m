@@ -139,6 +139,33 @@ classdef plot_app < matlab.apps.AppBase
         UnlatchingMotorLabel           matlab.ui.control.Label
         GraphingCornerLabel            matlab.ui.control.Label
         graphing_corner                matlab.ui.container.TabGroup
+        graphing_corner_kinematics     matlab.ui.container.Tab
+        kinematicsoutputoptionsLabel   matlab.ui.control.Label
+        forcedisp                      matlab.ui.control.CheckBox
+        latchkinematicsCheckBox        matlab.ui.control.CheckBox
+        loadkinematicsCheckBox         matlab.ui.control.CheckBox
+        LoadingphaseLabel              matlab.ui.control.Label
+        UnlatchingandlaunchingphaseLabel  matlab.ui.control.Label
+        graphing_corner_one_D          matlab.ui.container.Tab
+        OD_minunlatchingmotorforceCheckBox  matlab.ui.control.CheckBox
+        xaxisLabel_2                   matlab.ui.control.Label
+        OD_x_log_space                 matlab.ui.control.CheckBox
+        OD_y_maxCheckBox               matlab.ui.control.CheckBox
+        OD_y_unlatchCheckBox           matlab.ui.control.CheckBox
+        OD_t_LCheckBox                 matlab.ui.control.CheckBox
+        OD_v_toCheckBox                matlab.ui.control.CheckBox
+        OD_P_maxCheckBox               matlab.ui.control.CheckBox
+        OD_t_toCheckBox                matlab.ui.control.CheckBox
+        OD_KE_maxCheckBox              matlab.ui.control.CheckBox
+        IV1DropDownLabel_2             matlab.ui.control.Label
+        OD_IV1DropDown                 matlab.ui.control.DropDown
+        yaxisOutputOptionsLabel        matlab.ui.control.Label
+        pixelsofresolutionLabel_2      matlab.ui.control.Label
+        OD_n                           matlab.ui.control.NumericEditField
+        xminEditFieldLabel_2           matlab.ui.control.Label
+        OD_xmin                        matlab.ui.control.NumericEditField
+        xmaxEditFieldLabel_2           matlab.ui.control.Label
+        OD_xmax                        matlab.ui.control.NumericEditField
         graphing_corner_heatmap        matlab.ui.container.Tab
         minunlatchingmotorforceCheckBox  matlab.ui.control.CheckBox
         xaxisLabel                     matlab.ui.control.Label
@@ -164,36 +191,9 @@ classdef plot_app < matlab.apps.AppBase
         ymin                           matlab.ui.control.NumericEditField
         ymaxLabel                      matlab.ui.control.Label
         ymax                           matlab.ui.control.NumericEditField
-        heatmapoutputoptionsLabel      matlab.ui.control.Label
+        HeatmapOutputOptionsLabel      matlab.ui.control.Label
         pixelsofresolutionLabel        matlab.ui.control.Label
         n                              matlab.ui.control.NumericEditField
-        graphing_corner_one_D          matlab.ui.container.Tab
-        OD_minunlatchingmotorforceCheckBox  matlab.ui.control.CheckBox
-        xaxisLabel_2                   matlab.ui.control.Label
-        OD_x_log_space                 matlab.ui.control.CheckBox
-        OD_y_maxCheckBox               matlab.ui.control.CheckBox
-        OD_y_unlatchCheckBox           matlab.ui.control.CheckBox
-        OD_t_LCheckBox                 matlab.ui.control.CheckBox
-        OD_v_toCheckBox                matlab.ui.control.CheckBox
-        OD_P_maxCheckBox               matlab.ui.control.CheckBox
-        OD_t_toCheckBox                matlab.ui.control.CheckBox
-        OD_KE_maxCheckBox              matlab.ui.control.CheckBox
-        IV1DropDownLabel_2             matlab.ui.control.Label
-        OD_IV1DropDown                 matlab.ui.control.DropDown
-        yaxisoutputoptionsLabel        matlab.ui.control.Label
-        pixelsofresolutionLabel_2      matlab.ui.control.Label
-        OD_n                           matlab.ui.control.NumericEditField
-        xminEditFieldLabel_2           matlab.ui.control.Label
-        OD_xmin                        matlab.ui.control.NumericEditField
-        xmaxEditFieldLabel_2           matlab.ui.control.Label
-        OD_xmax                        matlab.ui.control.NumericEditField
-        graphing_corner_kinematics     matlab.ui.container.Tab
-        kinematicsoutputoptionsLabel   matlab.ui.control.Label
-        forcedisp                      matlab.ui.control.CheckBox
-        latchkinematicsCheckBox        matlab.ui.control.CheckBox
-        loadkinematicsCheckBox         matlab.ui.control.CheckBox
-        LoadingphaseLabel              matlab.ui.control.Label
-        UnlatchingphaseLabel           matlab.ui.control.Label
         go                             matlab.ui.control.Button
         Image                          matlab.ui.control.Image
     end
@@ -592,7 +592,6 @@ classdef plot_app < matlab.apps.AppBase
                 subplot(subplot_rows,subplot_cols,ii);
                 size(outval{ii})
                 plot(looping_value_x,outval{ii},'.'); 
-
                 xlabel(app.axis_labels_dict(xname),'Interpreter', 'Latex');
                 ylabel(metrics_dict(metrics{ii}), 'Interpreter', 'Latex');
                 ylim_range = max(outval{ii})-min(outval{ii});
@@ -604,7 +603,7 @@ classdef plot_app < matlab.apps.AppBase
                 else
                     ylim([min(outval{ii})-0.05*ylim_range max(outval{ii})+0.05*ylim_range])
                 end
-                
+                set(gca,'TickLabelInterpreter','latex')
                 % makes the x in log scale if needed
                 if app.OD_x_log_space.Value
                     set(gca,'XScale','log')
@@ -736,27 +735,31 @@ classdef plot_app < matlab.apps.AppBase
             % force displacement curves for motor and spring
             if (app.forcedisp.Value)    
                 figure('Name','Motor and Spring Force Displacement Curves')
-                y_max = sol(1,2)
+                if (loading_motor.range == Inf)
+                    y_max = 5*sol(1,2);
+                else
+                    y_max = -loading_motor.range;
+                end
                 y_range = linspace(0,y_max,100);
                 motor_force_array = [];
                 spring_force_array = [];
                 for i = 1:length(y_range)
-                    motor_force_array(end+1) = loading_motor.Force(Inf,[y_range(i),0]);
+                    motor_force_array(end+1) = loading_motor.Force(Inf,[-y_range(i),0]);
                     spring_force_array(end+1) = spring.Force(Inf,[y_range(i),0]);
                 end
-                force_arrays = {motor_force_array spring_force_array};
+                force_arrays = {spring_force_array motor_force_array};
                 for i = 1:2
-                    %subplot(1,2,i)
                     box on
                     set(gca,'TickLabelInterpreter','latex')
                     hold on
-                    plot(y_range,force_arrays{i});
-                    hold off
+                    plot(abs(y_range),force_arrays{i});
                 end
+                plot([-sol(1,2),-sol(1,2)],[0,spring.Force(Inf,[sol(1,2),0])],"--k")
+                plot(-sol(1,2),spring.Force(Inf,[sol(1,2),0]),'ok')
                 title('Force Displacement Curve',"Interpreter","latex");
                 ylabel('Force',"Interpreter","latex");
                 xlabel('Displacement',"Interpreter","latex");
-                legend('motor','spring')
+                legend('spring','motor','loaded displacement')
             end
             
         end
@@ -814,12 +817,25 @@ classdef plot_app < matlab.apps.AppBase
             
             app.load_vars = {'load_mass_mass'};
             app.latch_vars = {'latch_mass','latch_coeff_fric','latch_radius','latch_v_0','min_latching_dist','max_latching_dist'};
-            app.spring_vars = {'linear_spring_k','linear_spring_mass','linear_spring_Fmax'};
-            app.lm_vars = {'lm_linear_motor_Fmax','lm_linear_motor_Vmax','lm_linear_motor_range_of_motion','lm_linear_motor_voltage_frac'};
+            app.spring_vars = {'exp_spring_k','exp_spring_char_len','exp_spring_Fmax','exp_spring_mass'};
+            %app.spring_vars = {'linear_spring_k','linear_spring_mass','linear_spring_Fmax'};
+            %app.lm_vars = {'lm_linear_motor_Fmax','lm_linear_motor_Vmax','lm_linear_motor_range_of_motion','lm_linear_motor_voltage_frac'};
+            app.lm_vars = {'lm_hill_motor_Fmax','lm_hill_motor_Vmax','lm_hill_motor_muscle_length','lm_hill_motor_rate_of_activation','lm_hill_motor_L_i','lm_hill_motor_a_L','lm_hill_motor_b_L','lm_hill_motor_s'};
             app.um_vars = {'um_linear_motor_Fmax','um_linear_motor_Vmax','um_linear_motor_range_of_motion','um_linear_motor_voltage_frac'};
             update_dd_vars(app);
             
             app.IV2DropDown.Items(ismember(app.IV2DropDown.Items,app.IV1DropDown.Value)) = [];
+            
+            % parameter defaults
+            app.spring.SelectedTab = app.exponential_spring;
+            app.loading_motor.SelectedTab = app.lm_hill_muscle_motor;
+            
+            % 1D plots defaults
+            app.OD_IV1DropDown.Value = 'loading motor (Hill) Fmax';
+            
+            % 2D plots defaults
+            app.IV1DropDown.Value = 'exponential spring k_0';
+            app.IV2DropDown.Value = 'loading motor (Hill) Fmax';
         end
 
         % Button pushed function: go
@@ -1166,14 +1182,14 @@ classdef plot_app < matlab.apps.AppBase
             % Create FmaxLabel_2
             app.FmaxLabel_2 = uilabel(app.lm_linear_motor);
             app.FmaxLabel_2.HorizontalAlignment = 'right';
-            app.FmaxLabel_2.Position = [157 62 46 22];
+            app.FmaxLabel_2.Position = [159 62 46 22];
             app.FmaxLabel_2.Text = 'Fmax =';
 
             % Create lm_linear_motor_Fmax
             app.lm_linear_motor_Fmax = uieditfield(app.lm_linear_motor, 'numeric');
             app.lm_linear_motor_Fmax.Limits = [0 Inf];
             app.lm_linear_motor_Fmax.Tooltip = {'max force of the motor'};
-            app.lm_linear_motor_Fmax.Position = [218 62 45 22];
+            app.lm_linear_motor_Fmax.Position = [220 62 44 22];
             app.lm_linear_motor_Fmax.Value = 10;
 
             % Create VmaxLabel_2
@@ -1228,7 +1244,7 @@ classdef plot_app < matlab.apps.AppBase
             app.lm_linear_motor_voltage_frac = uieditfield(app.lm_linear_motor, 'numeric');
             app.lm_linear_motor_voltage_frac.Limits = [0 Inf];
             app.lm_linear_motor_voltage_frac.Tooltip = {'fraction of max voltage of motor'};
-            app.lm_linear_motor_voltage_frac.Position = [220 23 40 22];
+            app.lm_linear_motor_voltage_frac.Position = [220 23 44 22];
             app.lm_linear_motor_voltage_frac.Value = 1;
 
             % Create lm_hill_muscle_motor
@@ -1484,7 +1500,7 @@ classdef plot_app < matlab.apps.AppBase
             app.load_mass_mass.Limits = [0 Inf];
             app.load_mass_mass.Tooltip = {'mass of the load'};
             app.load_mass_mass.Position = [258 65 40 22];
-            app.load_mass_mass.Value = 0.025;
+            app.load_mass_mass.Value = 0.01;
 
             % Create OptionalFieldsLabel_10
             app.OptionalFieldsLabel_10 = uilabel(app.load_mass);
@@ -1748,88 +1764,244 @@ classdef plot_app < matlab.apps.AppBase
             % Create graphing_corner
             app.graphing_corner = uitabgroup(app.UIFigure);
             app.graphing_corner.AutoResizeChildren = 'off';
-            app.graphing_corner.Position = [856 238 322 496];
+            app.graphing_corner.Position = [856 297 322 437];
+
+            % Create graphing_corner_kinematics
+            app.graphing_corner_kinematics = uitab(app.graphing_corner);
+            app.graphing_corner_kinematics.Title = 'Kinematics';
+            app.graphing_corner_kinematics.BackgroundColor = [0.949 0.8471 0.6078];
+
+            % Create kinematicsoutputoptionsLabel
+            app.kinematicsoutputoptionsLabel = uilabel(app.graphing_corner_kinematics);
+            app.kinematicsoutputoptionsLabel.FontSize = 22;
+            app.kinematicsoutputoptionsLabel.FontWeight = 'bold';
+            app.kinematicsoutputoptionsLabel.Position = [21 369 283 28];
+            app.kinematicsoutputoptionsLabel.Text = 'kinematics output options';
+
+            % Create forcedisp
+            app.forcedisp = uicheckbox(app.graphing_corner_kinematics);
+            app.forcedisp.Text = 'motor and spring force displacement curves';
+            app.forcedisp.Position = [54 312 256 22];
+            app.forcedisp.Value = true;
+
+            % Create latchkinematicsCheckBox
+            app.latchkinematicsCheckBox = uicheckbox(app.graphing_corner_kinematics);
+            app.latchkinematicsCheckBox.Text = 'latch kinematics';
+            app.latchkinematicsCheckBox.Position = [54 257 107 22];
+            app.latchkinematicsCheckBox.Value = true;
+
+            % Create loadkinematicsCheckBox
+            app.loadkinematicsCheckBox = uicheckbox(app.graphing_corner_kinematics);
+            app.loadkinematicsCheckBox.Text = 'load kinematics';
+            app.loadkinematicsCheckBox.Position = [54 230 105 22];
+            app.loadkinematicsCheckBox.Value = true;
+
+            % Create LoadingphaseLabel
+            app.LoadingphaseLabel = uilabel(app.graphing_corner_kinematics);
+            app.LoadingphaseLabel.Position = [34 337 111 22];
+            app.LoadingphaseLabel.Text = 'Loading phase:';
+
+            % Create UnlatchingandlaunchingphaseLabel
+            app.UnlatchingandlaunchingphaseLabel = uilabel(app.graphing_corner_kinematics);
+            app.UnlatchingandlaunchingphaseLabel.Position = [33 285 180 22];
+            app.UnlatchingandlaunchingphaseLabel.Text = 'Unlatching and launching phase:';
+
+            % Create graphing_corner_one_D
+            app.graphing_corner_one_D = uitab(app.graphing_corner);
+            app.graphing_corner_one_D.AutoResizeChildren = 'off';
+            app.graphing_corner_one_D.Title = '1D Plot';
+            app.graphing_corner_one_D.BackgroundColor = [0.9608 0.7804 0.3647];
+
+            % Create OD_minunlatchingmotorforceCheckBox
+            app.OD_minunlatchingmotorforceCheckBox = uicheckbox(app.graphing_corner_one_D);
+            app.OD_minunlatchingmotorforceCheckBox.Text = 'min unlatching motor force';
+            app.OD_minunlatchingmotorforceCheckBox.Position = [127 169 164 22];
+
+            % Create xaxisLabel_2
+            app.xaxisLabel_2 = uilabel(app.graphing_corner_one_D);
+            app.xaxisLabel_2.FontSize = 22;
+            app.xaxisLabel_2.FontWeight = 'bold';
+            app.xaxisLabel_2.Position = [128 376 67 28];
+            app.xaxisLabel_2.Text = 'x-axis';
+
+            % Create OD_x_log_space
+            app.OD_x_log_space = uicheckbox(app.graphing_corner_one_D);
+            app.OD_x_log_space.Tooltip = {'runs in linspace unless this box is checked'};
+            app.OD_x_log_space.Text = 'log space';
+            app.OD_x_log_space.Position = [235 317 74 22];
+
+            % Create OD_y_maxCheckBox
+            app.OD_y_maxCheckBox = uicheckbox(app.graphing_corner_one_D);
+            app.OD_y_maxCheckBox.Text = 'y_max';
+            app.OD_y_maxCheckBox.Position = [32 217 58 22];
+
+            % Create OD_y_unlatchCheckBox
+            app.OD_y_unlatchCheckBox = uicheckbox(app.graphing_corner_one_D);
+            app.OD_y_unlatchCheckBox.Text = 'y_unlatch';
+            app.OD_y_unlatchCheckBox.Position = [32 193 74 22];
+
+            % Create OD_t_LCheckBox
+            app.OD_t_LCheckBox = uicheckbox(app.graphing_corner_one_D);
+            app.OD_t_LCheckBox.Text = 't_L';
+            app.OD_t_LCheckBox.Position = [32 169 39 22];
+
+            % Create OD_v_toCheckBox
+            app.OD_v_toCheckBox = uicheckbox(app.graphing_corner_one_D);
+            app.OD_v_toCheckBox.Text = 'v_to';
+            app.OD_v_toCheckBox.Position = [32 145 45 22];
+
+            % Create OD_P_maxCheckBox
+            app.OD_P_maxCheckBox = uicheckbox(app.graphing_corner_one_D);
+            app.OD_P_maxCheckBox.Text = 'P_max';
+            app.OD_P_maxCheckBox.Position = [127 217 60 22];
+            app.OD_P_maxCheckBox.Value = true;
+
+            % Create OD_t_toCheckBox
+            app.OD_t_toCheckBox = uicheckbox(app.graphing_corner_one_D);
+            app.OD_t_toCheckBox.Text = 't_to';
+            app.OD_t_toCheckBox.Position = [127 193 42 22];
+
+            % Create OD_KE_maxCheckBox
+            app.OD_KE_maxCheckBox = uicheckbox(app.graphing_corner_one_D);
+            app.OD_KE_maxCheckBox.Text = 'KE_max';
+            app.OD_KE_maxCheckBox.Position = [127 145 68 22];
+
+            % Create IV1DropDownLabel_2
+            app.IV1DropDownLabel_2 = uilabel(app.graphing_corner_one_D);
+            app.IV1DropDownLabel_2.HorizontalAlignment = 'right';
+            app.IV1DropDownLabel_2.FontSize = 16;
+            app.IV1DropDownLabel_2.Position = [61 350 34 22];
+            app.IV1DropDownLabel_2.Text = 'IV 1';
+
+            % Create OD_IV1DropDown
+            app.OD_IV1DropDown = uidropdown(app.graphing_corner_one_D);
+            app.OD_IV1DropDown.Items = {'--no selection--'};
+            app.OD_IV1DropDown.Tooltip = {'Independent Variable 1'};
+            app.OD_IV1DropDown.FontSize = 16;
+            app.OD_IV1DropDown.Position = [110 350 150 22];
+            app.OD_IV1DropDown.Value = '--no selection--';
+
+            % Create yaxisOutputOptionsLabel
+            app.yaxisOutputOptionsLabel = uilabel(app.graphing_corner_one_D);
+            app.yaxisOutputOptionsLabel.FontSize = 22;
+            app.yaxisOutputOptionsLabel.FontWeight = 'bold';
+            app.yaxisOutputOptionsLabel.Position = [43 253 237 28];
+            app.yaxisOutputOptionsLabel.Text = 'y-axis Output Options';
+
+            % Create pixelsofresolutionLabel_2
+            app.pixelsofresolutionLabel_2 = uilabel(app.graphing_corner_one_D);
+            app.pixelsofresolutionLabel_2.HorizontalAlignment = 'right';
+            app.pixelsofresolutionLabel_2.FontSize = 16;
+            app.pixelsofresolutionLabel_2.Position = [58 102 151 22];
+            app.pixelsofresolutionLabel_2.Text = 'pixels of resolution =';
+
+            % Create OD_n
+            app.OD_n = uieditfield(app.graphing_corner_one_D, 'numeric');
+            app.OD_n.Limits = [1 1024];
+            app.OD_n.RoundFractionalValues = 'on';
+            app.OD_n.ValueDisplayFormat = '%.0f';
+            app.OD_n.Position = [224 102 39 22];
+            app.OD_n.Value = 100;
+
+            % Create xminEditFieldLabel_2
+            app.xminEditFieldLabel_2 = uilabel(app.graphing_corner_one_D);
+            app.xminEditFieldLabel_2.HorizontalAlignment = 'right';
+            app.xminEditFieldLabel_2.Position = [19 317 34 22];
+            app.xminEditFieldLabel_2.Text = 'x min';
+
+            % Create OD_xmin
+            app.OD_xmin = uieditfield(app.graphing_corner_one_D, 'numeric');
+            app.OD_xmin.Position = [68 317 40 22];
+
+            % Create xmaxEditFieldLabel_2
+            app.xmaxEditFieldLabel_2 = uilabel(app.graphing_corner_one_D);
+            app.xmaxEditFieldLabel_2.HorizontalAlignment = 'right';
+            app.xmaxEditFieldLabel_2.Position = [116 317 38 22];
+            app.xmaxEditFieldLabel_2.Text = 'x max';
+
+            % Create OD_xmax
+            app.OD_xmax = uieditfield(app.graphing_corner_one_D, 'numeric');
+            app.OD_xmax.Position = [169 317 40 22];
+            app.OD_xmax.Value = 42;
 
             % Create graphing_corner_heatmap
             app.graphing_corner_heatmap = uitab(app.graphing_corner);
             app.graphing_corner_heatmap.AutoResizeChildren = 'off';
             app.graphing_corner_heatmap.Title = '2D Plot';
-            app.graphing_corner_heatmap.BackgroundColor = [0.9882 0.7216 0.8863];
+            app.graphing_corner_heatmap.BackgroundColor = [0.9804 0.6941 0.0275];
 
             % Create minunlatchingmotorforceCheckBox
             app.minunlatchingmotorforceCheckBox = uicheckbox(app.graphing_corner_heatmap);
             app.minunlatchingmotorforceCheckBox.Text = 'min unlatching motor force';
-            app.minunlatchingmotorforceCheckBox.Position = [127 97 164 22];
+            app.minunlatchingmotorforceCheckBox.Position = [127 85 164 22];
 
             % Create xaxisLabel
             app.xaxisLabel = uilabel(app.graphing_corner_heatmap);
             app.xaxisLabel.FontSize = 22;
             app.xaxisLabel.FontWeight = 'bold';
-            app.xaxisLabel.Position = [128 435 67 28];
+            app.xaxisLabel.Position = [128 376 67 28];
             app.xaxisLabel.Text = 'x-axis';
 
             % Create yaxisLabel
             app.yaxisLabel = uilabel(app.graphing_corner_heatmap);
             app.yaxisLabel.FontSize = 22;
             app.yaxisLabel.FontWeight = 'bold';
-            app.yaxisLabel.Position = [128 312 67 28];
+            app.yaxisLabel.Position = [128 280 67 28];
             app.yaxisLabel.Text = 'y-axis';
 
             % Create x_log_space
             app.x_log_space = uicheckbox(app.graphing_corner_heatmap);
             app.x_log_space.Tooltip = {'runs in linspace unless this box is checked'};
             app.x_log_space.Text = 'log space';
-            app.x_log_space.Position = [235 364 74 22];
-            app.x_log_space.Value = true;
+            app.x_log_space.Position = [235 317 74 22];
 
             % Create y_log_space
             app.y_log_space = uicheckbox(app.graphing_corner_heatmap);
             app.y_log_space.Tooltip = {'runs in linspace unless this box is checked'};
             app.y_log_space.Text = 'log space';
-            app.y_log_space.Position = [235 235 74 22];
-            app.y_log_space.Value = true;
+            app.y_log_space.Position = [235 212 74 22];
 
             % Create y_maxCheckBox
             app.y_maxCheckBox = uicheckbox(app.graphing_corner_heatmap);
             app.y_maxCheckBox.Text = 'y_max';
-            app.y_maxCheckBox.Position = [32 145 58 22];
-            app.y_maxCheckBox.Value = true;
+            app.y_maxCheckBox.Position = [32 133 58 22];
 
             % Create y_unlatchCheckBox
             app.y_unlatchCheckBox = uicheckbox(app.graphing_corner_heatmap);
             app.y_unlatchCheckBox.Text = 'y_unlatch';
-            app.y_unlatchCheckBox.Position = [32 121 74 22];
+            app.y_unlatchCheckBox.Position = [32 109 74 22];
 
             % Create t_LCheckBox
             app.t_LCheckBox = uicheckbox(app.graphing_corner_heatmap);
             app.t_LCheckBox.Text = 't_L';
-            app.t_LCheckBox.Position = [32 97 39 22];
+            app.t_LCheckBox.Position = [32 85 39 22];
 
             % Create v_toCheckBox
             app.v_toCheckBox = uicheckbox(app.graphing_corner_heatmap);
             app.v_toCheckBox.Text = 'v_to';
-            app.v_toCheckBox.Position = [32 73 45 22];
+            app.v_toCheckBox.Position = [32 61 45 22];
 
             % Create P_maxCheckBox
             app.P_maxCheckBox = uicheckbox(app.graphing_corner_heatmap);
             app.P_maxCheckBox.Text = 'P_max';
-            app.P_maxCheckBox.Position = [127 145 60 22];
+            app.P_maxCheckBox.Position = [127 133 60 22];
+            app.P_maxCheckBox.Value = true;
 
             % Create t_toCheckBox
             app.t_toCheckBox = uicheckbox(app.graphing_corner_heatmap);
             app.t_toCheckBox.Text = 't_to';
-            app.t_toCheckBox.Position = [127 121 42 22];
+            app.t_toCheckBox.Position = [127 109 42 22];
 
             % Create KE_maxCheckBox
             app.KE_maxCheckBox = uicheckbox(app.graphing_corner_heatmap);
             app.KE_maxCheckBox.Text = 'KE_max';
-            app.KE_maxCheckBox.Position = [127 73 68 22];
+            app.KE_maxCheckBox.Position = [127 61 68 22];
 
             % Create IV1DropDownLabel
             app.IV1DropDownLabel = uilabel(app.graphing_corner_heatmap);
             app.IV1DropDownLabel.HorizontalAlignment = 'right';
             app.IV1DropDownLabel.FontSize = 16;
-            app.IV1DropDownLabel.Position = [61 397 34 22];
+            app.IV1DropDownLabel.Position = [61 350 34 22];
             app.IV1DropDownLabel.Text = 'IV 1';
 
             % Create IV1DropDown
@@ -1838,14 +2010,14 @@ classdef plot_app < matlab.apps.AppBase
             app.IV1DropDown.ValueChangedFcn = createCallbackFcn(app, @IV1DropDownValueChanged, true);
             app.IV1DropDown.Tooltip = {'Independent Variable 1'};
             app.IV1DropDown.FontSize = 16;
-            app.IV1DropDown.Position = [110 397 150 22];
+            app.IV1DropDown.Position = [110 350 150 22];
             app.IV1DropDown.Value = '--no selection--';
 
             % Create IV2DropDownLabel
             app.IV2DropDownLabel = uilabel(app.graphing_corner_heatmap);
             app.IV2DropDownLabel.HorizontalAlignment = 'right';
             app.IV2DropDownLabel.FontSize = 16;
-            app.IV2DropDownLabel.Position = [61 274 34 22];
+            app.IV2DropDownLabel.Position = [61 251 34 22];
             app.IV2DropDownLabel.Text = 'IV 2';
 
             % Create IV2DropDown
@@ -1853,65 +2025,65 @@ classdef plot_app < matlab.apps.AppBase
             app.IV2DropDown.Items = {'--no selection--'};
             app.IV2DropDown.ValueChangedFcn = createCallbackFcn(app, @IV2DropDownValueChanged, true);
             app.IV2DropDown.FontSize = 16;
-            app.IV2DropDown.Position = [110 274 150 22];
+            app.IV2DropDown.Position = [110 251 150 22];
             app.IV2DropDown.Value = '--no selection--';
 
             % Create xminEditFieldLabel
             app.xminEditFieldLabel = uilabel(app.graphing_corner_heatmap);
             app.xminEditFieldLabel.HorizontalAlignment = 'right';
-            app.xminEditFieldLabel.Position = [19 364 34 22];
+            app.xminEditFieldLabel.Position = [19 317 34 22];
             app.xminEditFieldLabel.Text = 'x min';
 
             % Create xmin
             app.xmin = uieditfield(app.graphing_corner_heatmap, 'numeric');
-            app.xmin.Position = [68 364 40 22];
-            app.xmin.Value = 4;
+            app.xmin.Position = [68 317 40 22];
+            app.xmin.Value = 500;
 
             % Create xmaxEditFieldLabel
             app.xmaxEditFieldLabel = uilabel(app.graphing_corner_heatmap);
             app.xmaxEditFieldLabel.HorizontalAlignment = 'right';
-            app.xmaxEditFieldLabel.Position = [116 364 38 22];
+            app.xmaxEditFieldLabel.Position = [116 317 38 22];
             app.xmaxEditFieldLabel.Text = 'x max';
 
             % Create xmax
             app.xmax = uieditfield(app.graphing_corner_heatmap, 'numeric');
-            app.xmax.Position = [169 364 40 22];
-            app.xmax.Value = 9;
+            app.xmax.Position = [169 317 40 22];
+            app.xmax.Value = 8000;
 
             % Create yminLabel
             app.yminLabel = uilabel(app.graphing_corner_heatmap);
             app.yminLabel.HorizontalAlignment = 'right';
-            app.yminLabel.Position = [19 235 34 22];
+            app.yminLabel.Position = [19 212 34 22];
             app.yminLabel.Text = 'y min';
 
             % Create ymin
             app.ymin = uieditfield(app.graphing_corner_heatmap, 'numeric');
-            app.ymin.Position = [68 235 40 22];
-            app.ymin.Value = -5;
+            app.ymin.Position = [68 212 40 22];
+            app.ymin.Value = 0.5;
 
             % Create ymaxLabel
             app.ymaxLabel = uilabel(app.graphing_corner_heatmap);
             app.ymaxLabel.HorizontalAlignment = 'right';
-            app.ymaxLabel.Position = [121 235 38 22];
+            app.ymaxLabel.Position = [121 212 38 22];
             app.ymaxLabel.Text = 'y max';
 
             % Create ymax
             app.ymax = uieditfield(app.graphing_corner_heatmap, 'numeric');
-            app.ymax.Position = [174 235 40 22];
-            app.ymax.Value = -2;
+            app.ymax.Position = [174 212 40 22];
+            app.ymax.Value = 15;
 
-            % Create heatmapoutputoptionsLabel
-            app.heatmapoutputoptionsLabel = uilabel(app.graphing_corner_heatmap);
-            app.heatmapoutputoptionsLabel.FontSize = 22;
-            app.heatmapoutputoptionsLabel.FontWeight = 'bold';
-            app.heatmapoutputoptionsLabel.Position = [42 176 259 28];
-            app.heatmapoutputoptionsLabel.Text = 'heatmap output options';
+            % Create HeatmapOutputOptionsLabel
+            app.HeatmapOutputOptionsLabel = uilabel(app.graphing_corner_heatmap);
+            app.HeatmapOutputOptionsLabel.FontSize = 22;
+            app.HeatmapOutputOptionsLabel.FontWeight = 'bold';
+            app.HeatmapOutputOptionsLabel.Position = [28 163 269 28];
+            app.HeatmapOutputOptionsLabel.Text = 'Heatmap Output Options';
 
             % Create pixelsofresolutionLabel
             app.pixelsofresolutionLabel = uilabel(app.graphing_corner_heatmap);
             app.pixelsofresolutionLabel.HorizontalAlignment = 'right';
             app.pixelsofresolutionLabel.FontSize = 16;
-            app.pixelsofresolutionLabel.Position = [58 30 151 22];
+            app.pixelsofresolutionLabel.Position = [58 18 151 22];
             app.pixelsofresolutionLabel.Text = 'pixels of resolution =';
 
             % Create n
@@ -1919,166 +2091,8 @@ classdef plot_app < matlab.apps.AppBase
             app.n.Limits = [1 1024];
             app.n.RoundFractionalValues = 'on';
             app.n.ValueDisplayFormat = '%.0f';
-            app.n.Position = [224 30 39 22];
-            app.n.Value = 10;
-
-            % Create graphing_corner_one_D
-            app.graphing_corner_one_D = uitab(app.graphing_corner);
-            app.graphing_corner_one_D.AutoResizeChildren = 'off';
-            app.graphing_corner_one_D.Title = '1D Plot';
-            app.graphing_corner_one_D.BackgroundColor = [1 0.5608 0.8314];
-
-            % Create OD_minunlatchingmotorforceCheckBox
-            app.OD_minunlatchingmotorforceCheckBox = uicheckbox(app.graphing_corner_one_D);
-            app.OD_minunlatchingmotorforceCheckBox.Text = 'min unlatching motor force';
-            app.OD_minunlatchingmotorforceCheckBox.Position = [127 228 164 22];
-
-            % Create xaxisLabel_2
-            app.xaxisLabel_2 = uilabel(app.graphing_corner_one_D);
-            app.xaxisLabel_2.FontSize = 22;
-            app.xaxisLabel_2.FontWeight = 'bold';
-            app.xaxisLabel_2.Position = [128 435 67 28];
-            app.xaxisLabel_2.Text = 'x-axis';
-
-            % Create OD_x_log_space
-            app.OD_x_log_space = uicheckbox(app.graphing_corner_one_D);
-            app.OD_x_log_space.Tooltip = {'runs in linspace unless this box is checked'};
-            app.OD_x_log_space.Text = 'log space';
-            app.OD_x_log_space.Position = [235 364 74 22];
-            app.OD_x_log_space.Value = true;
-
-            % Create OD_y_maxCheckBox
-            app.OD_y_maxCheckBox = uicheckbox(app.graphing_corner_one_D);
-            app.OD_y_maxCheckBox.Text = 'y_max';
-            app.OD_y_maxCheckBox.Position = [32 276 58 22];
-            app.OD_y_maxCheckBox.Value = true;
-
-            % Create OD_y_unlatchCheckBox
-            app.OD_y_unlatchCheckBox = uicheckbox(app.graphing_corner_one_D);
-            app.OD_y_unlatchCheckBox.Text = 'y_unlatch';
-            app.OD_y_unlatchCheckBox.Position = [32 252 74 22];
-
-            % Create OD_t_LCheckBox
-            app.OD_t_LCheckBox = uicheckbox(app.graphing_corner_one_D);
-            app.OD_t_LCheckBox.Text = 't_L';
-            app.OD_t_LCheckBox.Position = [32 228 39 22];
-
-            % Create OD_v_toCheckBox
-            app.OD_v_toCheckBox = uicheckbox(app.graphing_corner_one_D);
-            app.OD_v_toCheckBox.Text = 'v_to';
-            app.OD_v_toCheckBox.Position = [32 204 45 22];
-
-            % Create OD_P_maxCheckBox
-            app.OD_P_maxCheckBox = uicheckbox(app.graphing_corner_one_D);
-            app.OD_P_maxCheckBox.Text = 'P_max';
-            app.OD_P_maxCheckBox.Position = [127 276 60 22];
-
-            % Create OD_t_toCheckBox
-            app.OD_t_toCheckBox = uicheckbox(app.graphing_corner_one_D);
-            app.OD_t_toCheckBox.Text = 't_to';
-            app.OD_t_toCheckBox.Position = [127 252 42 22];
-
-            % Create OD_KE_maxCheckBox
-            app.OD_KE_maxCheckBox = uicheckbox(app.graphing_corner_one_D);
-            app.OD_KE_maxCheckBox.Text = 'KE_max';
-            app.OD_KE_maxCheckBox.Position = [127 204 68 22];
-
-            % Create IV1DropDownLabel_2
-            app.IV1DropDownLabel_2 = uilabel(app.graphing_corner_one_D);
-            app.IV1DropDownLabel_2.HorizontalAlignment = 'right';
-            app.IV1DropDownLabel_2.FontSize = 16;
-            app.IV1DropDownLabel_2.Position = [61 397 34 22];
-            app.IV1DropDownLabel_2.Text = 'IV 1';
-
-            % Create OD_IV1DropDown
-            app.OD_IV1DropDown = uidropdown(app.graphing_corner_one_D);
-            app.OD_IV1DropDown.Items = {'--no selection--'};
-            app.OD_IV1DropDown.Tooltip = {'Independent Variable 1'};
-            app.OD_IV1DropDown.FontSize = 16;
-            app.OD_IV1DropDown.Position = [110 397 150 22];
-            app.OD_IV1DropDown.Value = '--no selection--';
-
-            % Create yaxisoutputoptionsLabel
-            app.yaxisoutputoptionsLabel = uilabel(app.graphing_corner_one_D);
-            app.yaxisoutputoptionsLabel.FontSize = 22;
-            app.yaxisoutputoptionsLabel.FontWeight = 'bold';
-            app.yaxisoutputoptionsLabel.Position = [60 312 230 28];
-            app.yaxisoutputoptionsLabel.Text = 'y-axis output options';
-
-            % Create pixelsofresolutionLabel_2
-            app.pixelsofresolutionLabel_2 = uilabel(app.graphing_corner_one_D);
-            app.pixelsofresolutionLabel_2.HorizontalAlignment = 'right';
-            app.pixelsofresolutionLabel_2.FontSize = 16;
-            app.pixelsofresolutionLabel_2.Position = [58 161 151 22];
-            app.pixelsofresolutionLabel_2.Text = 'pixels of resolution =';
-
-            % Create OD_n
-            app.OD_n = uieditfield(app.graphing_corner_one_D, 'numeric');
-            app.OD_n.Limits = [1 1024];
-            app.OD_n.RoundFractionalValues = 'on';
-            app.OD_n.ValueDisplayFormat = '%.0f';
-            app.OD_n.Position = [224 161 39 22];
-            app.OD_n.Value = 10;
-
-            % Create xminEditFieldLabel_2
-            app.xminEditFieldLabel_2 = uilabel(app.graphing_corner_one_D);
-            app.xminEditFieldLabel_2.HorizontalAlignment = 'right';
-            app.xminEditFieldLabel_2.Position = [19 364 34 22];
-            app.xminEditFieldLabel_2.Text = 'x min';
-
-            % Create OD_xmin
-            app.OD_xmin = uieditfield(app.graphing_corner_one_D, 'numeric');
-            app.OD_xmin.Position = [68 364 40 22];
-            app.OD_xmin.Value = 4;
-
-            % Create xmaxEditFieldLabel_2
-            app.xmaxEditFieldLabel_2 = uilabel(app.graphing_corner_one_D);
-            app.xmaxEditFieldLabel_2.HorizontalAlignment = 'right';
-            app.xmaxEditFieldLabel_2.Position = [116 364 38 22];
-            app.xmaxEditFieldLabel_2.Text = 'x max';
-
-            % Create OD_xmax
-            app.OD_xmax = uieditfield(app.graphing_corner_one_D, 'numeric');
-            app.OD_xmax.Position = [169 364 40 22];
-            app.OD_xmax.Value = 9;
-
-            % Create graphing_corner_kinematics
-            app.graphing_corner_kinematics = uitab(app.graphing_corner);
-            app.graphing_corner_kinematics.Title = 'Kinematics';
-            app.graphing_corner_kinematics.BackgroundColor = [1 0.3412 0.7451];
-
-            % Create kinematicsoutputoptionsLabel
-            app.kinematicsoutputoptionsLabel = uilabel(app.graphing_corner_kinematics);
-            app.kinematicsoutputoptionsLabel.FontSize = 22;
-            app.kinematicsoutputoptionsLabel.FontWeight = 'bold';
-            app.kinematicsoutputoptionsLabel.Position = [21 428 283 28];
-            app.kinematicsoutputoptionsLabel.Text = 'kinematics output options';
-
-            % Create forcedisp
-            app.forcedisp = uicheckbox(app.graphing_corner_kinematics);
-            app.forcedisp.Text = 'motor and spring force displacement curves';
-            app.forcedisp.Position = [54 371 256 22];
-            app.forcedisp.Value = true;
-
-            % Create latchkinematicsCheckBox
-            app.latchkinematicsCheckBox = uicheckbox(app.graphing_corner_kinematics);
-            app.latchkinematicsCheckBox.Text = 'latch kinematics';
-            app.latchkinematicsCheckBox.Position = [54 316 107 22];
-
-            % Create loadkinematicsCheckBox
-            app.loadkinematicsCheckBox = uicheckbox(app.graphing_corner_kinematics);
-            app.loadkinematicsCheckBox.Text = 'load kinematics';
-            app.loadkinematicsCheckBox.Position = [54 289 105 22];
-
-            % Create LoadingphaseLabel
-            app.LoadingphaseLabel = uilabel(app.graphing_corner_kinematics);
-            app.LoadingphaseLabel.Position = [34 396 111 22];
-            app.LoadingphaseLabel.Text = 'Loading phase:';
-
-            % Create UnlatchingphaseLabel
-            app.UnlatchingphaseLabel = uilabel(app.graphing_corner_kinematics);
-            app.UnlatchingphaseLabel.Position = [33 344 102 22];
-            app.UnlatchingphaseLabel.Text = 'Unlatching phase:';
+            app.n.Position = [224 18 39 22];
+            app.n.Value = 30;
 
             % Create go
             app.go = uibutton(app.UIFigure, 'push');
@@ -2087,12 +2101,12 @@ classdef plot_app < matlab.apps.AppBase
             app.go.BackgroundColor = [1 1 1];
             app.go.FontSize = 22;
             app.go.FontWeight = 'bold';
-            app.go.Position = [978 184 101 38];
+            app.go.Position = [969 243 101 38];
             app.go.Text = 'Graph!';
 
             % Create Image
             app.Image = uiimage(app.UIFigure);
-            app.Image.Position = [886 21 290 152];
+            app.Image.Position = [851 30 336 199];
             app.Image.ImageSource = 'lamsa.PNG';
 
             % Show the figure after all components are created
