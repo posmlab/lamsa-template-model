@@ -39,10 +39,9 @@ function latch = rounded_latch(R, m_L, varargin)
     latch.max_width = R;
     latch.mass = m_L;
     
-    yL = @(x) (x>runway_length)*(latch.max_width*(1-sqrt(1-(x-runway_length)^2/latch.max_width^2)));
-    syms x;
-    yL_prime = @(x) (x>runway_length)*((x-runway_length)/(latch.max_width*sqrt(1-((x-runway_length)/(latch.max_width))^2)));
-    yL_doubleprime = @(x) (x > runway_length)*(((1-((x-runway_length)/(latch.max_width))^2)*(latch.max_width^2)+((x-runway_length)^2))/( ((1-((x-runway_length)/(latch.max_width))^2)^(3/2))*(latch.max_width^3) ));
+    yL = @(x) (x>=runway_length)*(latch.max_width*(1-sqrt(1-(x-runway_length)^2/latch.max_width^2)));
+    yL_prime = @(x) (x>=runway_length)*((x-runway_length)/(latch.max_width*sqrt(1-((x-runway_length)/(latch.max_width))^2)));
+    yL_doubleprime = @(x) (x >= runway_length)*(((1-((x-runway_length)/(latch.max_width))^2)*(latch.max_width^2)+((x-runway_length)^2))/( ((1-((x-runway_length)/(latch.max_width))^2)^(3/2))*(latch.max_width^3) ));
     latch.y_L = {yL, yL_prime, yL_doubleprime}; % stores yL and its derivatives
     latch.min_latching_dist = abs(min_latching_dist);
     latch.max_latching_dist = abs(max_latching_dist);
