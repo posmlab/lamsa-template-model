@@ -221,6 +221,8 @@ classdef plot_app < matlab.apps.AppBase
             app.OD_IV1DropDown.Items = app.dd_vars_labels;
         end
         
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
         function heatmap(app)
             if ~(app.y_maxCheckBox.Value || app.y_unlatchCheckBox.Value || app.t_LCheckBox.Value || ...
                     app.v_toCheckBox.Value || app.P_maxCheckBox.Value || app.t_toCheckBox.Value || app.KE_maxCheckBox.Value)
@@ -395,7 +397,7 @@ classdef plot_app < matlab.apps.AppBase
             close(f)
             
             % plot output
-            fh = figure();
+            fh = figure('Name','Heatmaps');
             fh.WindowState = 'maximized';
             subplot_rows = floor(sqrt(length(metrics)));
             subplot_cols = ceil(length(metrics)/floor(sqrt(length(metrics))));
@@ -581,7 +583,7 @@ classdef plot_app < matlab.apps.AppBase
             close(f)
             
             % plot output
-            fh = figure();
+            fh = figure('Name','1D Plot');
             fh.WindowState = 'maximized';
             subplot_rows = floor(sqrt(length(metrics)));
             subplot_cols = ceil(length(metrics)/floor(sqrt(length(metrics))));
@@ -643,7 +645,7 @@ classdef plot_app < matlab.apps.AppBase
                 spring = linear_elastic_extensional_spring(app.lee_spring_E.Value,app.lee_spring_A.Value,app.lee_spring_L.Value,app.lee_spring_rho.Value,app.lee_spring_sigma_f.Value);
             end
             
-            load_bar_value = load_bar_value + load_bar_increment;
+            load_bar_value = load_bar_value + 2*load_bar_increment;
             waitbar(load_bar_value,f,'Processing...');
             
             % loading motor struct initialization
@@ -654,7 +656,7 @@ classdef plot_app < matlab.apps.AppBase
             end
             
             load_bar_value = load_bar_value + load_bar_increment;
-                waitbar(load_bar_value,f,'Processing...');
+            waitbar(load_bar_value,f,'Processing...');
             
             % unlatching motor struct initialization
             if (app.unlatching_motor.SelectedTab == app.um_linear_motor)
@@ -663,8 +665,6 @@ classdef plot_app < matlab.apps.AppBase
                 unlatching_motor = hill_muscle_motor(app.um_hill_motor_muscle_length.Value,app.um_hill_motor_Fmax.Value,app.um_hill_motor_Vmax.Value,app.um_hill_motor_rate_of_activation.Value,app.um_hill_motor_L_i.Value,app.um_hill_motor_a_L.Value,app.um_hill_motor_b_L.Value,app.um_hill_motor_s.Value);
             end
             
-            load_bar_value = load_bar_value + load_bar_increment;
-            waitbar(load_bar_value,f,'Processing...');
         
             [sol,transition_times] = solve_model(loading_motor,unlatching_motor,load,latch,spring,output_directory);
             columntitles=["Time", "y postition", "y velocity", "x position", "x velocity", "normal force on latch x", ...
@@ -677,7 +677,7 @@ classdef plot_app < matlab.apps.AppBase
             
             % latch kinematics
             if (app.latchkinematicsCheckBox.Value)    
-                figure
+                figure('Name','Latch Kinematics')
                 for i = 4:5
                     subplot(1,3,i-3)
                     box on
@@ -706,7 +706,7 @@ classdef plot_app < matlab.apps.AppBase
             
             % load kinematics
             if (app.loadkinematicsCheckBox.Value)
-                figure
+                figure('Name','Load Kinematics')
                 for i = 2:3
                     subplot(1,3,i-1)
                     box on
@@ -735,7 +735,7 @@ classdef plot_app < matlab.apps.AppBase
             
             % force displacement curves for motor and spring
             if (app.forcedisp.Value)    
-                figure
+                figure('Name','Motor and Spring Force Displacement Curves')
                 y_max = sol(1,2);
                 y_range = linspace(0,y_max,100);
                 motor_force_array = [];
@@ -745,6 +745,7 @@ classdef plot_app < matlab.apps.AppBase
                     spring_force_array(end+1) = spring.Force(Inf,[y_range(i),0]);
                 end
                 force_arrays = {motor_force_array spring_force_array};
+                forcedisp_titles = {'Loading Motor','Spring'};
                 for i = 1:2
                     subplot(1,2,i)
                     box on
@@ -752,6 +753,9 @@ classdef plot_app < matlab.apps.AppBase
                     hold on
                     plot(y_range,force_arrays{i});
                     hold off
+                    title(forcedisp_titles(i),"Interpreter","latex");
+                    ylabel('Force [N]',"Interpreter","latex");
+                    xlabel('Displacement [m]',"Interpreter","latex");
                 end
             end
             
@@ -2047,6 +2051,7 @@ classdef plot_app < matlab.apps.AppBase
             app.forcedisp = uicheckbox(app.graphing_corner_kinematics);
             app.forcedisp.Text = 'motor and spring force displacement curves';
             app.forcedisp.Position = [54 361 256 22];
+            app.forcedisp.Value = true;
 
             % Create latchkinematicsCheckBox
             app.latchkinematicsCheckBox = uicheckbox(app.graphing_corner_kinematics);
