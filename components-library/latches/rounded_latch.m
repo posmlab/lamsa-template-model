@@ -9,12 +9,17 @@
 %     fails (optional)
 %     max_latching_dist - can only load until this point until unlatching
 %     begins (optional)
+%     runway_length - This is a number that changes the shape of the latch
+%     by adding in a 'runway' portion, i.e. a portion of the latch that is
+%     completely horizontal/flat before the rounded portion. The default
+%     value is 0, which corresponds to a runway with a length 0 (which is
+%     just the same shape as the latch) 
 % min # arguments = 2
 
 function latch = rounded_latch(R, m_L, varargin)
     % optional parameters
-    varargin_param_names = {'latch.coeff_fric', 'latch.v_0','min_latching_dist','max_latching_dist'};
-    varargin_default_values = {0,0,0,Inf};
+    varargin_param_names = {'latch.coeff_fric', 'latch.v_0','min_latching_dist','max_latching_dist','runway_length'};
+    varargin_default_values = {0,0,0,Inf,0};
     
     % check and assign optional parameters
     if (nargin < 2)
@@ -34,12 +39,11 @@ function latch = rounded_latch(R, m_L, varargin)
     latch.max_width = R;
     latch.mass = m_L;
     
-    yL = @(x) latch.max_width*(1-sqrt(1-x^2/latch.max_width^2)); % function for the shape of the latch
+    yL = @(x) (x>runway_length)*(latch.max_width*(1-sqrt(1-(x-runway_length)^2/latch.max_width^2)));
     syms x;
-    yL_prime = diff(yL(x));
-    yL_doubleprime = diff(yL(x),2);
-    latch.y_L = {yL, matlabFunction(yL_prime), matlabFunction(yL_doubleprime)}; % stores yL and its derivatives
-    
+    yL_prime = @(x) (x>runway_length)*((x-runway_length)/(latch.max_width*sqrt(1-((x-runway_length)/(latch.max_width))^2)));
+    yL_doubleprime = @(x) (x > runway_length)*(((1-((x-runway_length)/(latch.max_width))^2)*(latch.max_width^2)+((x-runway_length)^2))/( ((1-((x-runway_length)/(latch.max_width))^2)^(3/2))*(latch.max_width^3) ));
+    latch.y_L = {yL, yL_prime, yL_doubleprime}; % stores yL and its derivatives
     latch.min_latching_dist = abs(min_latching_dist);
     latch.max_latching_dist = abs(max_latching_dist);
 end 
