@@ -15,18 +15,6 @@ classdef plot_app < matlab.apps.AppBase
         RequiredFieldsLabel_2          matlab.ui.control.Label
         OptionalFieldsLabel_2          matlab.ui.control.Label
         defaultvaluesfilledinLabel_2   matlab.ui.control.Label
-        exponential_spring             matlab.ui.container.Tab
-        k_0Label                       matlab.ui.control.Label
-        exp_spring_k                   matlab.ui.control.NumericEditField
-        characteristiclengthLabel      matlab.ui.control.Label
-        exp_spring_char_len            matlab.ui.control.NumericEditField
-        FmaxLabel_4                    matlab.ui.control.Label
-        exp_spring_Fmax                matlab.ui.control.NumericEditField
-        massEditFieldLabel_5           matlab.ui.control.Label
-        exp_spring_mass                matlab.ui.control.NumericEditField
-        RequiredFieldsLabel            matlab.ui.control.Label
-        OptionalFieldsLabel            matlab.ui.control.Label
-        defaultvaluesfilledinLabel     matlab.ui.control.Label
         linear_elastic_extensional_spring  matlab.ui.container.Tab
         RequiredFieldsLabel_9          matlab.ui.control.Label
         OptionalFieldsLabel_7          matlab.ui.control.Label
@@ -41,6 +29,18 @@ classdef plot_app < matlab.apps.AppBase
         lee_spring_L                   matlab.ui.control.NumericEditField
         sigma_fLabel                   matlab.ui.control.Label
         lee_spring_sigma_f             matlab.ui.control.NumericEditField
+        exponential_spring             matlab.ui.container.Tab
+        k_0Label                       matlab.ui.control.Label
+        exp_spring_k                   matlab.ui.control.NumericEditField
+        characteristiclengthLabel      matlab.ui.control.Label
+        exp_spring_char_len            matlab.ui.control.NumericEditField
+        FmaxLabel_4                    matlab.ui.control.Label
+        exp_spring_Fmax                matlab.ui.control.NumericEditField
+        massEditFieldLabel_5           matlab.ui.control.Label
+        exp_spring_mass                matlab.ui.control.NumericEditField
+        RequiredFieldsLabel            matlab.ui.control.Label
+        OptionalFieldsLabel            matlab.ui.control.Label
+        defaultvaluesfilledinLabel     matlab.ui.control.Label
         loading_motor                  matlab.ui.container.TabGroup
         lm_linear_motor                matlab.ui.container.Tab
         FmaxLabel_2                    matlab.ui.control.Label
@@ -188,6 +188,12 @@ classdef plot_app < matlab.apps.AppBase
         xmaxEditFieldLabel_2           matlab.ui.control.Label
         OD_xmax                        matlab.ui.control.NumericEditField
         graphing_corner_kinematics     matlab.ui.container.Tab
+        kinematicsoutputoptionsLabel   matlab.ui.control.Label
+        forcedisp                      matlab.ui.control.CheckBox
+        latchkinematicsCheckBox        matlab.ui.control.CheckBox
+        loadkinematicsCheckBox         matlab.ui.control.CheckBox
+        LoadingkinematicsLabel         matlab.ui.control.Label
+        UnlatchingkinematicsLabel      matlab.ui.control.Label
         go                             matlab.ui.control.Button
     end
 
@@ -216,6 +222,12 @@ classdef plot_app < matlab.apps.AppBase
         end
         
         function heatmap(app)
+            if ~(app.y_maxCheckBox.Value || app.y_unlatchCheckBox.Value || app.t_LCheckBox.Value || ...
+                    app.v_toCheckBox.Value || app.P_maxCheckBox.Value || app.t_toCheckBox.Value || app.KE_maxCheckBox.Value)
+                warndlg('You must select at least one output option', 'Warning');
+                return
+            end
+            
             % determines resolution of heatplots
             N=app.n.Value; 
             
@@ -430,6 +442,13 @@ classdef plot_app < matlab.apps.AppBase
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
         function one_D_plot(app)
+            if ~(app.OD_y_maxCheckBox.Value || app.OD_y_unlatchCheckBox.Value || app.OD_t_LCheckBox.Value || ...
+                    app.OD_v_toCheckBox.Value || app.OD_P_maxCheckBox.Value || app.OD_t_toCheckBox.Value || app.OD_KE_maxCheckBox.Value)
+                warndlg('You must select at least one output option', 'Warning');
+                return
+            end
+            
+            % determines resolution of heatplots
             N=app.OD_n.Value; 
             
             % initializing waitbar
@@ -595,6 +614,15 @@ classdef plot_app < matlab.apps.AppBase
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         function kinematics(app)
+            if ~(app.loadkinematicsCheckBox.Value || app.latchkinematicsCheckBox.Value || app.forcedisp.Value)
+                warndlg('You must select at least one kinematics option', 'Warning');
+                return
+            end
+            
+            f = waitbar(0,'Please wait...');
+            load_bar_value = 1/4;
+            load_bar_increment = 1/4;
+            
             % initializing output directory
             output_directory = create_output_directory();
             
@@ -615,6 +643,9 @@ classdef plot_app < matlab.apps.AppBase
                 spring = linear_elastic_extensional_spring(app.lee_spring_E.Value,app.lee_spring_A.Value,app.lee_spring_L.Value,app.lee_spring_rho.Value,app.lee_spring_sigma_f.Value);
             end
             
+            load_bar_value = load_bar_value + load_bar_increment;
+            waitbar(load_bar_value,f,'Processing...');
+            
             % loading motor struct initialization
             if (app.loading_motor.SelectedTab == app.lm_linear_motor)
                 loading_motor = linear_motor(app.lm_linear_motor_Fmax.Value,app.lm_linear_motor_Vmax.Value,app.lm_linear_motor_range_of_motion.Value,app.lm_linear_motor_voltage_frac.Value);
@@ -622,12 +653,18 @@ classdef plot_app < matlab.apps.AppBase
                 loading_motor = hill_muscle_motor(app.lm_hill_motor_muscle_length.Value,app.lm_hill_motor_Fmax.Value,app.lm_hill_motor_Vmax.Value,app.lm_hill_motor_rate_of_activation.Value,app.lm_hill_motor_L_i.Value,app.lm_hill_motor_a_L.Value,app.lm_hill_motor_b_L.Value,app.lm_hill_motor_s.Value);
             end
             
+            load_bar_value = load_bar_value + load_bar_increment;
+                waitbar(load_bar_value,f,'Processing...');
+            
             % unlatching motor struct initialization
             if (app.unlatching_motor.SelectedTab == app.um_linear_motor)
                 unlatching_motor = linear_motor(app.um_linear_motor_Fmax.Value,app.um_linear_motor_Vmax.Value,app.um_linear_motor_range_of_motion.Value,app.um_linear_motor_voltage_frac.Value);
             elseif (app.unlatching_motor.SelectedTab == app.um_hill_muscle_motor)
                 unlatching_motor = hill_muscle_motor(app.um_hill_motor_muscle_length.Value,app.um_hill_motor_Fmax.Value,app.um_hill_motor_Vmax.Value,app.um_hill_motor_rate_of_activation.Value,app.um_hill_motor_L_i.Value,app.um_hill_motor_a_L.Value,app.um_hill_motor_b_L.Value,app.um_hill_motor_s.Value);
             end
+            
+            load_bar_value = load_bar_value + load_bar_increment;
+            waitbar(load_bar_value,f,'Processing...');
         
             [sol,transition_times] = solve_model(loading_motor,unlatching_motor,load,latch,spring,output_directory);
             columntitles=["Time", "y postition", "y velocity", "x position", "x velocity", "normal force on latch x", ...
@@ -636,59 +673,88 @@ classdef plot_app < matlab.apps.AppBase
                 "unlatching motor force into"];
             units=[" [s]"," [m]"," [m/s]"];
             
-            % latch kinematics
-            figure
-            for i = 4:5
-                subplot(3,1,i-3)
-                box on
-                set(gca,'TickLabelInterpreter','latex')
-                hold on
-                plot(sol(:,1),sol(:,i));
-                hold off
-                title(columntitles(i),"Interpreter","latex");
-                ylabel(columntitles(i)+units(i-2),"Interpreter","latex");
-                xlabel(columntitles(1)+units(1),"Interpreter","latex");
-            end
+            close(f)
             
-            for i = [6 8 11]
-                subplot(3,1,3)
-                box on
-                set(gca,'TickLabelInterpreter','latex')
-                hold on
-                plot(sol(:,1),sol(:,i),"DisplayName",columntitles(i))
+            % latch kinematics
+            if (app.latchkinematicsCheckBox.Value)    
+                figure
+                for i = 4:5
+                    subplot(1,3,i-3)
+                    box on
+                    set(gca,'TickLabelInterpreter','latex')
+                    hold on
+                    plot(sol(:,1),sol(:,i));
+                    hold off
+                    title(columntitles(i),"Interpreter","latex");
+                    ylabel(columntitles(i)+units(i-2),"Interpreter","latex");
+                    xlabel(columntitles(1)+units(1),"Interpreter","latex");
+                end
+                
+                for i = [6 8 11]
+                    subplot(1,3,3)
+                    box on
+                    set(gca,'TickLabelInterpreter','latex')
+                    hold on
+                    plot(sol(:,1),sol(:,i),"DisplayName",columntitles(i))
+                end
+                title("Latch Force Components","Interpreter","latex");
+                ylabel("Force [N]","Interpreter","latex");
+                xlabel(columntitles(1)+" [s]","Interpreter","latex");
+                legend("show")
+                hold off
             end
-            title("Latch Force Components","Interpreter","latex");
-            ylabel("Force [N]","Interpreter","latex");
-            xlabel(columntitles(1)+" [s]","Interpreter","latex");
-            legend("show")
-            hold off
             
             % load kinematics
-            figure
-            for i = 2:3
-                subplot(3,1,i-1)
-                box on
-                set(gca,'TickLabelInterpreter','latex')
-                hold on
-                plot(sol(:,1),sol(:,i));
+            if (app.loadkinematicsCheckBox.Value)
+                figure
+                for i = 2:3
+                    subplot(1,3,i-1)
+                    box on
+                    set(gca,'TickLabelInterpreter','latex')
+                    hold on
+                    plot(sol(:,1),sol(:,i));
+                    hold off
+                    title(columntitles(i),"Interpreter","latex");
+                    ylabel(columntitles(i)+units(i),"Interpreter","latex");
+                    xlabel(columntitles(1)+units(1),"Interpreter","latex");
+                end
+                
+                for i = [7 9 10]
+                    subplot(1,3,3)
+                    box on
+                    set(gca,'TickLabelInterpreter','latex')
+                    hold on
+                    plot(sol(:,1),sol(:,i),"DisplayName",columntitles(i))
+                end
+                title("Load Force Components","Interpreter","latex");
+                ylabel("Force [N]","Interpreter","latex");
+                xlabel(columntitles(1)+" [s]","Interpreter","latex");
+                legend("show")
                 hold off
-                title(columntitles(i),"Interpreter","latex");
-                ylabel(columntitles(i)+units(i),"Interpreter","latex");
-                xlabel(columntitles(1)+units(1),"Interpreter","latex");
+            end    
+            
+            % force displacement curves for motor and spring
+            if (app.forcedisp.Value)    
+                figure
+                y_max = sol(1,2);
+                y_range = linspace(0,y_max,100);
+                motor_force_array = [];
+                spring_force_array = [];
+                for i = 1:length(y_range)
+                    motor_force_array(end+1) = loading_motor.Force(Inf,[y_range(i),0]);
+                    spring_force_array(end+1) = spring.Force(Inf,[y_range(i),0]);
+                end
+                force_arrays = {motor_force_array spring_force_array};
+                for i = 1:2
+                    subplot(1,2,i)
+                    box on
+                    set(gca,'TickLabelInterpreter','latex')
+                    hold on
+                    plot(y_range,force_arrays{i});
+                    hold off
+                end
             end
             
-            for i = [7 9 10]
-                subplot(3,1,3)
-                box on
-                set(gca,'TickLabelInterpreter','latex')
-                hold on
-                plot(sol(:,1),sol(:,i),"DisplayName",columntitles(i))
-            end
-            title("Load Force Components","Interpreter","latex");
-            ylabel("Force [N]","Interpreter","latex");
-            xlabel(columntitles(1)+" [s]","Interpreter","latex");
-            legend("show")
-            hold off
         end
     end
     
@@ -843,7 +909,7 @@ classdef plot_app < matlab.apps.AppBase
             % Create UIFigure and hide until all components are created
             app.UIFigure = uifigure('Visible', 'off');
             app.UIFigure.AutoResizeChildren = 'off';
-            app.UIFigure.Color = [0.902 0.902 0.902];
+            app.UIFigure.Color = [0.7255 0.8784 0.5176];
             app.UIFigure.Position = [60 -10 1207 803];
             app.UIFigure.Name = 'MATLAB App';
             app.UIFigure.Scrollable = 'on';
@@ -865,6 +931,7 @@ classdef plot_app < matlab.apps.AppBase
             app.linear_spring = uitab(app.spring);
             app.linear_spring.AutoResizeChildren = 'off';
             app.linear_spring.Title = 'Linear Spring';
+            app.linear_spring.BackgroundColor = [0.9608 0.9608 0.6353];
 
             % Create kLabel
             app.kLabel = uilabel(app.linear_spring);
@@ -920,82 +987,10 @@ classdef plot_app < matlab.apps.AppBase
             app.defaultvaluesfilledinLabel_2.Position = [14 6 98 13];
             app.defaultvaluesfilledinLabel_2.Text = '(default values filled in)';
 
-            % Create exponential_spring
-            app.exponential_spring = uitab(app.spring);
-            app.exponential_spring.AutoResizeChildren = 'off';
-            app.exponential_spring.Title = 'Exponential Spring';
-
-            % Create k_0Label
-            app.k_0Label = uilabel(app.exponential_spring);
-            app.k_0Label.HorizontalAlignment = 'right';
-            app.k_0Label.Position = [162 56 44 22];
-            app.k_0Label.Text = 'k_0 =';
-
-            % Create exp_spring_k
-            app.exp_spring_k = uieditfield(app.exponential_spring, 'numeric');
-            app.exp_spring_k.Limits = [0 Inf];
-            app.exp_spring_k.Tooltip = {'spring stiffness'};
-            app.exp_spring_k.Position = [221 56 46 22];
-            app.exp_spring_k.Value = 2000;
-
-            % Create characteristiclengthLabel
-            app.characteristiclengthLabel = uilabel(app.exponential_spring);
-            app.characteristiclengthLabel.HorizontalAlignment = 'right';
-            app.characteristiclengthLabel.Position = [332 56 123 22];
-            app.characteristiclengthLabel.Text = 'characteristic length =';
-
-            % Create exp_spring_char_len
-            app.exp_spring_char_len = uieditfield(app.exponential_spring, 'numeric');
-            app.exp_spring_char_len.Limits = [0 Inf];
-            app.exp_spring_char_len.Tooltip = {'resting length where force is 0'};
-            app.exp_spring_char_len.Position = [470 56 38 22];
-            app.exp_spring_char_len.Value = 0.001;
-
-            % Create FmaxLabel_4
-            app.FmaxLabel_4 = uilabel(app.exponential_spring);
-            app.FmaxLabel_4.HorizontalAlignment = 'right';
-            app.FmaxLabel_4.Position = [411 17 46 22];
-            app.FmaxLabel_4.Text = 'Fmax =';
-
-            % Create exp_spring_Fmax
-            app.exp_spring_Fmax = uieditfield(app.exponential_spring, 'numeric');
-            app.exp_spring_Fmax.Limits = [0 Inf];
-            app.exp_spring_Fmax.Tooltip = {'max force of the spring'};
-            app.exp_spring_Fmax.Position = [472 17 36 22];
-            app.exp_spring_Fmax.Value = Inf;
-
-            % Create massEditFieldLabel_5
-            app.massEditFieldLabel_5 = uilabel(app.exponential_spring);
-            app.massEditFieldLabel_5.HorizontalAlignment = 'right';
-            app.massEditFieldLabel_5.Position = [162 17 44 22];
-            app.massEditFieldLabel_5.Text = 'mass =';
-
-            % Create exp_spring_mass
-            app.exp_spring_mass = uieditfield(app.exponential_spring, 'numeric');
-            app.exp_spring_mass.Limits = [0 Inf];
-            app.exp_spring_mass.Tooltip = {'mass of the spring'};
-            app.exp_spring_mass.Position = [221 17 46 22];
-            app.exp_spring_mass.Value = 0.01;
-
-            % Create RequiredFieldsLabel
-            app.RequiredFieldsLabel = uilabel(app.exponential_spring);
-            app.RequiredFieldsLabel.Position = [18 56 92 22];
-            app.RequiredFieldsLabel.Text = 'Required Fields:';
-
-            % Create OptionalFieldsLabel
-            app.OptionalFieldsLabel = uilabel(app.exponential_spring);
-            app.OptionalFieldsLabel.Position = [18 17 89 22];
-            app.OptionalFieldsLabel.Text = 'Optional Fields:';
-
-            % Create defaultvaluesfilledinLabel
-            app.defaultvaluesfilledinLabel = uilabel(app.exponential_spring);
-            app.defaultvaluesfilledinLabel.FontSize = 9;
-            app.defaultvaluesfilledinLabel.Position = [14 6 98 13];
-            app.defaultvaluesfilledinLabel.Text = '(default values filled in)';
-
             % Create linear_elastic_extensional_spring
             app.linear_elastic_extensional_spring = uitab(app.spring);
             app.linear_elastic_extensional_spring.Title = 'Linear Elastic Extensional Spring';
+            app.linear_elastic_extensional_spring.BackgroundColor = [0.7686 0.9608 0.9608];
 
             % Create RequiredFieldsLabel_9
             app.RequiredFieldsLabel_9 = uilabel(app.linear_elastic_extensional_spring);
@@ -1078,6 +1073,80 @@ classdef plot_app < matlab.apps.AppBase
             app.lee_spring_sigma_f.Position = [366 17 34 22];
             app.lee_spring_sigma_f.Value = Inf;
 
+            % Create exponential_spring
+            app.exponential_spring = uitab(app.spring);
+            app.exponential_spring.AutoResizeChildren = 'off';
+            app.exponential_spring.Title = 'Exponential Spring';
+            app.exponential_spring.BackgroundColor = [0.7137 0.9804 0.7137];
+
+            % Create k_0Label
+            app.k_0Label = uilabel(app.exponential_spring);
+            app.k_0Label.HorizontalAlignment = 'right';
+            app.k_0Label.Position = [162 56 44 22];
+            app.k_0Label.Text = 'k_0 =';
+
+            % Create exp_spring_k
+            app.exp_spring_k = uieditfield(app.exponential_spring, 'numeric');
+            app.exp_spring_k.Limits = [0 Inf];
+            app.exp_spring_k.Tooltip = {'spring stiffness'};
+            app.exp_spring_k.Position = [221 56 46 22];
+            app.exp_spring_k.Value = 2000;
+
+            % Create characteristiclengthLabel
+            app.characteristiclengthLabel = uilabel(app.exponential_spring);
+            app.characteristiclengthLabel.HorizontalAlignment = 'right';
+            app.characteristiclengthLabel.Position = [332 56 123 22];
+            app.characteristiclengthLabel.Text = 'characteristic length =';
+
+            % Create exp_spring_char_len
+            app.exp_spring_char_len = uieditfield(app.exponential_spring, 'numeric');
+            app.exp_spring_char_len.Limits = [0 Inf];
+            app.exp_spring_char_len.Tooltip = {'resting length where force is 0'};
+            app.exp_spring_char_len.Position = [470 56 38 22];
+            app.exp_spring_char_len.Value = 0.001;
+
+            % Create FmaxLabel_4
+            app.FmaxLabel_4 = uilabel(app.exponential_spring);
+            app.FmaxLabel_4.HorizontalAlignment = 'right';
+            app.FmaxLabel_4.Position = [411 17 46 22];
+            app.FmaxLabel_4.Text = 'Fmax =';
+
+            % Create exp_spring_Fmax
+            app.exp_spring_Fmax = uieditfield(app.exponential_spring, 'numeric');
+            app.exp_spring_Fmax.Limits = [0 Inf];
+            app.exp_spring_Fmax.Tooltip = {'max force of the spring'};
+            app.exp_spring_Fmax.Position = [472 17 36 22];
+            app.exp_spring_Fmax.Value = Inf;
+
+            % Create massEditFieldLabel_5
+            app.massEditFieldLabel_5 = uilabel(app.exponential_spring);
+            app.massEditFieldLabel_5.HorizontalAlignment = 'right';
+            app.massEditFieldLabel_5.Position = [162 17 44 22];
+            app.massEditFieldLabel_5.Text = 'mass =';
+
+            % Create exp_spring_mass
+            app.exp_spring_mass = uieditfield(app.exponential_spring, 'numeric');
+            app.exp_spring_mass.Limits = [0 Inf];
+            app.exp_spring_mass.Tooltip = {'mass of the spring'};
+            app.exp_spring_mass.Position = [221 17 46 22];
+            app.exp_spring_mass.Value = 0.01;
+
+            % Create RequiredFieldsLabel
+            app.RequiredFieldsLabel = uilabel(app.exponential_spring);
+            app.RequiredFieldsLabel.Position = [18 56 92 22];
+            app.RequiredFieldsLabel.Text = 'Required Fields:';
+
+            % Create OptionalFieldsLabel
+            app.OptionalFieldsLabel = uilabel(app.exponential_spring);
+            app.OptionalFieldsLabel.Position = [18 17 89 22];
+            app.OptionalFieldsLabel.Text = 'Optional Fields:';
+
+            % Create defaultvaluesfilledinLabel
+            app.defaultvaluesfilledinLabel = uilabel(app.exponential_spring);
+            app.defaultvaluesfilledinLabel.FontSize = 9;
+            app.defaultvaluesfilledinLabel.Position = [14 6 98 13];
+            app.defaultvaluesfilledinLabel.Text = '(default values filled in)';
+
             % Create loading_motor
             app.loading_motor = uitabgroup(app.UIFigure);
             app.loading_motor.AutoResizeChildren = 'off';
@@ -1088,6 +1157,7 @@ classdef plot_app < matlab.apps.AppBase
             app.lm_linear_motor = uitab(app.loading_motor);
             app.lm_linear_motor.AutoResizeChildren = 'off';
             app.lm_linear_motor.Title = 'Linear Motor';
+            app.lm_linear_motor.BackgroundColor = [0.9608 0.9608 0.6353];
 
             % Create FmaxLabel_2
             app.FmaxLabel_2 = uilabel(app.lm_linear_motor);
@@ -1099,7 +1169,7 @@ classdef plot_app < matlab.apps.AppBase
             app.lm_linear_motor_Fmax = uieditfield(app.lm_linear_motor, 'numeric');
             app.lm_linear_motor_Fmax.Limits = [0 Inf];
             app.lm_linear_motor_Fmax.Tooltip = {'max force of the motor'};
-            app.lm_linear_motor_Fmax.Position = [218 62 40 22];
+            app.lm_linear_motor_Fmax.Position = [218 62 45 22];
             app.lm_linear_motor_Fmax.Value = 10;
 
             % Create VmaxLabel_2
@@ -1112,7 +1182,7 @@ classdef plot_app < matlab.apps.AppBase
             app.lm_linear_motor_Vmax = uieditfield(app.lm_linear_motor, 'numeric');
             app.lm_linear_motor_Vmax.Limits = [0 Inf];
             app.lm_linear_motor_Vmax.Tooltip = {'max velocity of the motor'};
-            app.lm_linear_motor_Vmax.Position = [355 62 37 22];
+            app.lm_linear_motor_Vmax.Position = [355 62 45 22];
             app.lm_linear_motor_Vmax.Value = 10;
 
             % Create RequiredFieldsLabel_3
@@ -1130,7 +1200,7 @@ classdef plot_app < matlab.apps.AppBase
             app.lm_linear_motor_range_of_motion = uieditfield(app.lm_linear_motor, 'numeric');
             app.lm_linear_motor_range_of_motion.Limits = [0 Inf];
             app.lm_linear_motor_range_of_motion.Tooltip = {'total possible range of motion of the motor'};
-            app.lm_linear_motor_range_of_motion.Position = [544 62 37 22];
+            app.lm_linear_motor_range_of_motion.Position = [544 62 46 22];
             app.lm_linear_motor_range_of_motion.Value = 0.005;
 
             % Create OptionalFieldsLabel_8
@@ -1161,6 +1231,7 @@ classdef plot_app < matlab.apps.AppBase
             app.lm_hill_muscle_motor = uitab(app.loading_motor);
             app.lm_hill_muscle_motor.AutoResizeChildren = 'off';
             app.lm_hill_muscle_motor.Title = 'Hill Muscle Motor';
+            app.lm_hill_muscle_motor.BackgroundColor = [0.7686 0.9608 0.9608];
 
             % Create FmaxLabel
             app.FmaxLabel = uilabel(app.lm_hill_muscle_motor);
@@ -1172,7 +1243,7 @@ classdef plot_app < matlab.apps.AppBase
             app.lm_hill_motor_Fmax = uieditfield(app.lm_hill_muscle_motor, 'numeric');
             app.lm_hill_motor_Fmax.Limits = [0 Inf];
             app.lm_hill_motor_Fmax.Tooltip = {'max force of the motor'};
-            app.lm_hill_motor_Fmax.Position = [222 63 34 22];
+            app.lm_hill_motor_Fmax.Position = [222 63 46 22];
             app.lm_hill_motor_Fmax.Value = 10;
 
             % Create VmaxLabel
@@ -1185,7 +1256,7 @@ classdef plot_app < matlab.apps.AppBase
             app.lm_hill_motor_Vmax = uieditfield(app.lm_hill_muscle_motor, 'numeric');
             app.lm_hill_motor_Vmax.Limits = [0 Inf];
             app.lm_hill_motor_Vmax.Tooltip = {'max velocity of the motor'};
-            app.lm_hill_motor_Vmax.Position = [354 62 37 22];
+            app.lm_hill_motor_Vmax.Position = [354 62 46 22];
             app.lm_hill_motor_Vmax.Value = 10;
 
             % Create musclelengthLabel
@@ -1199,7 +1270,7 @@ classdef plot_app < matlab.apps.AppBase
             app.lm_hill_motor_muscle_length.Limits = [0 Inf];
             app.lm_hill_motor_muscle_length.ValueChangedFcn = createCallbackFcn(app, @lm_hill_motor_muscle_lengthValueChanged, true);
             app.lm_hill_motor_muscle_length.Tooltip = {''};
-            app.lm_hill_motor_muscle_length.Position = [525 62 36 22];
+            app.lm_hill_motor_muscle_length.Position = [525 62 47 22];
             app.lm_hill_motor_muscle_length.Value = 0.01;
 
             % Create RequiredFieldsLabel_4
@@ -1228,7 +1299,7 @@ classdef plot_app < matlab.apps.AppBase
             app.lm_hill_motor_rate_of_activation = uieditfield(app.lm_hill_muscle_motor, 'numeric');
             app.lm_hill_motor_rate_of_activation.Limits = [0 Inf];
             app.lm_hill_motor_rate_of_activation.Tooltip = {''};
-            app.lm_hill_motor_rate_of_activation.Position = [708 63 37 22];
+            app.lm_hill_motor_rate_of_activation.Position = [708 63 48 22];
             app.lm_hill_motor_rate_of_activation.Value = Inf;
 
             % Create initiallengthLabel
@@ -1241,7 +1312,7 @@ classdef plot_app < matlab.apps.AppBase
             app.lm_hill_motor_L_i = uieditfield(app.lm_hill_muscle_motor, 'numeric');
             app.lm_hill_motor_L_i.Limits = [0 Inf];
             app.lm_hill_motor_L_i.Tooltip = {''};
-            app.lm_hill_motor_L_i.Position = [222 23 33 22];
+            app.lm_hill_motor_L_i.Position = [222 23 46 22];
             app.lm_hill_motor_L_i.Value = 0.01;
 
             % Create a_LLabel
@@ -1253,7 +1324,7 @@ classdef plot_app < matlab.apps.AppBase
             % Create lm_hill_motor_a_L
             app.lm_hill_motor_a_L = uieditfield(app.lm_hill_muscle_motor, 'numeric');
             app.lm_hill_motor_a_L.Tooltip = {'determines shape of length-tension relationship'};
-            app.lm_hill_motor_a_L.Position = [354 23 37 22];
+            app.lm_hill_motor_a_L.Position = [354 23 46 22];
             app.lm_hill_motor_a_L.Value = 2.08;
 
             % Create b_LLabel
@@ -1265,7 +1336,7 @@ classdef plot_app < matlab.apps.AppBase
             % Create lm_hill_motor_b_L
             app.lm_hill_motor_b_L = uieditfield(app.lm_hill_muscle_motor, 'numeric');
             app.lm_hill_motor_b_L.Tooltip = {'determines shape of length-tension relationship'};
-            app.lm_hill_motor_b_L.Position = [523 24 39 22];
+            app.lm_hill_motor_b_L.Position = [523 24 49 22];
             app.lm_hill_motor_b_L.Value = -2.89;
 
             % Create sLabel
@@ -1277,7 +1348,7 @@ classdef plot_app < matlab.apps.AppBase
             % Create lm_hill_motor_s
             app.lm_hill_motor_s = uieditfield(app.lm_hill_muscle_motor, 'numeric');
             app.lm_hill_motor_s.Tooltip = {'determines shape of length-tension relationship'};
-            app.lm_hill_motor_s.Position = [708 23 37 22];
+            app.lm_hill_motor_s.Position = [708 23 48 22];
             app.lm_hill_motor_s.Value = -0.75;
 
             % Create latch
@@ -1289,6 +1360,7 @@ classdef plot_app < matlab.apps.AppBase
             app.rounded_latch = uitab(app.latch);
             app.rounded_latch.AutoResizeChildren = 'off';
             app.rounded_latch.Title = 'Rounded Latch';
+            app.rounded_latch.BackgroundColor = [0.9608 0.9608 0.6353];
 
             % Create RequiredFieldsLabel_5
             app.RequiredFieldsLabel_5 = uilabel(app.rounded_latch);
@@ -1391,6 +1463,7 @@ classdef plot_app < matlab.apps.AppBase
             app.load_mass = uitab(app.load);
             app.load_mass.AutoResizeChildren = 'off';
             app.load_mass.Title = 'Load Mass';
+            app.load_mass.BackgroundColor = [0.9608 0.9608 0.6353];
 
             % Create RequiredFieldsLabel_6
             app.RequiredFieldsLabel_6 = uilabel(app.load_mass);
@@ -1461,6 +1534,7 @@ classdef plot_app < matlab.apps.AppBase
             app.um_linear_motor = uitab(app.unlatching_motor);
             app.um_linear_motor.AutoResizeChildren = 'off';
             app.um_linear_motor.Title = 'Linear Motor';
+            app.um_linear_motor.BackgroundColor = [0.9608 0.9608 0.6353];
 
             % Create FmaxLabel_5
             app.FmaxLabel_5 = uilabel(app.um_linear_motor);
@@ -1534,6 +1608,7 @@ classdef plot_app < matlab.apps.AppBase
             app.um_hill_muscle_motor = uitab(app.unlatching_motor);
             app.um_hill_muscle_motor.AutoResizeChildren = 'off';
             app.um_hill_muscle_motor.Title = 'Hill Muscle Motor';
+            app.um_hill_muscle_motor.BackgroundColor = [0.7686 0.9608 0.9608];
 
             % Create FmaxLabel_6
             app.FmaxLabel_6 = uilabel(app.um_hill_muscle_motor);
@@ -1545,7 +1620,7 @@ classdef plot_app < matlab.apps.AppBase
             app.um_hill_motor_Fmax = uieditfield(app.um_hill_muscle_motor, 'numeric');
             app.um_hill_motor_Fmax.Limits = [0 Inf];
             app.um_hill_motor_Fmax.Tooltip = {'max force of the motor'};
-            app.um_hill_motor_Fmax.Position = [222 63 33 22];
+            app.um_hill_motor_Fmax.Position = [222 63 40 22];
             app.um_hill_motor_Fmax.Value = 10;
 
             % Create VmaxLabel_4
@@ -1558,7 +1633,7 @@ classdef plot_app < matlab.apps.AppBase
             app.um_hill_motor_Vmax = uieditfield(app.um_hill_muscle_motor, 'numeric');
             app.um_hill_motor_Vmax.Limits = [0 Inf];
             app.um_hill_motor_Vmax.Tooltip = {'max velocity of the motor'};
-            app.um_hill_motor_Vmax.Position = [354 62 37 22];
+            app.um_hill_motor_Vmax.Position = [354 62 44 22];
             app.um_hill_motor_Vmax.Value = 10;
 
             % Create musclelengthLabel_2
@@ -1572,7 +1647,7 @@ classdef plot_app < matlab.apps.AppBase
             app.um_hill_motor_muscle_length.Limits = [0 Inf];
             app.um_hill_motor_muscle_length.ValueChangedFcn = createCallbackFcn(app, @um_hill_motor_muscle_lengthValueChanged, true);
             app.um_hill_motor_muscle_length.Tooltip = {''};
-            app.um_hill_motor_muscle_length.Position = [525 62 36 22];
+            app.um_hill_motor_muscle_length.Position = [525 62 45 22];
             app.um_hill_motor_muscle_length.Value = 4;
 
             % Create RequiredFieldsLabel_8
@@ -1601,7 +1676,7 @@ classdef plot_app < matlab.apps.AppBase
             app.um_hill_motor_rate_of_activation = uieditfield(app.um_hill_muscle_motor, 'numeric');
             app.um_hill_motor_rate_of_activation.Limits = [0 Inf];
             app.um_hill_motor_rate_of_activation.Tooltip = {''};
-            app.um_hill_motor_rate_of_activation.Position = [708 63 36 22];
+            app.um_hill_motor_rate_of_activation.Position = [708 63 46 22];
             app.um_hill_motor_rate_of_activation.Value = 2;
 
             % Create initiallengthLabel_2
@@ -1614,7 +1689,7 @@ classdef plot_app < matlab.apps.AppBase
             app.um_hill_motor_L_i = uieditfield(app.um_hill_muscle_motor, 'numeric');
             app.um_hill_motor_L_i.Limits = [0 Inf];
             app.um_hill_motor_L_i.Tooltip = {''};
-            app.um_hill_motor_L_i.Position = [222 23 34 22];
+            app.um_hill_motor_L_i.Position = [222 23 40 22];
             app.um_hill_motor_L_i.Value = 4;
 
             % Create a_LLabel_2
@@ -1626,7 +1701,7 @@ classdef plot_app < matlab.apps.AppBase
             % Create um_hill_motor_a_L
             app.um_hill_motor_a_L = uieditfield(app.um_hill_muscle_motor, 'numeric');
             app.um_hill_motor_a_L.Tooltip = {'determines shape of length-tension relationship'};
-            app.um_hill_motor_a_L.Position = [354 23 37 22];
+            app.um_hill_motor_a_L.Position = [354 23 44 22];
             app.um_hill_motor_a_L.Value = 2.08;
 
             % Create b_LLabel_2
@@ -1638,7 +1713,7 @@ classdef plot_app < matlab.apps.AppBase
             % Create um_hill_motor_b_L
             app.um_hill_motor_b_L = uieditfield(app.um_hill_muscle_motor, 'numeric');
             app.um_hill_motor_b_L.Tooltip = {'determines shape of length-tension relationship'};
-            app.um_hill_motor_b_L.Position = [523 24 39 22];
+            app.um_hill_motor_b_L.Position = [523 24 47 22];
             app.um_hill_motor_b_L.Value = -2.89;
 
             % Create sLabel_2
@@ -1650,7 +1725,7 @@ classdef plot_app < matlab.apps.AppBase
             % Create um_hill_motor_s
             app.um_hill_motor_s = uieditfield(app.um_hill_muscle_motor, 'numeric');
             app.um_hill_motor_s.Tooltip = {'determines shape of length-tension relationship'};
-            app.um_hill_motor_s.Position = [708 23 37 22];
+            app.um_hill_motor_s.Position = [708 23 46 22];
             app.um_hill_motor_s.Value = -0.75;
 
             % Create UnlatchingMotorLabel
@@ -1674,6 +1749,7 @@ classdef plot_app < matlab.apps.AppBase
             app.graphing_corner_heatmap = uitab(app.graphing_corner);
             app.graphing_corner_heatmap.AutoResizeChildren = 'off';
             app.graphing_corner_heatmap.Title = '2D Plot';
+            app.graphing_corner_heatmap.BackgroundColor = [1 0.7686 0.7686];
 
             % Create minunlatchingmotorforceCheckBox
             app.minunlatchingmotorforceCheckBox = uicheckbox(app.graphing_corner_heatmap);
@@ -1842,6 +1918,7 @@ classdef plot_app < matlab.apps.AppBase
             app.graphing_corner_one_D = uitab(app.graphing_corner);
             app.graphing_corner_one_D.AutoResizeChildren = 'off';
             app.graphing_corner_one_D.Title = '1D Plot';
+            app.graphing_corner_one_D.BackgroundColor = [0.9804 0.8941 0.6941];
 
             % Create OD_minunlatchingmotorforceCheckBox
             app.OD_minunlatchingmotorforceCheckBox = uicheckbox(app.graphing_corner_one_D);
@@ -1958,12 +2035,47 @@ classdef plot_app < matlab.apps.AppBase
             % Create graphing_corner_kinematics
             app.graphing_corner_kinematics = uitab(app.graphing_corner);
             app.graphing_corner_kinematics.Title = 'Kinematics';
+            app.graphing_corner_kinematics.BackgroundColor = [0.9882 0.7608 0.902];
+
+            % Create kinematicsoutputoptionsLabel
+            app.kinematicsoutputoptionsLabel = uilabel(app.graphing_corner_kinematics);
+            app.kinematicsoutputoptionsLabel.FontSize = 22;
+            app.kinematicsoutputoptionsLabel.Position = [34 420 255 27];
+            app.kinematicsoutputoptionsLabel.Text = 'kinematics output options';
+
+            % Create forcedisp
+            app.forcedisp = uicheckbox(app.graphing_corner_kinematics);
+            app.forcedisp.Text = 'motor and spring force displacement curves';
+            app.forcedisp.Position = [54 361 256 22];
+
+            % Create latchkinematicsCheckBox
+            app.latchkinematicsCheckBox = uicheckbox(app.graphing_corner_kinematics);
+            app.latchkinematicsCheckBox.Text = 'latch kinematics';
+            app.latchkinematicsCheckBox.Position = [54 306 107 22];
+
+            % Create loadkinematicsCheckBox
+            app.loadkinematicsCheckBox = uicheckbox(app.graphing_corner_kinematics);
+            app.loadkinematicsCheckBox.Text = 'load kinematics';
+            app.loadkinematicsCheckBox.Position = [54 279 105 22];
+
+            % Create LoadingkinematicsLabel
+            app.LoadingkinematicsLabel = uilabel(app.graphing_corner_kinematics);
+            app.LoadingkinematicsLabel.Position = [34 386 111 22];
+            app.LoadingkinematicsLabel.Text = 'Loading kinematics:';
+
+            % Create UnlatchingkinematicsLabel
+            app.UnlatchingkinematicsLabel = uilabel(app.graphing_corner_kinematics);
+            app.UnlatchingkinematicsLabel.Position = [33 334 126 22];
+            app.UnlatchingkinematicsLabel.Text = 'Unlatching kinematics:';
 
             % Create go
             app.go = uibutton(app.UIFigure, 'push');
             app.go.ButtonPushedFcn = createCallbackFcn(app, @goButtonPushed, true);
+            app.go.Icon = 'graphbutton.png';
+            app.go.IconAlignment = 'bottom';
+            app.go.BackgroundColor = [1 1 1];
             app.go.FontSize = 22;
-            app.go.Position = [945 133 150 76];
+            app.go.Position = [924 95 202 115];
             app.go.Text = 'Graph!';
 
             % Show the figure after all components are created
