@@ -166,6 +166,8 @@ classdef plot_app < matlab.apps.AppBase
         OD_xmin                        matlab.ui.control.NumericEditField
         xmaxEditFieldLabel_2           matlab.ui.control.Label
         OD_xmax                        matlab.ui.control.NumericEditField
+        OD_KE_ratioCheckBox            matlab.ui.control.CheckBox
+        OD_unlatchingmotorworkdoneCheckBox  matlab.ui.control.CheckBox
         graphing_corner_heatmap        matlab.ui.container.Tab
         minunlatchingmotorforceCheckBox  matlab.ui.control.CheckBox
         xaxisLabel                     matlab.ui.control.Label
@@ -194,6 +196,8 @@ classdef plot_app < matlab.apps.AppBase
         HeatmapOutputOptionsLabel      matlab.ui.control.Label
         pixelsofresolutionLabel        matlab.ui.control.Label
         n                              matlab.ui.control.NumericEditField
+        KERatioCheckBox                matlab.ui.control.CheckBox
+        unlatchingmotorworkdoneCheckBox  matlab.ui.control.CheckBox
         go                             matlab.ui.control.Button
         Image                          matlab.ui.control.Image
     end
@@ -226,7 +230,8 @@ classdef plot_app < matlab.apps.AppBase
 
         function heatmap(app)
             if ~(app.y_maxCheckBox.Value || app.y_unlatchCheckBox.Value || app.t_LCheckBox.Value || ...
-                    app.v_toCheckBox.Value || app.P_maxCheckBox.Value || app.t_toCheckBox.Value || app.KE_maxCheckBox.Value)
+                    app.v_toCheckBox.Value || app.P_maxCheckBox.Value || app.t_toCheckBox.Value || app.KE_maxCheckBox.Value ... 
+                    || app.KERatioCheckBox.Value || app.unlatchingmotorworkdoneCheckBox.Value)
                 warndlg('You must select at least one output option', 'Warning');
                 return
             end
@@ -306,6 +311,17 @@ classdef plot_app < matlab.apps.AppBase
                 metrics_names{end+1} = 'KEmax';
                 metrics_labels{end+1} = '$KE_{\textrm{max}}$';
             end
+            if app.KERatioCheckBox.Value
+                metrics{end+1} = 'KE_Ratio';
+                metrics_names{end+1} = 'KE_Ratio';
+                metrics_labels{end+1} = 'KE Ratio';
+            end
+            if app.unlatchingmotorworkdoneCheckBox.Value
+                metrics{end+1} = 'unlatching_motor_work_done';
+                metrics_names{end+1} = 'unlatching_motor_work_done';
+                metrics_labels{end+1} = 'unlatching motor work done';
+            end
+            
             
             if isempty(metrics)
                 errordlg('You must pick at least one output option','Error');
@@ -387,7 +403,35 @@ classdef plot_app < matlab.apps.AppBase
                     
                     met_dict=get_metrics(sol,transition_times,load,metrics);
                     for ii=1:length(metrics)
-                        outval{ii}(i,j)=met_dict(metrics{ii});
+                        % the KE_Ratio gets special treatment because it's
+                        % weird. This is the ratio of the load mass's final
+                        % kinetic energy in braking vs. non-braking
+                        % scenarios. The difference between these scenarios
+                        % is that in one scenario, we allow a linear
+                        % unlatching motor to behave as normal (exerts a
+                        % negative force on the latch if the motor moves
+                        % faster than vmax), whereas in the other, we
+                        % specify that if the unlatching motor is moving so
+                        % fast that it would normally brake, we
+                        % artificially set the force to 0 instead. 
+                        % Comparing these two physical scenarios requires a
+                        % second call to solve_model, hence the special
+                        % treatment.
+                        if (strcmp(metrics{ii},'KE_Ratio') & app.unlatching_motor.SelectedTab == app.um_linear_motor)
+
+                            unlatching_motor_no_braking = linear_motor(app.um_linear_motor_Fmax.Value,app.um_linear_motor_Vmax.Value,app.um_linear_motor_range_of_motion.Value,app.um_linear_motor_voltage_frac.Value, true);
+                            [sol_no_braking, tt_no_braking] = solve_model(loading_motor,unlatching_motor_no_braking,load,latch,spring,output_directory);
+                            
+                            KE_no_braking = (0.5*load.mass*(sol_no_braking(end,3)^2));
+                            KE_braking = (0.5*load.mass*(sol(end,3)^2));
+                            ratio = KE_no_braking/KE_braking;
+                            outval{ii}(i,j)=ratio;
+                        elseif (strcmp(metrics{ii},'KE_Ratio') & app.unlatching_motor.SelectedTab ~= app.um_linear_motor)
+                            error("The KE_Ratio metric is only available for a linear unlatching motor (for now!)")
+                        else
+                            outval{ii}(i,j)=met_dict(metrics{ii});
+                        end
+                        metrics{ii};
                     end
                 end
                 disp(['row ' num2str(i) ' of ' num2str(N)]);
@@ -446,7 +490,8 @@ classdef plot_app < matlab.apps.AppBase
         
         function one_D_plot(app)
             if ~(app.OD_y_maxCheckBox.Value || app.OD_y_unlatchCheckBox.Value || app.OD_t_LCheckBox.Value || ...
-                    app.OD_v_toCheckBox.Value || app.OD_P_maxCheckBox.Value || app.OD_t_toCheckBox.Value || app.OD_KE_maxCheckBox.Value)
+                    app.OD_v_toCheckBox.Value || app.OD_P_maxCheckBox.Value || app.OD_t_toCheckBox.Value || app.OD_KE_maxCheckBox.Value ...
+                    || app.OD_KE_ratioCheckBox.Value || app.OD_unlatchingmotorworkdoneCheckBox.Value)
                 warndlg('You must select at least one output option', 'Warning');
                 return
             end
@@ -500,14 +545,20 @@ classdef plot_app < matlab.apps.AppBase
             if app.OD_KE_maxCheckBox.Value
                 metrics{end+1} = 'KEmax';
             end
+            if app.OD_KE_ratioCheckBox.Value
+                metrics{end+1} = 'KE_Ratio';
+            end
+            if app.OD_unlatchingmotorworkdoneCheckBox.Value
+                metrics{end+1} = 'unlatching_motor_work_done';
+            end
             
             if isempty(metrics)
                 errordlg('You must pick at least one output option','Error');
                 error('You must pick at least one output')
             end
             
-            metrics_names = {'ymax','yunlatch','tL','vto','Pmax','tto','minumforce','KEmax'};
-            metrics_labels = {'$y_{\textrm{max}}$','$y_{\textrm{unlatch}}$','$t_L$','$v_{\textrm{to}}$','$P_{\textrm{max}}$','$t_{\textrm{to}}$','min unlatching force','$KE_{\textrm{max}}$'};
+            metrics_names = {'ymax','yunlatch','tL','vto','Pmax','tto','minumforce','KEmax', 'KE_Ratio', 'unlatching_motor_work_done'};
+            metrics_labels = {'$y_{\textrm{max}}$','$y_{\textrm{unlatch}}$','$t_L$','$v_{\textrm{to}}$','$P_{\textrm{max}}$','$t_{\textrm{to}}$','min unlatching force','$KE_{\textrm{max}}$', 'KE Ratio', 'unlatching motor work done'};
             metrics_dict = containers.Map(metrics_names,metrics_labels);
             
             looping_param_x = app.dropdown_items_opposite_dict(app.OD_IV1DropDown.Value);
@@ -573,10 +624,37 @@ classdef plot_app < matlab.apps.AppBase
                 
                 met_dict=get_metrics(sol,transition_times,load,metrics);
                 for ii=1:length(metrics)
-                    outval{ii}(i)=met_dict(metrics{ii});
+                    % the KE_Ratio gets special treatment because it's
+                    % weird. This is the ratio of the load mass's final
+                    % kinetic energy in braking vs. non-braking
+                    % scenarios. The difference between these scenarios
+                    % is that in one scenario, we allow a linear
+                    % unlatching motor to behave as normal (exerts a
+                    % negative force on the latch if the motor moves
+                    % faster than vmax), whereas in the other, we
+                    % specify that if the unlatching motor is moving so
+                    % fast that it would normally brake, we
+                    % artificially set the force to 0 instead. 
+                    % Comparing these two physical scenarios requires a
+                    % second call to solve_model, hence the special
+                    % treatment.
+                    if (strcmp(metrics{ii},'KE_Ratio') & app.unlatching_motor.SelectedTab == app.um_linear_motor)
+                        
+                        unlatching_motor_no_braking = linear_motor(app.um_linear_motor_Fmax.Value,app.um_linear_motor_Vmax.Value,app.um_linear_motor_range_of_motion.Value,app.um_linear_motor_voltage_frac.Value, true);
+                        [sol_no_braking, tt_no_braking] = solve_model(loading_motor,unlatching_motor_no_braking,load,latch,spring,output_directory);
+                        KE_no_braking = (0.5*load.mass*(sol_no_braking(end,3)^2));
+                        
+                        KE_braking = (0.5*load.mass*(sol(end,3)^2));
+                        ratio = KE_no_braking/KE_braking;
+                        outval{ii}(i)=ratio;
+                    elseif (strcmp(metrics{ii},'KE_Ratio') & app.unlatching_motor.SelectedTab ~= app.um_linear_motor)
+                        error("The KE_Ratio metric is only available for a linear unlatching motor (for now!)")
+                    else
+                        outval{ii}(i)=met_dict(metrics{ii});
+                    end
                 end
                 
-                disp(['row ' num2str(i) ' of ' num2str(N)]);
+                disp(['point ' num2str(i) ' of ' num2str(N)]);
                 load_bar_value = load_bar_value + load_bar_increment;
                 waitbar(load_bar_value,f,'Processing...');
             end
@@ -779,8 +857,8 @@ classdef plot_app < matlab.apps.AppBase
             correctIndex = lastIndex-nameLength;
             pathname = pathname(1:correctIndex);
             pathname = pathname +"/../ext";
-            addpath(fullfile(pathname))
-            mlapp2classdef("plot_app.mlapp")
+            addpath(fullfile(pathname));
+            mlapp2classdef("plot_app.mlapp");
             
             varnames = {'load_mass_mass',...
                 'latch_mass','latch_coeff_fric','latch_radius','latch_v_0','min_latching_dist','max_latching_dist',...
@@ -1892,7 +1970,7 @@ classdef plot_app < matlab.apps.AppBase
             app.pixelsofresolutionLabel_2 = uilabel(app.graphing_corner_one_D);
             app.pixelsofresolutionLabel_2.HorizontalAlignment = 'right';
             app.pixelsofresolutionLabel_2.FontSize = 16;
-            app.pixelsofresolutionLabel_2.Position = [58 102 151 22];
+            app.pixelsofresolutionLabel_2.Position = [64 79 151 22];
             app.pixelsofresolutionLabel_2.Text = 'pixels of resolution =';
 
             % Create OD_n
@@ -1900,7 +1978,7 @@ classdef plot_app < matlab.apps.AppBase
             app.OD_n.Limits = [1 1024];
             app.OD_n.RoundFractionalValues = 'on';
             app.OD_n.ValueDisplayFormat = '%.0f';
-            app.OD_n.Position = [224 102 39 22];
+            app.OD_n.Position = [225 82 39 22];
             app.OD_n.Value = 100;
 
             % Create xminEditFieldLabel_2
@@ -1923,6 +2001,16 @@ classdef plot_app < matlab.apps.AppBase
             app.OD_xmax = uieditfield(app.graphing_corner_one_D, 'numeric');
             app.OD_xmax.Position = [169 317 40 22];
             app.OD_xmax.Value = 42;
+
+            % Create OD_KE_ratioCheckBox
+            app.OD_KE_ratioCheckBox = uicheckbox(app.graphing_corner_one_D);
+            app.OD_KE_ratioCheckBox.Text = 'KE Ratio';
+            app.OD_KE_ratioCheckBox.Position = [32 118 69 22];
+
+            % Create OD_unlatchingmotorworkdoneCheckBox
+            app.OD_unlatchingmotorworkdoneCheckBox = uicheckbox(app.graphing_corner_one_D);
+            app.OD_unlatchingmotorworkdoneCheckBox.Text = 'unlatching motor work done';
+            app.OD_unlatchingmotorworkdoneCheckBox.Position = [127 118 169 22];
 
             % Create graphing_corner_heatmap
             app.graphing_corner_heatmap = uitab(app.graphing_corner);
@@ -2083,7 +2171,7 @@ classdef plot_app < matlab.apps.AppBase
             app.pixelsofresolutionLabel = uilabel(app.graphing_corner_heatmap);
             app.pixelsofresolutionLabel.HorizontalAlignment = 'right';
             app.pixelsofresolutionLabel.FontSize = 16;
-            app.pixelsofresolutionLabel.Position = [58 18 151 22];
+            app.pixelsofresolutionLabel.Position = [59 9 151 22];
             app.pixelsofresolutionLabel.Text = 'pixels of resolution =';
 
             % Create n
@@ -2091,8 +2179,18 @@ classdef plot_app < matlab.apps.AppBase
             app.n.Limits = [1 1024];
             app.n.RoundFractionalValues = 'on';
             app.n.ValueDisplayFormat = '%.0f';
-            app.n.Position = [224 18 39 22];
+            app.n.Position = [225 9 39 22];
             app.n.Value = 30;
+
+            % Create KERatioCheckBox
+            app.KERatioCheckBox = uicheckbox(app.graphing_corner_heatmap);
+            app.KERatioCheckBox.Text = 'KE Ratio';
+            app.KERatioCheckBox.Position = [32 37 69 22];
+
+            % Create unlatchingmotorworkdoneCheckBox
+            app.unlatchingmotorworkdoneCheckBox = uicheckbox(app.graphing_corner_heatmap);
+            app.unlatchingmotorworkdoneCheckBox.Text = 'unlatching motor work done';
+            app.unlatchingmotorworkdoneCheckBox.Position = [127 37 169 22];
 
             % Create go
             app.go = uibutton(app.UIFigure, 'push');
