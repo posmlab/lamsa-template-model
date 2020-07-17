@@ -43,4 +43,17 @@ function metrics = get_metrics(sol,transition_times,load,met_names)
     if isKey(metrics,'minumforce')
         metrics('minumforce')= min(sol(:,11));
     end
+    if isKey(metrics,'unlatching_motor_work_done')
+        workDone = 0;
+        for index = 1:length(sol(:,4))
+            if (index == length(sol(:,4)))
+                break
+            else
+                forceApplied = sol(index, 11);
+                distanceTravelled = sol(index+1,4)-sol(index,4);
+                workDone = workDone + (forceApplied*distanceTravelled);
+            end
+        end
+        metrics('unlatching_motor_work_done')=workDone;
+    end
 end
