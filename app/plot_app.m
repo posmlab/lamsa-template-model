@@ -332,8 +332,8 @@ classdef plot_app < matlab.apps.AppBase
             
             looping_param_x = app.dropdown_items_opposite_dict(app.IV1DropDown.Value);
             looping_param_y = app.dropdown_items_opposite_dict(app.IV2DropDown.Value);
-            eval(['looping_param_x_value = app.' app.dropdown_items_opposite_dict(app.IV1DropDown.Value) '.Value'])
-            eval(['looping_param_y_value = app.' app.dropdown_items_opposite_dict(app.IV2DropDown.Value) '.Value'])
+            eval(['looping_param_x_value = app.' app.dropdown_items_opposite_dict(app.IV1DropDown.Value) '.Value;'])
+            eval(['looping_param_y_value = app.' app.dropdown_items_opposite_dict(app.IV2DropDown.Value) '.Value;'])
             
             % ensures that both independent variables that we are varying over are not the same
             if (strcmp(looping_param_y,looping_param_x))
@@ -419,7 +419,7 @@ classdef plot_app < matlab.apps.AppBase
                         % Comparing these two physical scenarios requires a
                         % second call to solve_model, hence the special
                         % treatment.
-                        if (strcmp(metrics{ii},'KE_Ratio') & app.unlatching_motor.SelectedTab == app.um_linear_motor)
+                        if (strcmp(metrics{ii},'KE_Ratio') && app.unlatching_motor.SelectedTab == app.um_linear_motor)
 
                             unlatching_motor_no_braking = linear_motor(app.um_linear_motor_Fmax.Value,app.um_linear_motor_Vmax.Value,app.um_linear_motor_range_of_motion.Value,app.um_linear_motor_voltage_frac.Value, true);
                             [sol_no_braking, tt_no_braking] = solve_model(loading_motor,unlatching_motor_no_braking,load,latch,spring,output_directory);
@@ -428,7 +428,7 @@ classdef plot_app < matlab.apps.AppBase
                             KE_braking = (0.5*load.mass*(sol(end,3)^2));
                             ratio = KE_no_braking/KE_braking;
                             outval{ii}(i,j)=ratio;
-                        elseif (strcmp(metrics{ii},'KE_Ratio') & app.unlatching_motor.SelectedTab ~= app.um_linear_motor)
+                        elseif (strcmp(metrics{ii},'KE_Ratio') && app.unlatching_motor.SelectedTab ~= app.um_linear_motor)
                             error("The KE_Ratio metric is only available for a linear unlatching motor (for now!)")
                         else
                             outval{ii}(i,j)=met_dict(metrics{ii});
@@ -443,8 +443,8 @@ classdef plot_app < matlab.apps.AppBase
             
             close(f)
             
-            eval(['app.' app.dropdown_items_opposite_dict(app.IV1DropDown.Value) '.Value = looping_param_x_value'])
-            eval(['app.' app.dropdown_items_opposite_dict(app.IV2DropDown.Value) '.Value = looping_param_y_value'])
+            eval(['app.' app.dropdown_items_opposite_dict(app.IV1DropDown.Value) '.Value = looping_param_x_value;']);
+            eval(['app.' app.dropdown_items_opposite_dict(app.IV2DropDown.Value) '.Value = looping_param_y_value;']);
             
             % plot output
             fh = figure('Name','Heatmaps');
@@ -567,7 +567,7 @@ classdef plot_app < matlab.apps.AppBase
             metrics_dict = containers.Map(metrics_names,metrics_labels);
             
             looping_param_x = app.dropdown_items_opposite_dict(app.OD_IV1DropDown.Value);
-            eval(['looping_param_x_value = app.' app.dropdown_items_opposite_dict(app.OD_IV1DropDown.Value) '.Value']);
+            eval(['looping_param_x_value = app.' app.dropdown_items_opposite_dict(app.OD_IV1DropDown.Value) '.Value;']);
             
             for ii=1:length(metrics)
                 outval{ii} = zeros(size(looping_value_x));
@@ -643,7 +643,7 @@ classdef plot_app < matlab.apps.AppBase
                     % Comparing these two physical scenarios requires a
                     % second call to solve_model, hence the special
                     % treatment.
-                    if (strcmp(metrics{ii},'KE_Ratio') & app.unlatching_motor.SelectedTab == app.um_linear_motor)
+                    if (strcmp(metrics{ii},'KE_Ratio') && app.unlatching_motor.SelectedTab == app.um_linear_motor)
                         
                         unlatching_motor_no_braking = linear_motor(app.um_linear_motor_Fmax.Value,app.um_linear_motor_Vmax.Value,app.um_linear_motor_range_of_motion.Value,app.um_linear_motor_voltage_frac.Value, true);
                         [sol_no_braking, tt_no_braking] = solve_model(loading_motor,unlatching_motor_no_braking,load,latch,spring,output_directory);
@@ -652,7 +652,7 @@ classdef plot_app < matlab.apps.AppBase
                         KE_braking = (0.5*load.mass*(sol(end,3)^2));
                         ratio = KE_no_braking/KE_braking;
                         outval{ii}(i)=ratio;
-                    elseif (strcmp(metrics{ii},'KE_Ratio') & app.unlatching_motor.SelectedTab ~= app.um_linear_motor)
+                    elseif (strcmp(metrics{ii},'KE_Ratio') && app.unlatching_motor.SelectedTab ~= app.um_linear_motor)
                         error("The KE_Ratio metric is only available for a linear unlatching motor (for now!)")
                     else
                         outval{ii}(i)=met_dict(metrics{ii});
@@ -665,7 +665,7 @@ classdef plot_app < matlab.apps.AppBase
             end
 
             close(f)
-            eval(['app.' app.dropdown_items_opposite_dict(app.OD_IV1DropDown.Value) '.Value = looping_param_x_value']);
+            eval(['app.' app.dropdown_items_opposite_dict(app.OD_IV1DropDown.Value) '.Value = looping_param_x_value;']);
             
             % plot output
             fh = figure('Name','1D Plot');
@@ -674,7 +674,6 @@ classdef plot_app < matlab.apps.AppBase
             subplot_cols = ceil(length(metrics)/floor(sqrt(length(metrics))));
             for ii=1:length(metrics)
                 subplot(subplot_rows,subplot_cols,ii);
-                size(outval{ii})
                 plot(looping_value_x,outval{ii},'.'); 
                 xlabel(app.axis_labels_dict(xname),'Interpreter', 'Latex');
                 ylabel(metrics_dict(metrics{ii}), 'Interpreter', 'Latex');
@@ -1899,7 +1898,7 @@ classdef plot_app < matlab.apps.AppBase
             % Create OD_minunlatchingmotorforceCheckBox
             app.OD_minunlatchingmotorforceCheckBox = uicheckbox(app.graphing_corner_one_D);
             app.OD_minunlatchingmotorforceCheckBox.Text = 'min unlatching motor force';
-            app.OD_minunlatchingmotorforceCheckBox.Position = [127 169 164 22];
+            app.OD_minunlatchingmotorforceCheckBox.Position = [127 177 164 22];
 
             % Create xaxisLabel_2
             app.xaxisLabel_2 = uilabel(app.graphing_corner_one_D);
@@ -1917,38 +1916,38 @@ classdef plot_app < matlab.apps.AppBase
             % Create OD_y_maxCheckBox
             app.OD_y_maxCheckBox = uicheckbox(app.graphing_corner_one_D);
             app.OD_y_maxCheckBox.Text = 'y_max';
-            app.OD_y_maxCheckBox.Position = [32 217 58 22];
+            app.OD_y_maxCheckBox.Position = [32 225 58 22];
 
             % Create OD_y_unlatchCheckBox
             app.OD_y_unlatchCheckBox = uicheckbox(app.graphing_corner_one_D);
             app.OD_y_unlatchCheckBox.Text = 'y_unlatch';
-            app.OD_y_unlatchCheckBox.Position = [32 193 74 22];
+            app.OD_y_unlatchCheckBox.Position = [32 201 74 22];
 
             % Create OD_t_LCheckBox
             app.OD_t_LCheckBox = uicheckbox(app.graphing_corner_one_D);
             app.OD_t_LCheckBox.Text = 't_L';
-            app.OD_t_LCheckBox.Position = [32 169 39 22];
+            app.OD_t_LCheckBox.Position = [32 177 39 22];
 
             % Create OD_v_toCheckBox
             app.OD_v_toCheckBox = uicheckbox(app.graphing_corner_one_D);
             app.OD_v_toCheckBox.Text = 'v_to';
-            app.OD_v_toCheckBox.Position = [32 145 45 22];
+            app.OD_v_toCheckBox.Position = [32 153 45 22];
 
             % Create OD_P_maxCheckBox
             app.OD_P_maxCheckBox = uicheckbox(app.graphing_corner_one_D);
             app.OD_P_maxCheckBox.Text = 'P_max';
-            app.OD_P_maxCheckBox.Position = [127 217 60 22];
+            app.OD_P_maxCheckBox.Position = [127 225 60 22];
             app.OD_P_maxCheckBox.Value = true;
 
             % Create OD_t_toCheckBox
             app.OD_t_toCheckBox = uicheckbox(app.graphing_corner_one_D);
             app.OD_t_toCheckBox.Text = 't_to';
-            app.OD_t_toCheckBox.Position = [127 193 42 22];
+            app.OD_t_toCheckBox.Position = [127 201 42 22];
 
             % Create OD_KE_maxCheckBox
             app.OD_KE_maxCheckBox = uicheckbox(app.graphing_corner_one_D);
             app.OD_KE_maxCheckBox.Text = 'KE_max';
-            app.OD_KE_maxCheckBox.Position = [127 145 68 22];
+            app.OD_KE_maxCheckBox.Position = [127 153 68 22];
 
             % Create IV1DropDownLabel_2
             app.IV1DropDownLabel_2 = uilabel(app.graphing_corner_one_D);
@@ -1969,7 +1968,7 @@ classdef plot_app < matlab.apps.AppBase
             app.yaxisOutputOptionsLabel = uilabel(app.graphing_corner_one_D);
             app.yaxisOutputOptionsLabel.FontSize = 22;
             app.yaxisOutputOptionsLabel.FontWeight = 'bold';
-            app.yaxisOutputOptionsLabel.Position = [43 253 237 28];
+            app.yaxisOutputOptionsLabel.Position = [44 261 237 28];
             app.yaxisOutputOptionsLabel.Text = 'y-axis Output Options';
 
             % Create pixelsofresolutionLabel_2
@@ -2011,12 +2010,12 @@ classdef plot_app < matlab.apps.AppBase
             % Create OD_KE_ratioCheckBox
             app.OD_KE_ratioCheckBox = uicheckbox(app.graphing_corner_one_D);
             app.OD_KE_ratioCheckBox.Text = 'KE Ratio';
-            app.OD_KE_ratioCheckBox.Position = [32 118 69 22];
+            app.OD_KE_ratioCheckBox.Position = [32 126 69 22];
 
             % Create OD_unlatchingmotorworkdoneCheckBox
             app.OD_unlatchingmotorworkdoneCheckBox = uicheckbox(app.graphing_corner_one_D);
             app.OD_unlatchingmotorworkdoneCheckBox.Text = 'unlatching motor work done';
-            app.OD_unlatchingmotorworkdoneCheckBox.Position = [127 118 169 22];
+            app.OD_unlatchingmotorworkdoneCheckBox.Position = [127 126 169 22];
 
             % Create graphing_corner_heatmap
             app.graphing_corner_heatmap = uitab(app.graphing_corner);
@@ -2027,7 +2026,7 @@ classdef plot_app < matlab.apps.AppBase
             % Create minunlatchingmotorforceCheckBox
             app.minunlatchingmotorforceCheckBox = uicheckbox(app.graphing_corner_heatmap);
             app.minunlatchingmotorforceCheckBox.Text = 'min unlatching motor force';
-            app.minunlatchingmotorforceCheckBox.Position = [127 85 164 22];
+            app.minunlatchingmotorforceCheckBox.Position = [127 95 164 22];
 
             % Create xaxisLabel
             app.xaxisLabel = uilabel(app.graphing_corner_heatmap);
@@ -2058,38 +2057,38 @@ classdef plot_app < matlab.apps.AppBase
             % Create y_maxCheckBox
             app.y_maxCheckBox = uicheckbox(app.graphing_corner_heatmap);
             app.y_maxCheckBox.Text = 'y_max';
-            app.y_maxCheckBox.Position = [32 133 58 22];
+            app.y_maxCheckBox.Position = [32 143 58 22];
 
             % Create y_unlatchCheckBox
             app.y_unlatchCheckBox = uicheckbox(app.graphing_corner_heatmap);
             app.y_unlatchCheckBox.Text = 'y_unlatch';
-            app.y_unlatchCheckBox.Position = [32 109 74 22];
+            app.y_unlatchCheckBox.Position = [32 119 74 22];
 
             % Create t_LCheckBox
             app.t_LCheckBox = uicheckbox(app.graphing_corner_heatmap);
             app.t_LCheckBox.Text = 't_L';
-            app.t_LCheckBox.Position = [32 85 39 22];
+            app.t_LCheckBox.Position = [32 95 39 22];
 
             % Create v_toCheckBox
             app.v_toCheckBox = uicheckbox(app.graphing_corner_heatmap);
             app.v_toCheckBox.Text = 'v_to';
-            app.v_toCheckBox.Position = [32 61 45 22];
+            app.v_toCheckBox.Position = [32 71 45 22];
 
             % Create P_maxCheckBox
             app.P_maxCheckBox = uicheckbox(app.graphing_corner_heatmap);
             app.P_maxCheckBox.Text = 'P_max';
-            app.P_maxCheckBox.Position = [127 133 60 22];
+            app.P_maxCheckBox.Position = [127 143 60 22];
             app.P_maxCheckBox.Value = true;
 
             % Create t_toCheckBox
             app.t_toCheckBox = uicheckbox(app.graphing_corner_heatmap);
             app.t_toCheckBox.Text = 't_to';
-            app.t_toCheckBox.Position = [127 109 42 22];
+            app.t_toCheckBox.Position = [127 119 42 22];
 
             % Create KE_maxCheckBox
             app.KE_maxCheckBox = uicheckbox(app.graphing_corner_heatmap);
             app.KE_maxCheckBox.Text = 'KE_max';
-            app.KE_maxCheckBox.Position = [127 61 68 22];
+            app.KE_maxCheckBox.Position = [127 71 68 22];
 
             % Create IV1DropDownLabel
             app.IV1DropDownLabel = uilabel(app.graphing_corner_heatmap);
@@ -2170,14 +2169,14 @@ classdef plot_app < matlab.apps.AppBase
             app.HeatmapOutputOptionsLabel = uilabel(app.graphing_corner_heatmap);
             app.HeatmapOutputOptionsLabel.FontSize = 22;
             app.HeatmapOutputOptionsLabel.FontWeight = 'bold';
-            app.HeatmapOutputOptionsLabel.Position = [28 163 269 28];
+            app.HeatmapOutputOptionsLabel.Position = [28 173 269 28];
             app.HeatmapOutputOptionsLabel.Text = 'Heatmap Output Options';
 
             % Create pixelsofresolutionLabel
             app.pixelsofresolutionLabel = uilabel(app.graphing_corner_heatmap);
             app.pixelsofresolutionLabel.HorizontalAlignment = 'right';
             app.pixelsofresolutionLabel.FontSize = 16;
-            app.pixelsofresolutionLabel.Position = [59 9 151 22];
+            app.pixelsofresolutionLabel.Position = [59 13 151 22];
             app.pixelsofresolutionLabel.Text = 'pixels of resolution =';
 
             % Create n
@@ -2185,18 +2184,18 @@ classdef plot_app < matlab.apps.AppBase
             app.n.Limits = [1 1024];
             app.n.RoundFractionalValues = 'on';
             app.n.ValueDisplayFormat = '%.0f';
-            app.n.Position = [225 9 39 22];
+            app.n.Position = [225 13 39 22];
             app.n.Value = 30;
 
             % Create KERatioCheckBox
             app.KERatioCheckBox = uicheckbox(app.graphing_corner_heatmap);
             app.KERatioCheckBox.Text = 'KE Ratio';
-            app.KERatioCheckBox.Position = [32 37 69 22];
+            app.KERatioCheckBox.Position = [32 47 69 22];
 
             % Create unlatchingmotorworkdoneCheckBox
             app.unlatchingmotorworkdoneCheckBox = uicheckbox(app.graphing_corner_heatmap);
             app.unlatchingmotorworkdoneCheckBox.Text = 'unlatching motor work done';
-            app.unlatchingmotorworkdoneCheckBox.Position = [127 37 169 22];
+            app.unlatchingmotorworkdoneCheckBox.Position = [127 47 169 22];
 
             % Create go
             app.go = uibutton(app.UIFigure, 'push');
