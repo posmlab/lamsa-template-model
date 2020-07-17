@@ -91,6 +91,8 @@ classdef plot_app < matlab.apps.AppBase
         min_latching_dist              matlab.ui.control.NumericEditField
         maxlatchingdistLabel           matlab.ui.control.Label
         max_latching_dist              matlab.ui.control.NumericEditField
+        runwaylengthLabel              matlab.ui.control.Label
+        runway_length                  matlab.ui.control.NumericEditField
         load                           matlab.ui.container.TabGroup
         load_mass                      matlab.ui.container.Tab
         RequiredFieldsLabel_6          matlab.ui.control.Label
@@ -356,7 +358,7 @@ classdef plot_app < matlab.apps.AppBase
                     load = load_mass(app.load_mass_mass.Value,app.load_m_rod.Value,app.load_EMA.Value);
                     
                     % latch struct initialization
-                    latch = rounded_latch(app.latch_radius.Value,app.latch_mass.Value,app.latch_coeff_fric.Value, app.latch_v_0.Value, app.min_latching_dist.Value, app.max_latching_dist.Value);
+                    latch = rounded_latch(app.latch_radius.Value,app.latch_mass.Value,app.latch_coeff_fric.Value, app.latch_v_0.Value, app.min_latching_dist.Value, app.max_latching_dist.Value, app.runway_length.Value);
                     
                     % spring struct initialization
                     if (app.spring.SelectedTab == app.linear_spring)
@@ -581,7 +583,7 @@ classdef plot_app < matlab.apps.AppBase
                 load = load_mass(app.load_mass_mass.Value,app.load_m_rod.Value,app.load_EMA.Value);
                 
                 % latch struct initialization
-                latch = rounded_latch(app.latch_radius.Value,app.latch_mass.Value,app.latch_coeff_fric.Value, app.latch_v_0.Value, app.min_latching_dist.Value, app.max_latching_dist.Value);
+                latch = rounded_latch(app.latch_radius.Value,app.latch_mass.Value,app.latch_coeff_fric.Value, app.latch_v_0.Value, app.min_latching_dist.Value, app.max_latching_dist.Value, app.runway_length.Value);
                 
                 % spring struct initialization
                 if (app.spring.SelectedTab == app.linear_spring)
@@ -717,7 +719,7 @@ classdef plot_app < matlab.apps.AppBase
             load = load_mass(app.load_mass_mass.Value,app.load_m_rod.Value,app.load_EMA.Value);
             
             % latch struct initialization
-            latch = rounded_latch(app.latch_radius.Value,app.latch_mass.Value,app.latch_coeff_fric.Value, app.latch_v_0.Value, app.min_latching_dist.Value, app.max_latching_dist.Value);
+            latch = rounded_latch(app.latch_radius.Value,app.latch_mass.Value,app.latch_coeff_fric.Value, app.latch_v_0.Value, app.min_latching_dist.Value, app.max_latching_dist.Value, app.runway_length.Value);
             
             % spring struct initialization
             if (app.spring.SelectedTab == app.linear_spring)
@@ -1028,7 +1030,7 @@ classdef plot_app < matlab.apps.AppBase
             app.spring = uitabgroup(app.UIFigure);
             app.spring.AutoResizeChildren = 'off';
             app.spring.SelectionChangedFcn = createCallbackFcn(app, @springSelectionChanged, true);
-            app.spring.Position = [32 338 795 115];
+            app.spring.Position = [36 310 795 115];
 
             % Create linear_spring
             app.linear_spring = uitab(app.spring);
@@ -1254,7 +1256,7 @@ classdef plot_app < matlab.apps.AppBase
             app.loading_motor = uitabgroup(app.UIFigure);
             app.loading_motor.AutoResizeChildren = 'off';
             app.loading_motor.SelectionChangedFcn = createCallbackFcn(app, @loading_motorSelectionChanged, true);
-            app.loading_motor.Position = [31 185 795 121];
+            app.loading_motor.Position = [34 160 795 121];
 
             % Create lm_linear_motor
             app.lm_linear_motor = uitab(app.loading_motor);
@@ -1457,7 +1459,7 @@ classdef plot_app < matlab.apps.AppBase
             % Create latch
             app.latch = uitabgroup(app.UIFigure);
             app.latch.AutoResizeChildren = 'off';
-            app.latch.Position = [32 472 795 116];
+            app.latch.Position = [32 444 795 144];
 
             % Create rounded_latch
             app.rounded_latch = uitab(app.latch);
@@ -1467,94 +1469,106 @@ classdef plot_app < matlab.apps.AppBase
 
             % Create RequiredFieldsLabel_5
             app.RequiredFieldsLabel_5 = uilabel(app.rounded_latch);
-            app.RequiredFieldsLabel_5.Position = [18 57 92 22];
+            app.RequiredFieldsLabel_5.Position = [18 85 92 22];
             app.RequiredFieldsLabel_5.Text = 'Required Fields:';
 
             % Create OptionalFieldsLabel_5
             app.OptionalFieldsLabel_5 = uilabel(app.rounded_latch);
-            app.OptionalFieldsLabel_5.Position = [18 18 89 22];
+            app.OptionalFieldsLabel_5.Position = [18 46 89 22];
             app.OptionalFieldsLabel_5.Text = 'Optional Fields:';
 
             % Create defaultvaluesfilledinLabel_5
             app.defaultvaluesfilledinLabel_5 = uilabel(app.rounded_latch);
             app.defaultvaluesfilledinLabel_5.FontSize = 9;
-            app.defaultvaluesfilledinLabel_5.Position = [14 7 98 13];
+            app.defaultvaluesfilledinLabel_5.Position = [14 35 98 13];
             app.defaultvaluesfilledinLabel_5.Text = '(default values filled in)';
 
             % Create massEditFieldLabel_2
             app.massEditFieldLabel_2 = uilabel(app.rounded_latch);
             app.massEditFieldLabel_2.HorizontalAlignment = 'right';
-            app.massEditFieldLabel_2.Position = [162 57 44 22];
+            app.massEditFieldLabel_2.Position = [162 85 44 22];
             app.massEditFieldLabel_2.Text = 'mass =';
 
             % Create latch_mass
             app.latch_mass = uieditfield(app.rounded_latch, 'numeric');
             app.latch_mass.Limits = [0 Inf];
             app.latch_mass.Tooltip = {'mass of the latch'};
-            app.latch_mass.Position = [221 57 40 22];
+            app.latch_mass.Position = [221 85 40 22];
             app.latch_mass.Value = 0.003;
 
             % Create Label
             app.Label = uilabel(app.rounded_latch);
             app.Label.HorizontalAlignment = 'right';
-            app.Label.Position = [181 18 25 22];
+            app.Label.Position = [181 46 25 22];
             app.Label.Text = 'μ =';
 
             % Create latch_coeff_fric
             app.latch_coeff_fric = uieditfield(app.rounded_latch, 'numeric');
             app.latch_coeff_fric.Limits = [0 Inf];
             app.latch_coeff_fric.Tooltip = {'coefficient of friction between the latch and load mass'};
-            app.latch_coeff_fric.Position = [221 18 40 22];
+            app.latch_coeff_fric.Position = [221 46 40 22];
 
             % Create radiusLabel
             app.radiusLabel = uilabel(app.rounded_latch);
             app.radiusLabel.HorizontalAlignment = 'right';
-            app.radiusLabel.Position = [288 57 48 22];
+            app.radiusLabel.Position = [288 85 48 22];
             app.radiusLabel.Text = 'radius =';
 
             % Create latch_radius
             app.latch_radius = uieditfield(app.rounded_latch, 'numeric');
             app.latch_radius.Limits = [0 Inf];
             app.latch_radius.Tooltip = {'latch radius'};
-            app.latch_radius.Position = [351 57 48 22];
+            app.latch_radius.Position = [351 85 48 22];
             app.latch_radius.Value = 0.005;
 
             % Create v_0Label
             app.v_0Label = uilabel(app.rounded_latch);
             app.v_0Label.HorizontalAlignment = 'right';
-            app.v_0Label.Position = [301 18 38 22];
+            app.v_0Label.Position = [301 46 38 22];
             app.v_0Label.Text = 'v_0 =';
 
             % Create latch_v_0
             app.latch_v_0 = uieditfield(app.rounded_latch, 'numeric');
             app.latch_v_0.Limits = [0 Inf];
             app.latch_v_0.Tooltip = {'initial velocity of the latch'};
-            app.latch_v_0.Position = [351 18 48 22];
+            app.latch_v_0.Position = [351 46 48 22];
 
             % Create minlatchingdistLabel
             app.minlatchingdistLabel = uilabel(app.rounded_latch);
             app.minlatchingdistLabel.HorizontalAlignment = 'right';
-            app.minlatchingdistLabel.Position = [419 18 102 22];
+            app.minlatchingdistLabel.Position = [419 46 102 22];
             app.minlatchingdistLabel.Text = 'min latching dist =';
 
             % Create min_latching_dist
             app.min_latching_dist = uieditfield(app.rounded_latch, 'numeric');
             app.min_latching_dist.Limits = [0 Inf];
             app.min_latching_dist.Tooltip = {'lowest position the latch can engage'};
-            app.min_latching_dist.Position = [533 18 48 22];
+            app.min_latching_dist.Position = [533 46 48 22];
 
             % Create maxlatchingdistLabel
             app.maxlatchingdistLabel = uilabel(app.rounded_latch);
             app.maxlatchingdistLabel.HorizontalAlignment = 'right';
-            app.maxlatchingdistLabel.Position = [590 18 105 22];
+            app.maxlatchingdistLabel.Position = [590 46 105 22];
             app.maxlatchingdistLabel.Text = 'max latching dist =';
 
             % Create max_latching_dist
             app.max_latching_dist = uieditfield(app.rounded_latch, 'numeric');
             app.max_latching_dist.Limits = [0 Inf];
             app.max_latching_dist.Tooltip = {'highest position the latch can engage'};
-            app.max_latching_dist.Position = [707 18 48 22];
+            app.max_latching_dist.Position = [707 46 48 22];
             app.max_latching_dist.Value = Inf;
+
+            % Create runwaylengthLabel
+            app.runwaylengthLabel = uilabel(app.rounded_latch);
+            app.runwaylengthLabel.HorizontalAlignment = 'right';
+            app.runwaylengthLabel.Position = [115 9 91 22];
+            app.runwaylengthLabel.Text = 'runway length =';
+
+            % Create runway_length
+            app.runway_length = uieditfield(app.rounded_latch, 'numeric');
+            app.runway_length.Limits = [0 Inf];
+            app.runway_length.Tooltip = {'coefficient of friction between the latch and load mass'};
+            app.runway_length.Position = [221 9 40 22];
 
             % Create load
             app.load = uitabgroup(app.UIFigure);
@@ -1624,14 +1638,14 @@ classdef plot_app < matlab.apps.AppBase
             % Create LoadingMotorLabel
             app.LoadingMotorLabel = uilabel(app.UIFigure);
             app.LoadingMotorLabel.FontWeight = 'bold';
-            app.LoadingMotorLabel.Position = [34 306 92 22];
+            app.LoadingMotorLabel.Position = [37 281 92 22];
             app.LoadingMotorLabel.Text = 'Loading Motor:';
 
             % Create unlatching_motor
             app.unlatching_motor = uitabgroup(app.UIFigure);
             app.unlatching_motor.AutoResizeChildren = 'off';
             app.unlatching_motor.SelectionChangedFcn = createCallbackFcn(app, @unlatching_motorSelectionChanged, true);
-            app.unlatching_motor.Position = [33 30 795 121];
+            app.unlatching_motor.Position = [32 9 795 121];
 
             % Create um_linear_motor
             app.um_linear_motor = uitab(app.unlatching_motor);
@@ -1834,7 +1848,7 @@ classdef plot_app < matlab.apps.AppBase
             % Create UnlatchingMotorLabel
             app.UnlatchingMotorLabel = uilabel(app.UIFigure);
             app.UnlatchingMotorLabel.FontWeight = 'bold';
-            app.UnlatchingMotorLabel.Position = [35 152 108 22];
+            app.UnlatchingMotorLabel.Position = [34 131 108 22];
             app.UnlatchingMotorLabel.Text = 'Unlatching Motor:';
 
             % Create GraphingCornerLabel
