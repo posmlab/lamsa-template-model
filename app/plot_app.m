@@ -140,7 +140,7 @@ classdef plot_app < matlab.apps.AppBase
         GraphingCornerLabel            matlab.ui.control.Label
         graphing_corner                matlab.ui.container.TabGroup
         graphing_corner_kinematics     matlab.ui.container.Tab
-        kinematicsoutputoptionsLabel   matlab.ui.control.Label
+        KinematicsOutputOptionsLabel   matlab.ui.control.Label
         forcedisp                      matlab.ui.control.CheckBox
         latchkinematicsCheckBox        matlab.ui.control.CheckBox
         loadkinematicsCheckBox         matlab.ui.control.CheckBox
@@ -332,6 +332,8 @@ classdef plot_app < matlab.apps.AppBase
             
             looping_param_x = app.dropdown_items_opposite_dict(app.IV1DropDown.Value);
             looping_param_y = app.dropdown_items_opposite_dict(app.IV2DropDown.Value);
+            eval(['looping_param_x_value = app.' app.dropdown_items_opposite_dict(app.IV1DropDown.Value) '.Value'])
+            eval(['looping_param_y_value = app.' app.dropdown_items_opposite_dict(app.IV2DropDown.Value) '.Value'])
             
             % ensures that both independent variables that we are varying over are not the same
             if (strcmp(looping_param_y,looping_param_x))
@@ -440,6 +442,9 @@ classdef plot_app < matlab.apps.AppBase
             end
             
             close(f)
+            
+            eval(['app.' app.dropdown_items_opposite_dict(app.IV1DropDown.Value) '.Value = looping_param_x_value'])
+            eval(['app.' app.dropdown_items_opposite_dict(app.IV2DropDown.Value) '.Value = looping_param_y_value'])
             
             % plot output
             fh = figure('Name','Heatmaps');
@@ -562,6 +567,7 @@ classdef plot_app < matlab.apps.AppBase
             metrics_dict = containers.Map(metrics_names,metrics_labels);
             
             looping_param_x = app.dropdown_items_opposite_dict(app.OD_IV1DropDown.Value);
+            eval(['looping_param_x_value = app.' app.dropdown_items_opposite_dict(app.OD_IV1DropDown.Value) '.Value']);
             
             for ii=1:length(metrics)
                 outval{ii} = zeros(size(looping_value_x));
@@ -620,7 +626,6 @@ classdef plot_app < matlab.apps.AppBase
                         latch_vi_a_zero = warndlg("The latch's initial velocity and acceleration are both zero.",'Warning');
                     end
                 end
-
                 
                 met_dict=get_metrics(sol,transition_times,load,metrics);
                 for ii=1:length(metrics)
@@ -660,6 +665,7 @@ classdef plot_app < matlab.apps.AppBase
             end
 
             close(f)
+            eval(['app.' app.dropdown_items_opposite_dict(app.OD_IV1DropDown.Value) '.Value = looping_param_x_value']);
             
             % plot output
             fh = figure('Name','1D Plot');
@@ -1849,12 +1855,12 @@ classdef plot_app < matlab.apps.AppBase
             app.graphing_corner_kinematics.Title = 'Kinematics';
             app.graphing_corner_kinematics.BackgroundColor = [0.949 0.8471 0.6078];
 
-            % Create kinematicsoutputoptionsLabel
-            app.kinematicsoutputoptionsLabel = uilabel(app.graphing_corner_kinematics);
-            app.kinematicsoutputoptionsLabel.FontSize = 22;
-            app.kinematicsoutputoptionsLabel.FontWeight = 'bold';
-            app.kinematicsoutputoptionsLabel.Position = [21 369 283 28];
-            app.kinematicsoutputoptionsLabel.Text = 'kinematics output options';
+            % Create KinematicsOutputOptionsLabel
+            app.KinematicsOutputOptionsLabel = uilabel(app.graphing_corner_kinematics);
+            app.KinematicsOutputOptionsLabel.FontSize = 22;
+            app.KinematicsOutputOptionsLabel.FontWeight = 'bold';
+            app.KinematicsOutputOptionsLabel.Position = [16 371 294 28];
+            app.KinematicsOutputOptionsLabel.Text = 'Kinematics Output Options';
 
             % Create forcedisp
             app.forcedisp = uicheckbox(app.graphing_corner_kinematics);
