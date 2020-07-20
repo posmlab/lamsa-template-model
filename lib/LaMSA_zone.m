@@ -145,7 +145,7 @@ for i=1:N %iterate over y-axis-variable of plot
         met_dict=get_metrics(sol,transition_times,load ,metrics);%getting metrics for LaMSA system
         met_dict_DA = get_metrics(solDA, ttDA, load, metrics);%getting metrics for direct actuation system
         for ii=1:length(metrics)
-            outval{ii}(i,j)=(met_dict(metrics{ii}))/(met_dict_DA(metrics{ii}));%assigning the values in the output matrix as the ratio betweent the systems
+            outval{ii}(i,j)=(met_dict(metrics{ii}))/(met_dict_DA(metrics{ii}));%assigning the values in the output matrix as the ratio between the systems
         end
         
     end

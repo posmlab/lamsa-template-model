@@ -15,7 +15,6 @@ N=20; % determines resolution of heatplots
 % setting x axis on the plot 
 xname = 'mandible mass';
 xrange = [-3 -1];
-%Fmaxs = logspace(xrange(1),xrange(2),N);
 m_m = logspace(xrange(1),xrange(2),N);
 
 
@@ -25,24 +24,6 @@ yrange = [-2 0];
 ema = logspace(yrange(1),yrange(2),N);
 
 metrics = {'tto','vto','Pmax','ymax','tL','KEmax','yunlatch','amax'};
-% hold on
-% close all
-% clearvars
-% tic
-% debug = false;
-% N=50;
-
-
-% xname = 'Young''s Modulus, $E$[Pa]';
-% xrange = [2 9];
-% Es=logspace(xrange(1),xrange(2),N);
-% yname = 'Cross-Sectional Area, $A$[m$^2$]';
-% yrange = [-10 -0];
-% As=logspace(yrange(1),yrange(2),N);
-% metrics = {'KEmax'};
-% L = 10E-3;
-% rho = 10;
-% sigma_f = 10E6;
 
 load_time_constraint = Inf;
 
@@ -94,14 +75,14 @@ latch = rounded_latch(R, m_L, coeff_fric, v_0L);
 characteristic_length = 1;
 
 %trap jaw ant spring parameters 
- L = 1;
- rho = 1.59E3;
- A = 2.56E-3;
- E = 1;
- sigma_f = 3.18E-1;
- m_s = L*rho*A;
- k=(E*A)/L;
- F_spring_max= sigma_f*A;
+L = 1;
+rho = 1.59E3;
+A = 2.56E-3;
+E = 1;
+sigma_f = 3.18E-1;
+m_s = L*rho*A;
+k=(E*A)/L;
+F_spring_max= sigma_f*A;
  
 
 % spring struct initialization
@@ -129,6 +110,7 @@ output_directory = create_output_directory();
 
 %% initializing an output value matrix for each metric
 
+%Establishing a cell array of the output matrices with resolution N
 for ii=1:length(metrics)
     outval{ii}=zeros(N);
 end
@@ -138,8 +120,9 @@ if (debug)
 end
 for i=1:N %iterate over y-axis-variable of plot
     for j=1:N %iterate over x-axis-variable of plot
-
+        %Add structs that vary with the looping variables
         load = load_mass(0,m_m(j),ema(i));
+        %Call solve_model
         [sol,transition_times]=solve_model(loading_motor,unlatching_motor,load,latch,spring);
         if (debug)
             figure(h1)
@@ -150,9 +133,9 @@ for i=1:N %iterate over y-axis-variable of plot
             hold on;
             ginput(1)
         end
-        met_dict=get_metrics(sol,transition_times,load,metrics);
+        met_dict=get_metrics(sol,transition_times,load,metrics);%get metrics from solve_model output
         for ii=1:length(metrics)
-            outval{ii}(i,j)=met_dict(metrics{ii});
+            outval{ii}(i,j)=met_dict(metrics{ii});%Filling the output matrix
         end
          
     end
@@ -164,12 +147,14 @@ toc
 hmap = figure;
 n=1;
 for ii=1:length(metrics)
+%Establishing axes and labels
     subplot(2,4,n);
     imagesc(xrange,yrange,outval{ii});
     set(gca,'YDir','normal');
     set(gca,'TickLabelInterpreter','latex')
     xlabel(xname,'Interpreter', 'Latex');
     ylabel(yname, 'Interpreter', 'Latex');
+%Colorbar settings
     c = colorbar;
     c.Label.String = metrics{ii};
     set(c,'TickLabelInterpreter','latex')
