@@ -4,7 +4,7 @@ LaMSA model implemented in MATLAB.
 
 **Open app/plot_app.mlapp in MATLAB for a graphical user interface to run the model.**
 
-See this [Youtube video on Using the MATLAB LaMSA Model](https://youtu.be/c-lTELC9GgM) to get started with the graphical user interface.
+See this [YouTube video on Using the MATLAB LaMSA Model](https://youtu.be/c-lTELC9GgM) to get started with the graphical user interface.
 
 ## Code details
 
