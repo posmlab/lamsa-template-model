@@ -185,7 +185,7 @@ if uielementflag.ReplaceAppUI
 end
 
 writemfile(mymcode, pathname, appname);
-disp(strcat({'Successfully converted '}, filename, '!'));
+disp(strcat({'Successfully saved '}, filename, '!'));
 end
 
 

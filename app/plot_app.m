@@ -239,7 +239,7 @@ classdef plot_app < matlab.apps.AppBase
             end
             
             % determines resolution of heatplots
-            N=app.n.Value; 
+            N=app.n.Value;
             
             % initializing waitbar
             f = waitbar(0,'Please wait...');
@@ -332,10 +332,11 @@ classdef plot_app < matlab.apps.AppBase
             
             metrics_dict = containers.Map(metrics_names,metrics_labels);
             
+            
             looping_param_x = app.dropdown_items_opposite_dict(app.IV1DropDown.Value);
             looping_param_y = app.dropdown_items_opposite_dict(app.IV2DropDown.Value);
-            eval(['looping_param_x_value = app.' app.dropdown_items_opposite_dict(app.IV1DropDown.Value) '.Value;'])
-            eval(['looping_param_y_value = app.' app.dropdown_items_opposite_dict(app.IV2DropDown.Value) '.Value;'])
+            eval(['looping_param_x_value = app.' app.dropdown_items_opposite_dict(app.IV1DropDown.Value) '.Value;']);
+            eval(['looping_param_y_value = app.' app.dropdown_items_opposite_dict(app.IV2DropDown.Value) '.Value;']);
             
             % ensures that both independent variables that we are varying over are not the same
             if (strcmp(looping_param_y,looping_param_x))
@@ -349,11 +350,11 @@ classdef plot_app < matlab.apps.AppBase
             for i=1:N %iterate over y-axis-variable of plot
                 for j=1:N %iterate over x-axis-variable of plot       
                     
-                    eval(['app.' looping_param_x '.Value = ' num2str(looping_value_x(j)) ';']);
-                    eval(['app.' looping_param_y '.Value = ' num2str(looping_value_y(i)) ';']);
+                    eval(['app.' looping_param_x '.Value = ' num2str(looping_value_x(j)) ';'])
+                    eval(['app.' looping_param_y '.Value = ' num2str(looping_value_y(i)) ';'])
                     
                     %% initializing LaMSA component structs
-            
+                    
                     % load mass struct initialization
                     load = load_mass(app.load_mass_mass.Value,app.load_m_rod.Value,app.load_EMA.Value);
                     
@@ -456,9 +457,11 @@ classdef plot_app < matlab.apps.AppBase
             for ii=1:length(metrics)
                 subplot(subplot_rows,subplot_cols,ii);
                 
-                imagesc(xrange,yrange,outval{ii});
-                set(gca,'YDir','normal'); 
-
+                % so that you can click on the heatplot and have a
+                % kinematics
+                % plot show up
+                imageHandle = imagesc(xrange,yrange,outval{ii});
+                set(gca,'YDir','normal');
                 xlabel(app.axis_labels_dict(xname),'Interpreter', 'Latex');
                 ylabel(app.axis_labels_dict(yname), 'Interpreter', 'Latex');
                 
@@ -490,7 +493,12 @@ classdef plot_app < matlab.apps.AppBase
                 end
                 set(gca,'YTickLabel',yticklabel);
                 set(gca,'YTick',ytick);
+                set(imageHandle,'ButtonDownFcn',{@showKinematics, looping_param_x, looping_param_y, ...
+                                                                  app.x_log_space.Value, app.y_log_space.Value, ...
+                                                                  app});
+                
             end
+            
         end
         
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
