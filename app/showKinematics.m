@@ -97,8 +97,8 @@ plotNames = {'Time vs. y coordinate of load', 'Time vs. y velocity of load', 'Ti
 if (booleanValue)
 figure;
 
-if ((ismember(1,indexs) | ismember(2,indexs) | ismember(3,indexs)) & ...
-    (ismember(4,indexs) | ismember(5,indexs) | ismember(6,indexs)))
+if ((ismember(1,indexs) || ismember(2,indexs) || ismember(3,indexs)) && ...
+    (ismember(4,indexs) || ismember(5,indexs) || ismember(6,indexs)))
     numColumns = 2;  
 else
     numColumns = 1;
@@ -115,13 +115,14 @@ numRows = max(numXPlots, numYPlots);
 % head.
 
 if (numColumns == 1)
-    if (ismember(1,indexs) | ismember(2, indexs) | ismember(3, indexs)) % if plotting y column
+    if (ismember(1,indexs) || ismember(2, indexs) || ismember(3, indexs)) % if plotting y column
         if (ismember(1, indexs))
             subplot(numRows, numColumns, 1)
             plot(sol(:,1),sol(:,2))
-            xlabel("Time")
-            ylabel("y coordinate of load")
-            title("y coordinate of load as a function of time")
+            xlabel("time",'Interpreter','latex')
+            ylabel("y coordinate of load",'Interpreter','latex')
+            title("y coordinate of load vs. time",'Interpreter','latex')
+            set(gca,'TickLabelInterpreter','Latex');
         end
         if (ismember(2, indexs))
             if (ismember(1,indexs))
@@ -130,32 +131,35 @@ if (numColumns == 1)
                 subplot(numRows, numColumns, 1)
             end
             plot(sol(:,1),sol(:,3))
-            xlabel("Time")
-            ylabel("y velocity of load")
-            title("y velocity of load as a function of time")
+            xlabel("time",'Interpreter','latex')
+            ylabel("y velocity of load",'Interpreter','latex')
+            title("y velocity of load vs. time",'Interpreter','latex')
+            set(gca,'TickLabelInterpreter','Latex');
         end
         if (ismember(3, indexs))
-            if (ismember(1, indexs) & ismember(2, indexs))
+            if (ismember(1, indexs) && ismember(2, indexs))
                 subplot(numRows, numColumns, 3)
-            elseif (ismember(1, indexs) | ismember(2, indexs))
+            elseif (ismember(1, indexs) || ismember(2, indexs))
                 subplot(numRows, numColumns, 2)
             else
                 subplot(numRows, numColumns, 1)
             end
             y_forces = sol(:,10)+sol(:,9)-sol(:,7);
             plot(sol(:,1),y_forces)
-            xlabel("Time")
-            ylabel("y forces on load")
-            title("y forces on load as a function of time")
+            xlabel("time",'Interpreter','latex')
+            ylabel("y forces on load",'Interpreter','latex')
+            title("y forces on load vs. time",'Interpreter','latex')
+            set(gca,'TickLabelInterpreter','Latex');
         end
         
     else % else: plotting x column
         if (ismember(4, indexs))
             subplot(numRows, numColumns, 1)
             plot(sol(:,1),sol(:,4))
-            xlabel("Time")
-            ylabel("x coordinate of latch")
-            title("x coordinate of latch as a function of time")
+            xlabel("time",'Interpreter','latex')
+            ylabel("x coordinate of latch",'Interpreter','latex')
+            title("x coordinate of latch vs. time",'Interpreter','latex')
+            set(gca,'TickLabelInterpreter','Latex');
         end
         if (ismember(5,indexs))
             if (ismember(4, indexs))
@@ -164,23 +168,25 @@ if (numColumns == 1)
                 subplot(numRows, numColumns, 1)
             end
             plot(sol(:,1),sol(:,5))
-            xlabel("Time")
-            ylabel("x velocity of latch")
-            title("x velocity of latch as a function of time")
+            xlabel("time",'Interpreter','latex')
+            ylabel("x velocity of latch",'Interpreter','latex')
+            title("x velocity of latch vs. time",'Interpreter','latex')
+            set(gca,'TickLabelInterpreter','Latex');
         end
         if (ismember(6, indexs))
-            if (ismember(4, indexs) & ismember(5, indexs))
+            if (ismember(4, indexs) && ismember(5, indexs))
                 subplot(numRows, numColumns, 3)
-            elseif (ismember(4, indexs) | ismember(5, indexs))
+            elseif (ismember(4, indexs) || ismember(5, indexs))
                 subplot(numRows, numColumns, 2)
             else
                 subplot(numRows, numColumns, 1)
             end
             x_forces = sol(:,11)+sol(:,8)+sol(:,6);
             plot(sol(:,1),x_forces)
-            xlabel("Time")
-            ylabel("x forces on latch")
-            title("x forces on latch as a function of time")
+            xlabel("time",'Interpreter','latex')
+            ylabel("x forces on latch",'Interpreter','latex')
+            title("x forces on latch vs. time",'Interpreter','latex')
+            set(gca,'TickLabelInterpreter','Latex');
         end
     end
 end
@@ -189,16 +195,18 @@ if (numColumns == 2)
     if (ismember(1, indexs)) % t vs y
         subplot(numRows, numColumns,1)
         plot(sol(:,1),sol(:,2))
-        xlabel("Time")
-        ylabel("y coordinate of load")
-        title("y coordinate of load as a function of time")
+        xlabel("time",'Interpreter','latex')
+        ylabel("y coordinate of load",'Interpreter','latex')
+        title("y coordinate of load vs. time",'Interpreter','latex')
+        set(gca,'TickLabelInterpreter','Latex');
     end
     if (ismember(4, indexs)) % t vs x
         subplot(numRows, numColumns,2)
         plot(sol(:,1),sol(:,4))
-        xlabel("Time")
-        ylabel("x coordinate of latch")
-        title("x coordinate of latch as a function of time")
+        xlabel("time",'Interpreter','latex')
+        ylabel("x coordinate of latch",'Interpreter','latex')
+        title("x coordinate of latch vs. time",'Interpreter','latex')
+        set(gca,'TickLabelInterpreter','Latex');
     end
     if (ismember(2, indexs)) % t vs ydot
         if (ismember(1, indexs))
@@ -207,9 +215,10 @@ if (numColumns == 2)
             subplot(numRows, numColumns, 1)
         end
         plot(sol(:,1),sol(:,3))
-        xlabel("Time")
-        ylabel("y velocity of load")
-        title("y velocity of load as a function of time")        
+        xlabel("time",'Interpreter','latex')
+        ylabel("y velocity of load",'Interpreter','latex')
+        title("y velocity of load vs. time",'Interpreter','latex')
+        set(gca,'TickLabelInterpreter','Latex');
     end
     if (ismember(5, indexs)) % t vs xdot
         if (ismember(4, indexs))
@@ -218,13 +227,14 @@ if (numColumns == 2)
             subplot(numRows, numColumns, 2)
         end
         plot(sol(:,1),sol(:,5))
-        xlabel("Time")
-        ylabel("x velocity of latch")
-        title("x velocity of latch as a function of time")
+        xlabel("time",'Interpreter','latex')
+        ylabel("x velocity of latch",'Interpreter','latex')
+        title("x velocity of latch vs. time",'Interpreter','latex')
+        set(gca,'TickLabelInterpreter','Latex');
     end
 
     if (ismember(3, indexs)) % t vs yforces
-        if ((~ismember(1, indexs)) & (~ismember(2, indexs)))
+        if ((~ismember(1, indexs)) && (~ismember(2, indexs)))
             subplot(numRows, numColumns, 1)
         elseif xor(ismember(1, indexs),ismember(2, indexs))
             subplot(numRows, numColumns, 3)
@@ -233,13 +243,14 @@ if (numColumns == 2)
         end
         y_forces = sol(:,10)+sol(:,9)-sol(:,7);
         plot(sol(:,1), y_forces)
-        xlabel("Time")
-        ylabel("y forces on load")
-        title("y forces on load as a function of time")
+        xlabel("time",'Interpreter','latex')
+        ylabel("y forces on load",'Interpreter','latex')
+        title("y forces on load vs. time",'Interpreter','latex')
+        set(gca,'TickLabelInterpreter','Latex');
     end
 
     if (ismember(6, indexs)) % t vs xforces
-        if ((~ismember(4, indexs)) & (~ismember(5, indexs)))
+        if ((~ismember(4, indexs)) && (~ismember(5, indexs)))
             subplot(numRows, numColumns, 2)
         elseif xor(ismember(4, indexs),ismember(5, indexs))
             subplot(numRows, numColumns, 4)
@@ -248,9 +259,10 @@ if (numColumns == 2)
         end
         x_forces = sol(:,11)+sol(:,8)+sol(:,6);
         plot(sol(:,1), x_forces)
-        xlabel("Time")
-        ylabel("x forces on latch")
-        title("x forces on latch as a function of time")
+        xlabel("time",'Interpreter','latex')
+        ylabel("x forces on latch",'Interpreter','latex')
+        title("x forces on latch vs. time",'Interpreter','latex')
+        set(gca,'TickLabelInterpreter','Latex');
     end
 end
 
