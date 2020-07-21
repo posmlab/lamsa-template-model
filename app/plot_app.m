@@ -139,8 +139,6 @@ classdef plot_app < matlab.apps.AppBase
         OD_xmin                       matlab.ui.control.NumericEditField
         xmaxEditFieldLabel_2          matlab.ui.control.Label
         OD_xmax                       matlab.ui.control.NumericEditField
-        OD_KE_ratioCheckBox           matlab.ui.control.CheckBox
-        OD_unlatchingmotorworkdoneCheckBox  matlab.ui.control.CheckBox
         OD_x_log_space                matlab.ui.control.Switch
         graphing_corner_heatmap       matlab.ui.container.Tab
         minunlatchingmotorforceCheckBox  matlab.ui.control.CheckBox
@@ -166,8 +164,6 @@ classdef plot_app < matlab.apps.AppBase
         HeatmapOutputOptionsLabel     matlab.ui.control.Label
         pixelsofresolutionLabel       matlab.ui.control.Label
         n                             matlab.ui.control.NumericEditField
-        KERatioCheckBox               matlab.ui.control.CheckBox
-        unlatchingmotorworkdoneCheckBox  matlab.ui.control.CheckBox
         x_log_space                   matlab.ui.control.Switch
         y_log_space                   matlab.ui.control.Switch
         go                            matlab.ui.control.Button
@@ -203,9 +199,29 @@ classdef plot_app < matlab.apps.AppBase
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         function heatmap(app)
+            
+            if strcmp(app.x_log_space.Value,'log')
+                if ((app.xmin.Value <= 0) |(app.xmax.Value <= 0))
+                    warndlg("One or both of the values you've entered for the xmin/xmax " + ...
+                        "looping range is non-positive, " + ...
+                        "AND you have chosen a logspace x-axis. " + newline +...
+                        "Either change to linear spacing or use a positive bound.", 'Warning')
+                    return
+                end
+            end
+            
+            if strcmp(app.y_log_space.Value,'log')
+                if ((app.ymin.Value <= 0) | (app.ymax.Value <= 0))
+                    warndlg("One or both of the values you've entered for the ymin/ymax " + ...
+                        "looping range is non-positive,..." + ...
+                        "AND you have chosen a logspace y-axis. " + newline +...
+                        "Either change to linear spacing or use a positive bound.", 'Warning')
+                    return
+                end
+            end
+            
             if ~(app.y_maxCheckBox.Value || app.y_unlatchCheckBox.Value || app.t_LCheckBox.Value || ...
-                    app.v_toCheckBox.Value || app.P_maxCheckBox.Value || app.t_toCheckBox.Value || app.KE_maxCheckBox.Value ... 
-                    || app.KERatioCheckBox.Value || app.unlatchingmotorworkdoneCheckBox.Value)
+                    app.v_toCheckBox.Value || app.P_maxCheckBox.Value || app.t_toCheckBox.Value || app.KE_maxCheckBox.Value)
                 warndlg('You must select at least one output option', 'Warning');
                 return
             end
@@ -224,7 +240,35 @@ classdef plot_app < matlab.apps.AppBase
             end
             
             %% plot parameters
-
+            
+            looping_param_x = app.dropdown_items_opposite_dict(app.IV1DropDown.Value);
+            looping_param_y = app.dropdown_items_opposite_dict(app.IV2DropDown.Value);
+            eval(['looping_param_x_value = app.' app.dropdown_items_opposite_dict(app.IV1DropDown.Value) '.Value;']);
+            eval(['looping_param_y_value = app.' app.dropdown_items_opposite_dict(app.IV2DropDown.Value) '.Value;']);
+            
+            eval(['looping_param_x_limits = app.' app.dropdown_items_opposite_dict(app.IV1DropDown.Value) '.Limits;']);
+            eval(['looping_param_y_limits = app.' app.dropdown_items_opposite_dict(app.IV1DropDown.Value) '.Limits;']);
+            
+            if ((app.xmin.Value < looping_param_x_limits(1)) | ...
+                (app.xmin.Value > looping_param_x_limits(2)) | ...
+                (app.xmax.Value < looping_param_x_limits(1)) | ...
+                (app.xmax.Value > looping_param_x_limits(2)))     
+                warndlg("You have chosen an xmin or xmax value that is out of the bounds for the looping quantity you have selected." + newline + ...
+                    "i.e. you have chosen to loop through negative masses, or negative coefficients of friction, or something similarly bad.", ...
+                    'Warning')
+                return
+            end
+            if ((app.ymin.Value < looping_param_y_limits(1)) | ...
+                (app.ymin.Value > looping_param_y_limits(2)) | ...
+                (app.ymax.Value < looping_param_y_limits(1)) | ...
+                (app.ymax.Value > looping_param_y_limits(2)))     
+                warndlg("You have chosen an ymin or ymax value that is out of the bounds for the looping quantity you have selected." + newline + ...
+                    "i.e. you have chosen to loop through negative masses, or negative coefficients of friction, or something similarly bad.", ...
+                    'Warning')
+                return
+            end
+            
+            
             % setting x axis on the plot
             xname = app.dropdown_items_opposite_dict(app.IV1DropDown.Value);
             if strcmp(app.x_log_space.Value,'log')
@@ -289,16 +333,16 @@ classdef plot_app < matlab.apps.AppBase
                 metrics_names{end+1} = 'KEmax';
                 metrics_labels{end+1} = '$KE_{\textrm{max}}$';
             end
-            if app.KERatioCheckBox.Value
-                metrics{end+1} = 'KE_Ratio';
-                metrics_names{end+1} = 'KE_Ratio';
-                metrics_labels{end+1} = 'KE Ratio';
-            end
-            if app.unlatchingmotorworkdoneCheckBox.Value
-                metrics{end+1} = 'unlatching_motor_work_done';
-                metrics_names{end+1} = 'unlatching_motor_work_done';
-                metrics_labels{end+1} = 'unlatching motor work done';
-            end
+%             if app.KERatioCheckBox.Value
+%                 metrics{end+1} = 'KE_Ratio';
+%                 metrics_names{end+1} = 'KE_Ratio';
+%                 metrics_labels{end+1} = 'KE Ratio';
+%             end
+%             if app.unlatchingmotorworkdoneCheckBox.Value
+%                 metrics{end+1} = 'unlatching_motor_work_done';
+%                 metrics_names{end+1} = 'unlatching_motor_work_done';
+%                 metrics_labels{end+1} = 'unlatching motor work done';
+%             end
             
             
             if isempty(metrics)
@@ -306,19 +350,21 @@ classdef plot_app < matlab.apps.AppBase
                 return
             end
             
+            
             metrics_dict = containers.Map(metrics_names,metrics_labels);
             
             
-            looping_param_x = app.dropdown_items_opposite_dict(app.IV1DropDown.Value);
-            looping_param_y = app.dropdown_items_opposite_dict(app.IV2DropDown.Value);
-            eval(['looping_param_x_value = app.' app.dropdown_items_opposite_dict(app.IV1DropDown.Value) '.Value;']);
-            eval(['looping_param_y_value = app.' app.dropdown_items_opposite_dict(app.IV2DropDown.Value) '.Value;']);
+%             looping_param_x = app.dropdown_items_opposite_dict(app.IV1DropDown.Value);
+%             looping_param_y = app.dropdown_items_opposite_dict(app.IV2DropDown.Value);
+%             eval(['looping_param_x_value = app.' app.dropdown_items_opposite_dict(app.IV1DropDown.Value) '.Value;']);
+%             eval(['looping_param_y_value = app.' app.dropdown_items_opposite_dict(app.IV2DropDown.Value) '.Value;']);
             
             % ensures that both independent variables that we are varying over are not the same
             if (strcmp(looping_param_y,looping_param_x))
                 errordlg('The two independent variables must be different. Please change them and retry.','Error');
                 return
             end
+            
             
             for ii=1:length(metrics)
                 outval{ii}=zeros(N);
@@ -328,7 +374,6 @@ classdef plot_app < matlab.apps.AppBase
                     
                     eval(['app.' looping_param_x '.Value = ' num2str(looping_value_x(j)) ';'])
                     eval(['app.' looping_param_y '.Value = ' num2str(looping_value_y(i)) ';'])
-                    
                     %% initializing LaMSA component structs
                     
                     % load mass struct initialization
@@ -341,10 +386,16 @@ classdef plot_app < matlab.apps.AppBase
                     if (app.spring.SelectedTab == app.linear_spring)
                         spring = linear_spring(app.linear_spring_k.Value,app.linear_spring_mass.Value,app.linear_spring_Fmax.Value);
                     elseif (app.spring.SelectedTab == app.exponential_spring)
+%                         disp("THIS IS THE APP CODE")
+%                         app.exp_spring_k.Value
+%                         app.exp_spring_char_len.Value
+%                         app.exp_spring_mass.Value
+%                         app.exp_spring_Fmax.Value
                         spring = exponential_spring(app.exp_spring_k.Value,app.exp_spring_char_len.Value,app.exp_spring_mass.Value,app.exp_spring_Fmax.Value);
                     elseif (app.spring.SelectedTab == app.linear_elastic_extensional_spring)
                         spring = linear_elastic_extensional_spring(app.lee_spring_E.Value,app.lee_spring_A.Value,app.lee_spring_L.Value,app.lee_spring_rho.Value,app.lee_spring_sigma_f.Value);
                     end
+                    
                     
                     % loading motor struct initialization
                     if (app.loading_motor.SelectedTab == app.lm_linear_motor)
@@ -402,20 +453,21 @@ classdef plot_app < matlab.apps.AppBase
                         % Comparing these two physical scenarios requires a
                         % second call to solve_model, hence the special
                         % treatment.
-                        if (strcmp(metrics{ii},'KE_Ratio') && app.unlatching_motor.SelectedTab == app.um_linear_motor)
-
-                            unlatching_motor_no_braking = linear_motor(app.um_linear_motor_Fmax.Value,app.um_linear_motor_Vmax.Value,app.um_linear_motor_range_of_motion.Value,app.um_linear_motor_voltage_frac.Value, true);
-                            [sol_no_braking, tt_no_braking] = solve_model(loading_motor,unlatching_motor_no_braking,load,latch,spring,output_directory);
-                            
-                            KE_no_braking = (0.5*load.mass*(sol_no_braking(end,3)^2));
-                            KE_braking = (0.5*load.mass*(sol(end,3)^2));
-                            ratio = KE_no_braking/KE_braking;
-                            outval{ii}(i,j)=ratio;
-                        elseif (strcmp(metrics{ii},'KE_Ratio') && app.unlatching_motor.SelectedTab ~= app.um_linear_motor)
-                            error("The KE_Ratio metric is only available for a linear unlatching motor (for now!)")
-                        else
-                            outval{ii}(i,j)=met_dict(metrics{ii});
-                        end
+%                         if (strcmp(metrics{ii},'KE_Ratio') && app.unlatching_motor.SelectedTab == app.um_linear_motor)
+% 
+%                             unlatching_motor_no_braking = linear_motor(app.um_linear_motor_Fmax.Value,app.um_linear_motor_Vmax.Value,app.um_linear_motor_range_of_motion.Value,app.um_linear_motor_voltage_frac.Value, true);
+%                             [sol_no_braking, tt_no_braking] = solve_model(loading_motor,unlatching_motor_no_braking,load,latch,spring,output_directory);
+%                             
+%                             KE_no_braking = (0.5*load.mass*(sol_no_braking(end,3)^2));
+%                             KE_braking = (0.5*load.mass*(sol(end,3)^2));
+%                             ratio = KE_no_braking/KE_braking;
+%                             outval{ii}(i,j)=ratio;
+%                         elseif (strcmp(metrics{ii},'KE_Ratio') && app.unlatching_motor.SelectedTab ~= app.um_linear_motor)
+%                             error("The KE_Ratio metric is only available for a linear unlatching motor (for now!)")
+%                         else
+%                             outval{ii}(i,j)=met_dict(metrics{ii});
+%                         end
+                        outval{ii}(i,j)=met_dict(metrics{ii});
                         metrics{ii};
                     end
                 end
@@ -473,9 +525,7 @@ classdef plot_app < matlab.apps.AppBase
                 end
                 set(gca,'YTickLabel',yticklabel);
                 set(gca,'YTick',ytick);
-                set(imageHandle,'ButtonDownFcn',{@showKinematics, looping_param_x, looping_param_y, ...
-                                                                  app.x_log_space.Value, app.y_log_space.Value, ...
-                                                                  app});
+                set(imageHandle,'ButtonDownFcn',{@showKinematics, looping_param_x, looping_param_y, app});
                 
             end
             
@@ -485,10 +535,18 @@ classdef plot_app < matlab.apps.AppBase
         
         function one_D_plot(app)
             if ~(app.OD_y_maxCheckBox.Value || app.OD_y_unlatchCheckBox.Value || app.OD_t_LCheckBox.Value || ...
-                    app.OD_v_toCheckBox.Value || app.OD_P_maxCheckBox.Value || app.OD_t_toCheckBox.Value || app.OD_KE_maxCheckBox.Value ...
-                    || app.OD_KE_ratioCheckBox.Value || app.OD_unlatchingmotorworkdoneCheckBox.Value)
+                    app.OD_v_toCheckBox.Value || app.OD_P_maxCheckBox.Value || app.OD_t_toCheckBox.Value || app.OD_KE_maxCheckBox.Value)
                 warndlg('You must select at least one output option', 'Warning');
                 return
+            end
+            if strcmp(app.OD_x_log_space.Value,'log')
+                if ((app.OD_xmin.Value <= 0) |(app.OD_xmax.Value <= 0))
+                    warndlg("One or both of the values you've entered for the xmin/xmax " + ...
+                        "looping range is non-positive, " + ...
+                        "AND you have chosen a logspace x-axis. " + newline +...
+                        "Either change to linear spacing or use a positive bound.", 'Warning')
+                    return
+                end
             end
             
             % determines resolution of heatplots
@@ -505,7 +563,21 @@ classdef plot_app < matlab.apps.AppBase
             end
             
             %% plot parameters
-
+            looping_param_x = app.dropdown_items_opposite_dict(app.OD_IV1DropDown.Value);
+            eval(['looping_param_x_value = app.' app.dropdown_items_opposite_dict(app.OD_IV1DropDown.Value) '.Value;']);
+            eval(['looping_param_x_limits = app.' app.dropdown_items_opposite_dict(app.OD_IV1DropDown.Value) '.Limits;']);
+            
+            if ((app.OD_xmin.Value < looping_param_x_limits(1)) | ...
+                (app.OD_xmin.Value > looping_param_x_limits(2)) | ...
+                (app.OD_xmax.Value < looping_param_x_limits(1)) | ...
+                (app.OD_xmax.Value > looping_param_x_limits(2)))     
+                warndlg("You have chosen an xmin or xmax value that is out of the bounds for the looping quantity you have selected." + newline + ...
+                    "i.e. you have chosen to loop through negative masses, or negative coefficients of friction, or something similarly bad.", ...
+                    'Warning')
+                return
+            end
+            
+            
             % setting x axis on the plot
             xname = app.dropdown_items_opposite_dict(app.OD_IV1DropDown.Value);
             if strcmp(app.OD_x_log_space.Value,'log')
@@ -543,12 +615,12 @@ classdef plot_app < matlab.apps.AppBase
             if app.OD_KE_maxCheckBox.Value
                 metrics{end+1} = 'KEmax';
             end
-            if app.OD_KE_ratioCheckBox.Value
-                metrics{end+1} = 'KE_Ratio';
-            end
-            if app.OD_unlatchingmotorworkdoneCheckBox.Value
-                metrics{end+1} = 'unlatching_motor_work_done';
-            end
+%             if app.OD_KE_ratioCheckBox.Value
+%                 metrics{end+1} = 'KE_Ratio';
+%             end
+%             if app.OD_unlatchingmotorworkdoneCheckBox.Value
+%                 metrics{end+1} = 'unlatching_motor_work_done';
+%             end
             
             if isempty(metrics)
                 warndlg('You must pick at least one output option','Error');
@@ -558,9 +630,6 @@ classdef plot_app < matlab.apps.AppBase
             metrics_names = {'ymax','yunlatch','tL','vto','Pmax','tto','minumforce','KEmax', 'KE_Ratio', 'unlatching_motor_work_done'};
             metrics_labels = {'$y_{\textrm{max}}$','$y_{\textrm{unlatch}}$','$t_L$','$v_{\textrm{to}}$','$P_{\textrm{max}}$','$t_{\textrm{to}}$','min unlatching force','$KE_{\textrm{max}}$', 'KE Ratio', 'unlatching motor work done'};
             metrics_dict = containers.Map(metrics_names,metrics_labels);
-            
-            looping_param_x = app.dropdown_items_opposite_dict(app.OD_IV1DropDown.Value);
-            eval(['looping_param_x_value = app.' app.dropdown_items_opposite_dict(app.OD_IV1DropDown.Value) '.Value;']);
             
             for ii=1:length(metrics)
                 outval{ii} = zeros(size(looping_value_x));
@@ -1872,16 +1941,6 @@ classdef plot_app < matlab.apps.AppBase
             app.OD_xmax.Position = [169 298 40 22];
             app.OD_xmax.Value = 42;
 
-            % Create OD_KE_ratioCheckBox
-            app.OD_KE_ratioCheckBox = uicheckbox(app.graphing_corner_one_D);
-            app.OD_KE_ratioCheckBox.Text = 'KE Ratio';
-            app.OD_KE_ratioCheckBox.Position = [32 122 69 22];
-
-            % Create OD_unlatchingmotorworkdoneCheckBox
-            app.OD_unlatchingmotorworkdoneCheckBox = uicheckbox(app.graphing_corner_one_D);
-            app.OD_unlatchingmotorworkdoneCheckBox.Text = 'unlatching motor work done';
-            app.OD_unlatchingmotorworkdoneCheckBox.Position = [127 122 169 22];
-
             % Create OD_x_log_space
             app.OD_x_log_space = uiswitch(app.graphing_corner_one_D, 'slider');
             app.OD_x_log_space.Items = {'lin', 'log'};
@@ -2021,7 +2080,7 @@ classdef plot_app < matlab.apps.AppBase
             app.pixelsofresolutionLabel = uilabel(app.graphing_corner_heatmap);
             app.pixelsofresolutionLabel.HorizontalAlignment = 'right';
             app.pixelsofresolutionLabel.FontSize = 16;
-            app.pixelsofresolutionLabel.Position = [59 18 151 22];
+            app.pixelsofresolutionLabel.Position = [58 34 151 22];
             app.pixelsofresolutionLabel.Text = 'pixels of resolution =';
 
             % Create n
@@ -2029,18 +2088,8 @@ classdef plot_app < matlab.apps.AppBase
             app.n.Limits = [1 1024];
             app.n.RoundFractionalValues = 'on';
             app.n.ValueDisplayFormat = '%.0f';
-            app.n.Position = [225 18 39 22];
+            app.n.Position = [224 34 39 22];
             app.n.Value = 30;
-
-            % Create KERatioCheckBox
-            app.KERatioCheckBox = uicheckbox(app.graphing_corner_heatmap);
-            app.KERatioCheckBox.Text = 'KE Ratio';
-            app.KERatioCheckBox.Position = [32 52 69 22];
-
-            % Create unlatchingmotorworkdoneCheckBox
-            app.unlatchingmotorworkdoneCheckBox = uicheckbox(app.graphing_corner_heatmap);
-            app.unlatchingmotorworkdoneCheckBox.Text = 'unlatching motor work done';
-            app.unlatchingmotorworkdoneCheckBox.Position = [127 52 169 22];
 
             % Create x_log_space
             app.x_log_space = uiswitch(app.graphing_corner_heatmap, 'slider');
