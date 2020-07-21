@@ -229,11 +229,6 @@ classdef plot_app < matlab.apps.AppBase
             % determines resolution of heatplots
             N=app.n.Value;
             
-            % initializing waitbar
-            f = waitbar(0,'Please wait...');
-            load_bar_value = 1/N;
-            load_bar_increment = 1/N;
-            
             % output directory initialization
             if app.savesolutionCheckBox.Value
                 output_directory = create_output_directory();
@@ -268,6 +263,10 @@ classdef plot_app < matlab.apps.AppBase
                 return
             end
             
+            % initializing waitbar
+            f = waitbar(0,'Please wait...');
+            load_bar_value = 1/N;
+            load_bar_increment = 1/N;
             
             % setting x axis on the plot
             xname = app.dropdown_items_opposite_dict(app.IV1DropDown.Value);
@@ -364,7 +363,6 @@ classdef plot_app < matlab.apps.AppBase
                 errordlg('The two independent variables must be different. Please change them and retry.','Error');
                 return
             end
-            
             
             for ii=1:length(metrics)
                 outval{ii}=zeros(N);
@@ -552,11 +550,6 @@ classdef plot_app < matlab.apps.AppBase
             % determines resolution of heatplots
             N=app.OD_n.Value; 
             
-            % initializing waitbar
-            f = waitbar(0,'Please wait...');
-            load_bar_value = 1/N;
-            load_bar_increment = 1/N;
-            
             % output directory initialization
             if app.savesolutionCheckBox.Value
                 output_directory = create_output_directory();
@@ -577,6 +570,10 @@ classdef plot_app < matlab.apps.AppBase
                 return
             end
             
+            % initializing waitbar
+            f = waitbar(0,'Please wait...');
+            load_bar_value = 1/N;
+            load_bar_increment = 1/N;
             
             % setting x axis on the plot
             xname = app.dropdown_items_opposite_dict(app.OD_IV1DropDown.Value);
@@ -926,7 +923,8 @@ classdef plot_app < matlab.apps.AppBase
 
         % Code that executes after component creation
         function startupFcn(app)
-            
+            drawnow;
+            app.UIFigure.WindowState = 'maximized';
             % makes comparing changes in the app in github easier
             pathname = char(which("plot_app.mlapp"));
             lastIndex = strlength(pathname);
