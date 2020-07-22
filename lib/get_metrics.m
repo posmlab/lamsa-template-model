@@ -7,7 +7,11 @@ function metrics = get_metrics(sol,transition_times,load,met_names)
         sol(:,2:3)=sol(:,2:3)/load.EMA;
     end
     %define acceleration and kinetic energy as function of time 
-    acceleration=gradient(sol(:,3))./gradient(sol(:,1));
+    if size(sol,1) < 2
+        acceleration = 0;
+    else
+        acceleration=gradient(sol(:,3))./gradient(sol(:,1));
+    end
     kinetic_energy=.5*load.EMA^2*m*sol(:,3).^2;
     metrics=containers.Map(met_names,zeros(length(met_names),1),'UniformValues',false);
     if isKey(metrics,'vto')
@@ -23,8 +27,12 @@ function metrics = get_metrics(sol,transition_times,load,met_names)
         metrics('KEmax')=max(kinetic_energy);
     end
     if isKey(metrics,'Pmax')
-        %change in kinetic energy
-        metrics('Pmax')=max(gradient(kinetic_energy)./gradient(sol(:,1)));
+        %change in kinetic energy    
+        if size(sol,1) < 2
+            metrics('Pmax') = 0;
+        else
+            metrics('Pmax')=max(gradient(kinetic_energy)./gradient(sol(:,1)));
+        end
     end
     if isKey(metrics,'ymax')
         metrics('ymax')=sol(1,2);
