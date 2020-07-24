@@ -1,10 +1,10 @@
 addpath(genpath(fullfile(pwd,'..')));
 
 % determines resolution of heatplots
-N=500; 
+N=1000; 
 
 % setting x axis on the plot
-xrange = [1 10000];
+xrange = [1 100000];
 looping_value_x = linspace(xrange(1),xrange(2),N);
 
 % add things to metrics
@@ -31,10 +31,10 @@ unlatching_motor = linear_motor(0.25,1,0.005,1);
 k_index = 1;
 M=20;
 kopt_values = zeros(1,M);
-range = [0 0.0045];
+range = [0.001 0.006];
 linsp = linspace(range(1), range(2), M);
 for mld = 1:length(linsp)
-    latch = rounded_latch(0.005,0.003,0,0,linsp(mld),Inf,0);
+    latch = rounded_latch(0.005,0.003,0,0,0,linsp(mld),0);
 
     for ii=1:length(metrics)
         outval{ii} = zeros(size(looping_value_x));
@@ -110,7 +110,7 @@ hold on
 kopt_values2 = zeros(1,M);
 k_index = 1;
 for mld = 1:length(linsp)
-    latch = rounded_latch(0.005,0.003,0,0,linsp(mld),Inf,0);
+    latch = rounded_latch(0.005,0.003,0,0,0,linsp(mld),0);
 
     for ii=1:length(metrics)
         outval{ii} = zeros(size(looping_value_x));
@@ -181,10 +181,10 @@ plot(linsp,kopt_values2,'or');
 
 %% third sigma
 
-kopt_values2 = zeros(1,M);
+kopt_values3 = zeros(1,M);
 k_index = 1;
 for mld = 1:length(linsp)
-    latch = rounded_latch(0.005,0.003,0,0,linsp(mld),Inf,0);
+    latch = rounded_latch(0.005,0.003,0,0,0,linsp(mld),0);
 
     for ii=1:length(metrics)
         outval{ii} = zeros(size(looping_value_x));
@@ -245,10 +245,10 @@ for mld = 1:length(linsp)
     %plot(k,Pmax_sigma5,'ok')
     
     [maxval, index] = max(Pmax_sigma5);
-    kopt_values2(k_index) = looping_value_x(index);
+    kopt_values3(k_index) = looping_value_x(index);
     k_index = k_index + 1;
     
     disp(['point ' num2str(mld) ' of ' num2str(M)]);
 end
 
-plot(linsp,kopt_values2,'ob');
+plot(linsp,kopt_values3,'ob');
