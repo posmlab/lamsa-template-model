@@ -4,7 +4,7 @@ addpath(genpath(fullfile(pwd,'..')));
 N=1000; 
 
 % setting x axis on the plot
-xrange = [1 5E4];
+xrange = [1 100000];
 looping_value_x = linspace(xrange(1),xrange(2),N);
 
 % add things to metrics
@@ -29,7 +29,7 @@ unlatching_motor = linear_motor(0.25,1,0.005,1);
 %unlatching_motor = hill_muscle_motor(app.um_hill_motor_muscle_length.Value,app.um_hill_motor_Fmax.Value,app.um_hill_motor_Vmax.Value,app.um_hill_motor_rate_of_activation.Value,app.um_hill_motor_L_i.Value,app.um_hill_motor_a_L.Value,app.um_hill_motor_b_L.Value,app.um_hill_motor_s.Value);
 
 
-latch = rounded_latch(0.005,0.003,0,0,0,Inf,0);
+latch = rounded_latch(0.005,0.003,0,0,0,0.001,0);
 
 for ii=1:length(metrics)
     outval{ii} = zeros(size(looping_value_x));
@@ -76,20 +76,15 @@ for ii=1:length(metrics)
 end
 
  hold on
- 
- figure
-x = 0:0.1:10;
-y = gaussmf(x,[0.1*1E4 1E4]);
-plot(x,y)
 
-% Pmax = outval{1};
-% k = looping_value_x;
-% Pmax_sigma5 = zeros(size(Pmax));
-% for i = 1:length(k)
-%     mu = looping_value_x(i);
-%     sigma = 0.1*mu;
-%     gaus = @(k)(1/(sigma*sqrt(2*pi)))*exp(-(((k-mu).^2)/(2*sigma.^2)));
-%     Pmax_sigma5(i) = trapz(k,gaus(k).*Pmax);
-% end
-% 
-% plot(k,Pmax_sigma5,'ok')
+Pmax = outval{1};
+k = looping_value_x;
+Pmax_sigma5 = zeros(size(Pmax));
+for i = 1:length(k)
+    mu = looping_value_x(i);
+    sigma = 0*mu;
+    gaus = @(k)(1/(sigma*sqrt(2*pi)))*exp(-(((k-mu).^2)/(2*sigma.^2)));
+    Pmax_sigma5(i) = trapz(k,gaus(k).*Pmax);
+end
+
+plot(k,Pmax_sigma5,'ok')
