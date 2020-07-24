@@ -751,7 +751,7 @@ classdef plot_app < matlab.apps.AppBase
                 end
                 set(gca,'TickLabelInterpreter','latex')
                 % makes the x in log scale if needed
-                if app.OD_x_log_space.Value
+                if strcmp(app.OD_x_log_space.Value,'log')
                     set(gca,'XScale','log')
                 end
                
