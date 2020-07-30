@@ -86,16 +86,21 @@ if (unlatching_motor.max_force==0 && latch.v_0 == 0)
 end
 try
     [inst_check,~,~]=unlatching_end(0,[0,latch.v_0],m_eff,y0,latch,spring,unlatching_motor);
-catch ('Latch gets stuck!');
-    warning('Latch gets stuck!')
-    sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
-            latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
-            unlatching_motor.Force(0,[0,0])];
-    transition_times = [inf,inf];
-    if (nargin >= 6)
-    writeInfoToFile(m_eff, transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
+catch ME
+    switch ME.message
+        case 'Latch gets stuck!';
+            warning('Latch gets stuck!')
+            sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
+                    latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
+                    unlatching_motor.Force(0,[0,0])];
+            transition_times = [inf,inf];
+            if (nargin >= 6)
+                writeInfoToFile(m_eff, transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
+            end
+            return
+        otherwise
+            rethrow(ME)
     end
-    return
 end
 if inst_check>0 
     unlatch_opts=odeset('Events',@(t,y) unlatching_end(t,y,m_eff,y0,latch,spring,unlatching_motor),'RelTol',1E-7,'AbsTol',1E-10);
@@ -119,20 +124,24 @@ if inst_check>0
     try
         tspan=linspace(0,t_L_guess,1000);
         [t_unlatch,x_unlatch]=ode45(ode,tspan,[0 latch.v_0], unlatch_opts);
-    catch ("Latch gets stuck!");
-        warning('Latch gets stuck!')
-        % if the latch gets stuck, just give back
-        % the initial conditions
-        sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
-            latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
-            unlatching_motor.Force(0,[0,0])];
-        transition_times = [inf,inf];
-        if (nargin >= 6)
-        writeInfoToFile(m_eff, transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
+    catch ME
+        switch ME.message
+            case "Latch gets stuck!"
+            warning('Latch gets stuck!')
+            % if the latch gets stuck, just give back
+            % the initial conditions
+            sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
+                latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
+                unlatching_motor.Force(0,[0,0])];
+            transition_times = [inf,inf];
+            if (nargin >= 6)
+                writeInfoToFile(m_eff, transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
+            end
+            return
+            otherwise
+                rethrow(ME)
         end
-        return 
     end
-    
     % this while loop ensures that the system unlatches.
     % t_L_guess is a guess at the upper bound on the unlatching time.
     % Usually, integrating from t=0 to t=t_L_guess is a long enough
