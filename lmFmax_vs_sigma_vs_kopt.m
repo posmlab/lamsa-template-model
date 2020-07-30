@@ -22,7 +22,7 @@ clearvars
 addpath(genpath(fullfile(pwd,'..')));
 
 % determines resolution of heatmap
-N=10; 
+N=30; 
 
 % setting x axis on the plot 
 xname = 'loading motor Fmax';
@@ -32,7 +32,7 @@ Fmax_values = linspace(xrange(1),xrange(2),N);
 % setting y axis value on plot 
 yname = 'standard deviation';
 yrange = [0 1];
-simga_values = linspace(yrange(1),yrange(2),N);
+sigma_values = linspace(yrange(1),yrange(2),N);
 
 % range of k values to loop through to find the best one
 krange = [0 1E4];
@@ -80,7 +80,7 @@ for jj = 1:length(k_values)
         Pmax_sigma = zeros(size(Pmax_values_nonstochastic));
         for j = 1:N % looping through Fmax values      
             mu = Fmax_values(j);
-            sigma = simga_values(i)*mu;
+            sigma = sigma_values(i)*mu;
             if (sigma < (Fmax_values(2)-Fmax_values(1)))
                 Pmax_sigma(j) = Pmax_values_nonstochastic(j);
             else
