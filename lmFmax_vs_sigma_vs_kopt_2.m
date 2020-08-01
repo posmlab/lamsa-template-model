@@ -11,7 +11,7 @@ clearvars
 addpath(genpath(fullfile(pwd,'..')));
 
 % determines resolution of heatplots
-N=10; 
+N=20; 
 
 % setting x axis on the plot 
 xname = 'loading motor Fmax';
@@ -32,90 +32,57 @@ load = load_mass(0.01,0,1);
 unlatching_motor = linear_motor(0.25,1,0.005,1);
 
 % play with the min and max latching distance!
-% latch = rounded_latch(0.005,0.003,0,0,0,Inf,0);
-latch = rounded_latch(0.005,0.003,0,0,0.003,0.0035,0);
+latch = rounded_latch(0.005,0.003,0,0,0,Inf,0);
+% latch = rounded_latch(0.005,0.003,0,0,0.003,0.0035,0);
 
 %% calculating
 
 % initializing output matrices
-highest_P = zeros(N);
-best_k = zeros(1,N);
+Pmax_values_nonstochastic = zeros(N);
 
-for jj = 1:length(k_values)
+for jj = 1:length(Fmax_values)
     % looping through k values to find the best one
-    spring = linear_spring(k_values(jj),0,Inf);
+    loading_motor = linear_motor(Fmax_values(jj),10,0.005,1);
     
-    Pmax_values_nonstochastic = zeros(size(Fmax_values));
-    
-    for j = 1:N %x var
-        loading_motor = linear_motor(Fmax_values(j),10,0.005,1);
+    for j = 1:length(k_values) %x var
+        spring = linear_spring(k_values(j),0,Inf);
 
         %calling solve_model
         [sol,transition_times] = solve_model(loading_motor,unlatching_motor,load,latch,spring);
 
         met_dict=get_metrics(sol,transition_times,load,{'Pmax'});
-        Pmax_values_nonstochastic(j)=met_dict('Pmax');
+        Pmax_values_nonstochastic(j,jj)=met_dict('Pmax');
     end
-    
-    Pmax_values_sigma = zeros(N);
-    Pmax_values_sigma(1,:) = Pmax_values_nonstochastic;
-    for i = 2:N 
-        Pmax_sigma = zeros(size(Pmax_values_nonstochastic));
-        for j = 1:N       
-            mu = Fmax_values(j);
-            sigma = sigma_values(i)*mu;
-            if (sigma < (Fmax_values(2)-Fmax_values(1)))
-                Pmax_sigma(j) = Pmax_values_nonstochastic(j);
-            else
-                gaus = @(k)(1/(sigma*sqrt(2*pi)))*exp(-(((k-mu).^2)/(2*sigma.^2)));
-                Pmax_sigma(j) = trapz(Fmax_values,gaus(Fmax_values).*Pmax_values_nonstochastic);
-            end
-            [maxval, index] = max(Pmax_sigma);
-            Pmax_values_sigma(i,j) = maxval;
-        end
-    end
-
-    for x = 1:N
-        if (Pmax_values_sigma(1,x) > highest_P(1,x))
-            highest_P(1,x) = Pmax_values_sigma(1,x);
-            best_k(x) = k_values(jj);
-        end
-    end
-    
     disp(['row ' num2str(jj) ' of ' num2str(N)]);
 end
+    
+[highest_P, best_k_index] = max(Pmax_values_nonstochastic);
 
 %% calculating new max power
 
 % recalculating max power based on the doctored k_optimal values
 
-highest_P_sigma0 = zeros(size(Fmax_values));
-for j = 1:N 
-    spring = linear_spring(best_k(j),0,Inf);
-    loading_motor = linear_motor(Fmax_values(j),10,0.005,1);
+Power = zeros(N);
+for i = 1:length(best_k_index)
+    spring = linear_spring(k_values(best_k_index(i)),0,Inf);
+    PvsF1D = zeros(size(Fmax_values));
+    for jj = 1: length(Fmax_values)
+        loading_motor = linear_motor(Fmax_values(jj),10,0.005,1);
+        
+        [sol,transition_times] = solve_model(loading_motor,unlatching_motor,load,latch,spring);
 
-    %calling solve_model
-    [sol,transition_times] = solve_model(loading_motor,unlatching_motor,load,latch,spring);
-
-    met_dict=get_metrics(sol,transition_times,load,{'Pmax'});
-    highest_P_sigma0(j)=met_dict('Pmax');
-end
-
-new_highest_P = zeros(N);
-new_highest_P(1,:) = highest_P_sigma0;
-for i = 2:N %y var
-    Pmax_sigma = zeros(size(highest_P_sigma0));
-    for j = 1:N %x var        
-        mu = Fmax_values(j);
-        sigma = sigma_values(i)*mu;
+        met_dict=get_metrics(sol,transition_times,load,{'Pmax'});
+        PvsF1D(jj)=met_dict('Pmax');
+    end
+    for j = 1:length(sigma_values)
+        mu = Fmax_values(i);
+        sigma = sigma_values(j)*mu;
         if (sigma < (Fmax_values(2)-Fmax_values(1)))
-            Pmax_sigma(j) = highest_P_sigma0(j);
+            Power(j,i) = PvsF1D(i);
         else
             gaus = @(k)(1/(sigma*sqrt(2*pi)))*exp(-(((k-mu).^2)/(2*sigma.^2)));
-            Pmax_sigma(j) = trapz(Fmax_values,gaus(Fmax_values).*highest_P_sigma0);
+            Power(j,i) = trapz(Fmax_values,gaus(Fmax_values).*PvsF1D);
         end
-        [maxval, index] = max(Pmax_sigma);
-        new_highest_P(i,j) = maxval;
     end
 end
     
@@ -124,7 +91,7 @@ end
 hmap = figure;
 
 % plotting heatmap
-imagesc(xrange,yrange,repmat(best_k,[N,1]));
+imagesc(xrange,yrange,repmat(k_values(best_k_index),[N,1]));
 
 % setting axes labels
 set(gca,'YDir','normal');
@@ -143,7 +110,7 @@ c.Label.Interpreter="latex";
 hmap2 = figure;
 
 % plotting heatmap
-imagesc(xrange,yrange,new_highest_P);
+imagesc(xrange,yrange,Power);
 
 % setting axes labels
 set(gca,'YDir','normal');

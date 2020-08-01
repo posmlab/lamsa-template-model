@@ -43,8 +43,8 @@ load = load_mass(0.01,0,1);
 unlatching_motor = linear_motor(0.25,1,0.005,1);
 
 % play with the min and max latching distance!
-latch = rounded_latch(0.005,0.003,0,0,0,Inf,0);
-% latch = rounded_latch(0.005,0.003,0,0,0.003,0.0035,0);
+latch = rounded_latch(0.005,0.003,0,0,0.003,0.0035,0);
+% latch = rounded_latch(0.005,0.003,0,0,0,Inf,0);
 
 %% calculations 
 
