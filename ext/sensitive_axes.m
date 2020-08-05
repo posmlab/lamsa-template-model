@@ -10,7 +10,7 @@ function [axes,pac] = sensitive_axes(fun,x0,grad_pct,mesh_pct,pca_pct,pca_N)
     grad = ndimgrad(fun,x0,grad_pct);
     %If the gradient is small, call it zero
     if 2*grad_pct*x0'.*grad/f0<1e-4 %If the total variation is less than some small percentage
-        grad = zeros(length(params),1);
+        grad = zeros(length(x0),1);
     end
     %Determine the matrix U that maps to the tangent plane
     nullBasis = null(grad');
