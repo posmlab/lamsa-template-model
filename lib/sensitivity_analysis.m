@@ -1,4 +1,4 @@
-%% sensitivity_analysis
+%%sensitivity_analysis
 % creates wrapper function to put into sensitive_axes
 % finds ordered list of sensitive axes
 % inputs:
