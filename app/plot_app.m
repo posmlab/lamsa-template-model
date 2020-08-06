@@ -2,174 +2,186 @@ classdef plot_app < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
-        UIFigure                      matlab.ui.Figure
-        ParametersLabel               matlab.ui.control.Label
-        spring                        matlab.ui.container.TabGroup
-        linear_spring                 matlab.ui.container.Tab
-        kLabel                        matlab.ui.control.Label
-        linear_spring_k               matlab.ui.control.NumericEditField
-        massEditFieldLabel_4          matlab.ui.control.Label
-        linear_spring_mass            matlab.ui.control.NumericEditField
-        FmaxLabel_3                   matlab.ui.control.Label
-        linear_spring_Fmax            matlab.ui.control.NumericEditField
+        UIFigure                        matlab.ui.Figure
+        ParametersLabel                 matlab.ui.control.Label
+        spring                          matlab.ui.container.TabGroup
+        linear_spring                   matlab.ui.container.Tab
+        kLabel                          matlab.ui.control.Label
+        linear_spring_k                 matlab.ui.control.NumericEditField
+        massEditFieldLabel_4            matlab.ui.control.Label
+        linear_spring_mass              matlab.ui.control.NumericEditField
+        FmaxLabel_3                     matlab.ui.control.Label
+        linear_spring_Fmax              matlab.ui.control.NumericEditField
         linear_elastic_extensional_spring  matlab.ui.container.Tab
-        ELabel                        matlab.ui.control.Label
-        lee_spring_E                  matlab.ui.control.NumericEditField
-        rhoLabel                      matlab.ui.control.Label
-        lee_spring_rho                matlab.ui.control.NumericEditField
-        ALabel                        matlab.ui.control.Label
-        lee_spring_A                  matlab.ui.control.NumericEditField
-        LLabel                        matlab.ui.control.Label
-        lee_spring_L                  matlab.ui.control.NumericEditField
-        sigma_fLabel                  matlab.ui.control.Label
-        lee_spring_sigma_f            matlab.ui.control.NumericEditField
-        exponential_spring            matlab.ui.container.Tab
-        k_0Label                      matlab.ui.control.Label
-        exp_spring_k                  matlab.ui.control.NumericEditField
-        characteristiclengthLabel     matlab.ui.control.Label
-        exp_spring_char_len           matlab.ui.control.NumericEditField
-        FmaxLabel_4                   matlab.ui.control.Label
-        exp_spring_Fmax               matlab.ui.control.NumericEditField
-        massEditFieldLabel_5          matlab.ui.control.Label
-        exp_spring_mass               matlab.ui.control.NumericEditField
-        loading_motor                 matlab.ui.container.TabGroup
-        lm_linear_motor               matlab.ui.container.Tab
-        FmaxLabel_2                   matlab.ui.control.Label
-        lm_linear_motor_Fmax          matlab.ui.control.NumericEditField
-        VmaxLabel_2                   matlab.ui.control.Label
-        lm_linear_motor_Vmax          matlab.ui.control.NumericEditField
-        rangeofmotionLabel            matlab.ui.control.Label
+        ELabel                          matlab.ui.control.Label
+        lee_spring_E                    matlab.ui.control.NumericEditField
+        rhoLabel                        matlab.ui.control.Label
+        lee_spring_rho                  matlab.ui.control.NumericEditField
+        ALabel                          matlab.ui.control.Label
+        lee_spring_A                    matlab.ui.control.NumericEditField
+        LLabel                          matlab.ui.control.Label
+        lee_spring_L                    matlab.ui.control.NumericEditField
+        sigma_fLabel                    matlab.ui.control.Label
+        lee_spring_sigma_f              matlab.ui.control.NumericEditField
+        exponential_spring              matlab.ui.container.Tab
+        k_0Label                        matlab.ui.control.Label
+        exp_spring_k                    matlab.ui.control.NumericEditField
+        characteristiclengthLabel       matlab.ui.control.Label
+        exp_spring_char_len             matlab.ui.control.NumericEditField
+        FmaxLabel_4                     matlab.ui.control.Label
+        exp_spring_Fmax                 matlab.ui.control.NumericEditField
+        massEditFieldLabel_5            matlab.ui.control.Label
+        exp_spring_mass                 matlab.ui.control.NumericEditField
+        loading_motor                   matlab.ui.container.TabGroup
+        lm_linear_motor                 matlab.ui.container.Tab
+        FmaxLabel_2                     matlab.ui.control.Label
+        lm_linear_motor_Fmax            matlab.ui.control.NumericEditField
+        VmaxLabel_2                     matlab.ui.control.Label
+        lm_linear_motor_Vmax            matlab.ui.control.NumericEditField
+        rangeofmotionLabel              matlab.ui.control.Label
         lm_linear_motor_range_of_motion  matlab.ui.control.NumericEditField
-        voltagefracLabel              matlab.ui.control.Label
-        lm_linear_motor_voltage_frac  matlab.ui.control.NumericEditField
-        lm_hill_muscle_motor          matlab.ui.container.Tab
-        FmaxLabel                     matlab.ui.control.Label
-        lm_hill_motor_Fmax            matlab.ui.control.NumericEditField
-        VmaxLabel                     matlab.ui.control.Label
-        lm_hill_motor_Vmax            matlab.ui.control.NumericEditField
-        musclelengthLabel             matlab.ui.control.Label
-        lm_hill_motor_muscle_length   matlab.ui.control.NumericEditField
-        rateofactivationLabel         matlab.ui.control.Label
+        voltagefracLabel                matlab.ui.control.Label
+        lm_linear_motor_voltage_frac    matlab.ui.control.NumericEditField
+        lm_hill_muscle_motor            matlab.ui.container.Tab
+        FmaxLabel                       matlab.ui.control.Label
+        lm_hill_motor_Fmax              matlab.ui.control.NumericEditField
+        VmaxLabel                       matlab.ui.control.Label
+        lm_hill_motor_Vmax              matlab.ui.control.NumericEditField
+        musclelengthLabel               matlab.ui.control.Label
+        lm_hill_motor_muscle_length     matlab.ui.control.NumericEditField
+        rateofactivationLabel           matlab.ui.control.Label
         lm_hill_motor_rate_of_activation  matlab.ui.control.NumericEditField
-        initiallengthLabel            matlab.ui.control.Label
-        lm_hill_motor_L_i             matlab.ui.control.NumericEditField
-        a_LLabel                      matlab.ui.control.Label
-        lm_hill_motor_a_L             matlab.ui.control.NumericEditField
-        b_LLabel                      matlab.ui.control.Label
-        lm_hill_motor_b_L             matlab.ui.control.NumericEditField
-        sLabel                        matlab.ui.control.Label
-        lm_hill_motor_s               matlab.ui.control.NumericEditField
-        latch                         matlab.ui.container.TabGroup
-        rounded_latch                 matlab.ui.container.Tab
-        massLabel                     matlab.ui.control.Label
-        latch_mass                    matlab.ui.control.NumericEditField
-        Label                         matlab.ui.control.Label
-        latch_coeff_fric              matlab.ui.control.NumericEditField
-        radiusLabel                   matlab.ui.control.Label
-        latch_radius                  matlab.ui.control.NumericEditField
-        v_0Label                      matlab.ui.control.Label
-        latch_v_0                     matlab.ui.control.NumericEditField
-        minlatchingdistLabel          matlab.ui.control.Label
-        min_latching_dist             matlab.ui.control.NumericEditField
-        maxlatchingdistLabel          matlab.ui.control.Label
-        max_latching_dist             matlab.ui.control.NumericEditField
-        runwaylengthLabel             matlab.ui.control.Label
-        runway_length                 matlab.ui.control.NumericEditField
-        load                          matlab.ui.container.TabGroup
-        load_mass                     matlab.ui.container.Tab
-        massEditFieldLabel            matlab.ui.control.Label
-        load_mass_mass                matlab.ui.control.NumericEditField
-        massofleverarmLabel           matlab.ui.control.Label
-        load_m_rod                    matlab.ui.control.NumericEditField
-        EMALabel                      matlab.ui.control.Label
-        load_EMA                      matlab.ui.control.NumericEditField
-        LoadingMotorLabel             matlab.ui.control.Label
-        unlatching_motor              matlab.ui.container.TabGroup
-        um_linear_motor               matlab.ui.container.Tab
-        FmaxLabel_5                   matlab.ui.control.Label
-        um_linear_motor_Fmax          matlab.ui.control.NumericEditField
-        VmaxLabel_3                   matlab.ui.control.Label
-        um_linear_motor_Vmax          matlab.ui.control.NumericEditField
-        rangeofmotionLabel_2          matlab.ui.control.Label
+        initiallengthLabel              matlab.ui.control.Label
+        lm_hill_motor_L_i               matlab.ui.control.NumericEditField
+        a_LLabel                        matlab.ui.control.Label
+        lm_hill_motor_a_L               matlab.ui.control.NumericEditField
+        b_LLabel                        matlab.ui.control.Label
+        lm_hill_motor_b_L               matlab.ui.control.NumericEditField
+        sLabel                          matlab.ui.control.Label
+        lm_hill_motor_s                 matlab.ui.control.NumericEditField
+        latch                           matlab.ui.container.TabGroup
+        rounded_latch                   matlab.ui.container.Tab
+        massLabel                       matlab.ui.control.Label
+        latch_mass                      matlab.ui.control.NumericEditField
+        Label                           matlab.ui.control.Label
+        latch_coeff_fric                matlab.ui.control.NumericEditField
+        radiusLabel                     matlab.ui.control.Label
+        latch_radius                    matlab.ui.control.NumericEditField
+        v_0Label                        matlab.ui.control.Label
+        latch_v_0                       matlab.ui.control.NumericEditField
+        minlatchingdistLabel            matlab.ui.control.Label
+        min_latching_dist               matlab.ui.control.NumericEditField
+        maxlatchingdistLabel            matlab.ui.control.Label
+        max_latching_dist               matlab.ui.control.NumericEditField
+        runwaylengthLabel               matlab.ui.control.Label
+        runway_length                   matlab.ui.control.NumericEditField
+        load                            matlab.ui.container.TabGroup
+        load_mass                       matlab.ui.container.Tab
+        massEditFieldLabel              matlab.ui.control.Label
+        load_mass_mass                  matlab.ui.control.NumericEditField
+        massofleverarmLabel             matlab.ui.control.Label
+        load_m_rod                      matlab.ui.control.NumericEditField
+        EMALabel                        matlab.ui.control.Label
+        load_EMA                        matlab.ui.control.NumericEditField
+        LoadingMotorLabel               matlab.ui.control.Label
+        unlatching_motor                matlab.ui.container.TabGroup
+        um_linear_motor                 matlab.ui.container.Tab
+        FmaxLabel_5                     matlab.ui.control.Label
+        um_linear_motor_Fmax            matlab.ui.control.NumericEditField
+        VmaxLabel_3                     matlab.ui.control.Label
+        um_linear_motor_Vmax            matlab.ui.control.NumericEditField
+        rangeofmotionLabel_2            matlab.ui.control.Label
         um_linear_motor_range_of_motion  matlab.ui.control.NumericEditField
-        voltagefracLabel_2            matlab.ui.control.Label
-        um_linear_motor_voltage_frac  matlab.ui.control.NumericEditField
-        um_hill_muscle_motor          matlab.ui.container.Tab
-        FmaxLabel_6                   matlab.ui.control.Label
-        um_hill_motor_Fmax            matlab.ui.control.NumericEditField
-        VmaxLabel_4                   matlab.ui.control.Label
-        um_hill_motor_Vmax            matlab.ui.control.NumericEditField
-        musclelengthLabel_2           matlab.ui.control.Label
-        um_hill_motor_muscle_length   matlab.ui.control.NumericEditField
-        rateofactivationLabel_2       matlab.ui.control.Label
+        voltagefracLabel_2              matlab.ui.control.Label
+        um_linear_motor_voltage_frac    matlab.ui.control.NumericEditField
+        um_hill_muscle_motor            matlab.ui.container.Tab
+        FmaxLabel_6                     matlab.ui.control.Label
+        um_hill_motor_Fmax              matlab.ui.control.NumericEditField
+        VmaxLabel_4                     matlab.ui.control.Label
+        um_hill_motor_Vmax              matlab.ui.control.NumericEditField
+        musclelengthLabel_2             matlab.ui.control.Label
+        um_hill_motor_muscle_length     matlab.ui.control.NumericEditField
+        rateofactivationLabel_2         matlab.ui.control.Label
         um_hill_motor_rate_of_activation  matlab.ui.control.NumericEditField
-        initiallengthLabel_2          matlab.ui.control.Label
-        um_hill_motor_L_i             matlab.ui.control.NumericEditField
-        a_LLabel_2                    matlab.ui.control.Label
-        um_hill_motor_a_L             matlab.ui.control.NumericEditField
-        b_LLabel_2                    matlab.ui.control.Label
-        um_hill_motor_b_L             matlab.ui.control.NumericEditField
-        sLabel_2                      matlab.ui.control.Label
-        um_hill_motor_s               matlab.ui.control.NumericEditField
-        UnlatchingMotorLabel          matlab.ui.control.Label
-        GraphingCornerLabel           matlab.ui.control.Label
-        graphing_corner               matlab.ui.container.TabGroup
-        graphing_corner_kinematics    matlab.ui.container.Tab
-        KinematicsOutputOptionsLabel  matlab.ui.control.Label
-        forcedisp                     matlab.ui.control.CheckBox
-        latchkinematicsCheckBox       matlab.ui.control.CheckBox
-        loadkinematicsCheckBox        matlab.ui.control.CheckBox
-        LoadingphaseLabel             matlab.ui.control.Label
+        initiallengthLabel_2            matlab.ui.control.Label
+        um_hill_motor_L_i               matlab.ui.control.NumericEditField
+        a_LLabel_2                      matlab.ui.control.Label
+        um_hill_motor_a_L               matlab.ui.control.NumericEditField
+        b_LLabel_2                      matlab.ui.control.Label
+        um_hill_motor_b_L               matlab.ui.control.NumericEditField
+        sLabel_2                        matlab.ui.control.Label
+        um_hill_motor_s                 matlab.ui.control.NumericEditField
+        UnlatchingMotorLabel            matlab.ui.control.Label
+        GraphingCornerLabel             matlab.ui.control.Label
+        graphing_corner                 matlab.ui.container.TabGroup
+        graphing_corner_kinematics      matlab.ui.container.Tab
+        KinematicsOutputOptionsLabel    matlab.ui.control.Label
+        forcedisp                       matlab.ui.control.CheckBox
+        latchkinematicsCheckBox         matlab.ui.control.CheckBox
+        loadkinematicsCheckBox          matlab.ui.control.CheckBox
+        LoadingphaseLabel               matlab.ui.control.Label
         UnlatchingandlaunchingphaseLabel  matlab.ui.control.Label
-        graphing_corner_one_D         matlab.ui.container.Tab
+        graphing_corner_one_D           matlab.ui.container.Tab
         OD_minunlatchingmotorforceCheckBox  matlab.ui.control.CheckBox
-        xaxisLabel_2                  matlab.ui.control.Label
-        OD_y_maxCheckBox              matlab.ui.control.CheckBox
-        OD_y_unlatchCheckBox          matlab.ui.control.CheckBox
-        OD_t_LCheckBox                matlab.ui.control.CheckBox
-        OD_v_toCheckBox               matlab.ui.control.CheckBox
-        OD_P_maxCheckBox              matlab.ui.control.CheckBox
-        OD_t_toCheckBox               matlab.ui.control.CheckBox
-        OD_KE_maxCheckBox             matlab.ui.control.CheckBox
-        OD_IV1DropDown                matlab.ui.control.DropDown
-        yaxisOutputOptionsLabel       matlab.ui.control.Label
-        pixelsofresolutionLabel_2     matlab.ui.control.Label
-        OD_n                          matlab.ui.control.NumericEditField
-        xminEditFieldLabel_2          matlab.ui.control.Label
-        OD_xmin                       matlab.ui.control.NumericEditField
-        xmaxEditFieldLabel_2          matlab.ui.control.Label
-        OD_xmax                       matlab.ui.control.NumericEditField
-        OD_x_log_space                matlab.ui.control.Switch
-        graphing_corner_heatmap       matlab.ui.container.Tab
+        xaxisLabel_2                    matlab.ui.control.Label
+        OD_y_maxCheckBox                matlab.ui.control.CheckBox
+        OD_y_unlatchCheckBox            matlab.ui.control.CheckBox
+        OD_t_LCheckBox                  matlab.ui.control.CheckBox
+        OD_v_toCheckBox                 matlab.ui.control.CheckBox
+        OD_P_maxCheckBox                matlab.ui.control.CheckBox
+        OD_t_toCheckBox                 matlab.ui.control.CheckBox
+        OD_KE_maxCheckBox               matlab.ui.control.CheckBox
+        OD_IV1DropDown                  matlab.ui.control.DropDown
+        yaxisOutputOptionsLabel         matlab.ui.control.Label
+        pixelsofresolutionLabel_2       matlab.ui.control.Label
+        OD_n                            matlab.ui.control.NumericEditField
+        xminEditFieldLabel_2            matlab.ui.control.Label
+        OD_xmin                         matlab.ui.control.NumericEditField
+        xmaxEditFieldLabel_2            matlab.ui.control.Label
+        OD_xmax                         matlab.ui.control.NumericEditField
+        OD_x_log_space                  matlab.ui.control.Switch
+        graphing_corner_heatmap         matlab.ui.container.Tab
         minunlatchingmotorforceCheckBox  matlab.ui.control.CheckBox
-        xaxisLabel                    matlab.ui.control.Label
-        yaxisLabel                    matlab.ui.control.Label
-        y_maxCheckBox                 matlab.ui.control.CheckBox
-        y_unlatchCheckBox             matlab.ui.control.CheckBox
-        t_LCheckBox                   matlab.ui.control.CheckBox
-        v_toCheckBox                  matlab.ui.control.CheckBox
-        P_maxCheckBox                 matlab.ui.control.CheckBox
-        t_toCheckBox                  matlab.ui.control.CheckBox
-        KE_maxCheckBox                matlab.ui.control.CheckBox
-        IV1DropDown                   matlab.ui.control.DropDown
-        IV2DropDown                   matlab.ui.control.DropDown
-        xminEditFieldLabel            matlab.ui.control.Label
-        xmin                          matlab.ui.control.NumericEditField
-        xmaxEditFieldLabel            matlab.ui.control.Label
-        xmax                          matlab.ui.control.NumericEditField
-        yminLabel                     matlab.ui.control.Label
-        ymin                          matlab.ui.control.NumericEditField
-        ymaxLabel                     matlab.ui.control.Label
-        ymax                          matlab.ui.control.NumericEditField
-        HeatmapOutputOptionsLabel     matlab.ui.control.Label
-        pixelsofresolutionLabel       matlab.ui.control.Label
-        n                             matlab.ui.control.NumericEditField
-        x_log_space                   matlab.ui.control.Switch
-        y_log_space                   matlab.ui.control.Switch
-        go                            matlab.ui.control.Button
-        ShowModelSchematicButton      matlab.ui.control.Button
-        Image                         matlab.ui.control.Image
-        savesolutionCheckBox          matlab.ui.control.CheckBox
+        xaxisLabel                      matlab.ui.control.Label
+        yaxisLabel                      matlab.ui.control.Label
+        y_maxCheckBox                   matlab.ui.control.CheckBox
+        y_unlatchCheckBox               matlab.ui.control.CheckBox
+        t_LCheckBox                     matlab.ui.control.CheckBox
+        v_toCheckBox                    matlab.ui.control.CheckBox
+        P_maxCheckBox                   matlab.ui.control.CheckBox
+        t_toCheckBox                    matlab.ui.control.CheckBox
+        KE_maxCheckBox                  matlab.ui.control.CheckBox
+        IV1DropDown                     matlab.ui.control.DropDown
+        IV2DropDown                     matlab.ui.control.DropDown
+        xminEditFieldLabel              matlab.ui.control.Label
+        xmin                            matlab.ui.control.NumericEditField
+        xmaxEditFieldLabel              matlab.ui.control.Label
+        xmax                            matlab.ui.control.NumericEditField
+        yminLabel                       matlab.ui.control.Label
+        ymin                            matlab.ui.control.NumericEditField
+        ymaxLabel                       matlab.ui.control.Label
+        ymax                            matlab.ui.control.NumericEditField
+        HeatmapOutputOptionsLabel       matlab.ui.control.Label
+        pixelsofresolutionLabel         matlab.ui.control.Label
+        n                               matlab.ui.control.NumericEditField
+        x_log_space                     matlab.ui.control.Switch
+        y_log_space                     matlab.ui.control.Switch
+        graphing_corner_sensitivity     matlab.ui.container.Tab
+        VariablesListBoxLabel           matlab.ui.control.Label
+        sensitivity_vars                matlab.ui.control.ListBox
+        pressCTRLtoselectmultipleLabel  matlab.ui.control.Label
+        MetricButtonGroup               matlab.ui.container.ButtonGroup
+        ymaxButton                      matlab.ui.control.RadioButton
+        yunlatchButton                  matlab.ui.control.RadioButton
+        tLButton                        matlab.ui.control.RadioButton
+        vtoButton                       matlab.ui.control.RadioButton
+        PmaxButton                      matlab.ui.control.RadioButton
+        ttoButton                       matlab.ui.control.RadioButton
+        KEmaxButton                     matlab.ui.control.RadioButton
+        go                              matlab.ui.control.Button
+        ShowModelSchematicButton        matlab.ui.control.Button
+        Image                           matlab.ui.control.Image
+        savesolutionCheckBox            matlab.ui.control.CheckBox
     end
 
     properties (Access = private)
@@ -194,6 +206,7 @@ classdef plot_app < matlab.apps.AppBase
             app.IV1DropDown.Items = app.dd_vars_labels;
             app.IV2DropDown.Items = app.dd_vars_labels;
             app.OD_IV1DropDown.Items = app.dd_vars_labels;
+            app.sensitivity_vars.Items = app.dd_vars_labels;
         end
         
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -201,7 +214,7 @@ classdef plot_app < matlab.apps.AppBase
         function heatmap(app)
             
             if strcmp(app.x_log_space.Value,'log')
-                if ((app.xmin.Value <= 0) |(app.xmax.Value <= 0))
+                if ((app.xmin.Value <= 0) ||(app.xmax.Value <= 0))
                     warndlg("One or both of the values you've entered for the xmin/xmax " + ...
                         "looping range is non-positive, " + ...
                         "AND you have chosen a logspace x-axis. " + newline +...
@@ -211,7 +224,7 @@ classdef plot_app < matlab.apps.AppBase
             end
             
             if strcmp(app.y_log_space.Value,'log')
-                if ((app.ymin.Value <= 0) | (app.ymax.Value <= 0))
+                if ((app.ymin.Value <= 0) || (app.ymax.Value <= 0))
                     warndlg("One or both of the values you've entered for the ymin/ymax " + ...
                         "looping range is non-positive,..." + ...
                         "AND you have chosen a logspace y-axis. " + newline +...
@@ -915,6 +928,72 @@ classdef plot_app < matlab.apps.AppBase
             end
             
         end
+        
+        function sensitivity(app)
+            labels = strings([1 length(app.sensitivity_vars.Value)]);
+            x0 = zeros([1 length(labels)]);
+            for i=1:length(labels)
+                labels(i) = app.sensitivity_vars.Value(i);
+                x0(i) = eval(['app.' app.dropdown_items_opposite_dict(labels(i)) '.Value;']);
+            end
+            load_str = "mass = @(x0)load_mass(app.load_mass_mass.Value,app.load_m_rod.Value,app.load_EMA.Value);";
+            
+            latch_str = "latch = @(x0)rounded_latch(app.latch_radius.Value,app.latch_mass.Value,app.latch_coeff_fric.Value, app.latch_v_0.Value, app.min_latching_dist.Value, app.max_latching_dist.Value, app.runway_length.Value);";
+            
+            if (app.spring.SelectedTab == app.linear_spring)
+                spring_str = "spring_fun = @(x0)linear_spring(app.linear_spring_k.Value,app.linear_spring_mass.Value,app.linear_spring_Fmax.Value);";
+            elseif (app.spring.SelectedTab == app.exponential_spring)
+                spring_str = "spring_fun = @(x0)exponential_spring(app.exp_spring_k.Value,app.exp_spring_char_len.Value,app.exp_spring_mass.Value,app.exp_spring_Fmax.Value);";
+            elseif (app.spring.SelectedTab == app.linear_elastic_extensional_spring)
+                spring_str = "spring_fun = @(x0)linear_elastic_extensional_spring(app.lee_spring_E.Value,app.lee_spring_A.Value,app.lee_spring_L.Value,app.lee_spring_rho.Value,app.lee_spring_sigma_f.Value);";
+            end
+
+            if (app.loading_motor.SelectedTab == app.lm_linear_motor)
+                loading_motor_str = "loading_motor = @(x0)linear_motor(app.lm_linear_motor_Fmax.Value,app.lm_linear_motor_Vmax.Value,app.lm_linear_motor_range_of_motion.Value,app.lm_linear_motor_voltage_frac.Value);";
+            elseif (app.loading_motor.SelectedTab == app.lm_hill_muscle_motor)
+                loading_motor_str = "loading_motor = @(x0)hill_muscle_motor(app.lm_hill_motor_muscle_length.Value,app.lm_hill_motor_Fmax.Value,app.lm_hill_motor_Vmax.Value,app.lm_hill_motor_rate_of_activation.Value,app.lm_hill_motor_L_i.Value,app.lm_hill_motor_a_L.Value,app.lm_hill_motor_b_L.Value,app.lm_hill_motor_s.Value);";
+            end
+
+            if (app.unlatching_motor.SelectedTab == app.um_linear_motor)
+                unlatching_motor_str = "unlatching_motor = @(x0)linear_motor(app.um_linear_motor_Fmax.Value,app.um_linear_motor_Vmax.Value,app.um_linear_motor_range_of_motion.Value,app.um_linear_motor_voltage_frac.Value);";
+            elseif (app.unlatching_motor.SelectedTab == app.um_hill_muscle_motor)
+                unlatching_motor_str = "unlatchin_motor = @(x0)hill_muscle_motor(app.um_hill_motor_muscle_length.Value,app.um_hill_motor_Fmax.Value,app.um_hill_motor_Vmax.Value,app.um_hill_motor_rate_of_activation.Value,app.um_hill_motor_L_i.Value,app.um_hill_motor_a_L.Value,app.um_hill_motor_b_L.Value,app.um_hill_motor_s.Value);";
+            end
+            
+            for i=1:length(labels)
+                load_str = strrep(load_str,strcat("app.",app.dropdown_items_opposite_dict(labels(i)),".Value"),strcat("x0(",num2str(i),")"));
+                latch_str = strrep(latch_str,strcat("app.",app.dropdown_items_opposite_dict(labels(i)),".Value"),strcat("x0(",num2str(i),")"));
+                spring_str = strrep(spring_str,strcat("app.",app.dropdown_items_opposite_dict(labels(i)),".Value"),strcat("x0(",num2str(i),")"));
+                loading_motor_str = strrep(loading_motor_str,strcat("app.",app.dropdown_items_opposite_dict(labels(i)),".Value"),strcat("x0(",num2str(i),")"));
+                unlatching_motor_str = strrep(unlatching_motor_str,strcat("app.",app.dropdown_items_opposite_dict(labels(i)),".Value"),strcat("x0(",num2str(i),")"));
+            end
+            eval(load_str);
+            eval(latch_str);
+            eval(spring_str);
+            eval(loading_motor_str);
+            eval(unlatching_motor_str);
+            
+            [combos,var_list] = sensitivity_analysis(loading_motor,unlatching_motor,mass,latch,spring_fun,x0,app.MetricButtonGroup.SelectedObject.Text,labels);
+            commandwindow;
+            disp(' ');
+            disp('----------------------');
+            disp('Sensitivity Analysis');
+            disp('----------------------');
+            disp(' ');
+            column_labels = strings([1, size(combos,2)]);
+            for i=1:length(column_labels)
+                column_labels(i) = "combo #"+num2str(i);
+            end
+            column_labels
+            temp_table = combos
+            combo_table = array2table(combos,'RowNames',labels,'VariableNames',column_labels);
+            disp('Most Sensitive Combinations of Parameters')
+            disp(combo_table);
+            disp('Most Sensitive Parameter Axes')
+            for i=1:length(var_list)
+                disp(var_list(i));
+            end
+        end
     end
     
 
@@ -935,8 +1014,8 @@ classdef plot_app < matlab.apps.AppBase
             addpath(fullfile(pathname));
             mlapp2classdef("plot_app.mlapp");
             
-            varnames = {'load_mass_mass',...
-                'latch_mass','latch_coeff_fric','latch_radius','latch_v_0','min_latching_dist','max_latching_dist',...
+            varnames = {'load_mass_mass','load_m_rod','load_EMA',...
+                'latch_mass','latch_coeff_fric','latch_radius','latch_v_0','min_latching_dist','max_latching_dist','runway_length'...
                 'linear_spring_k','linear_spring_mass','linear_spring_Fmax',...
                 'exp_spring_k','exp_spring_char_len','exp_spring_Fmax','exp_spring_mass',...
                 'lee_spring_E','lee_spring_A','lee_spring_L','lee_spring_rho','lee_spring_sigma_f',...
@@ -944,8 +1023,8 @@ classdef plot_app < matlab.apps.AppBase
                 'lm_hill_motor_Fmax','lm_hill_motor_Vmax','lm_hill_motor_muscle_length','lm_hill_motor_rate_of_activation','lm_hill_motor_L_i','lm_hill_motor_a_L','lm_hill_motor_b_L','lm_hill_motor_s',...
                 'um_linear_motor_Fmax','um_linear_motor_Vmax','um_linear_motor_range_of_motion','um_linear_motor_voltage_frac'...
                 'um_hill_motor_Fmax','um_hill_motor_Vmax','um_hill_motor_muscle_length','um_hill_motor_rate_of_activation','um_hill_motor_L_i','um_hill_motor_a_L','um_hill_motor_b_L','um_hill_motor_s'};
-            latexlabels = {'load mass',...
-                'latch mass','latch $\mu$','latch radius','latch $v_0$','min latching distance','max latching distance',...
+            latexlabels = {'load mass','lever arm mass','EMA'...
+                'latch mass','latch $\mu$','latch radius','latch $v_0$','min latching distance','max latching distance','runway length'...
                 'linear spring k','linear spring mass','linear spring Fmax',...
                 'exponential spring $k_0$','exponential spring characteristic length','exponential spring Fmax','exponential spring mass',...
                 'spring E','spring A','spring L','spring $\rho$','spring $\sigma_f$',...
@@ -953,8 +1032,8 @@ classdef plot_app < matlab.apps.AppBase
                 'loading motor (Hill) Fmax','loading motor (Hill) Vmax','loading motor (Hill) muscle length','loading motor (Hill) rate of activation','loading motor (Hill) motor $L_i$','loading motor (Hill) $a_L$','loading motor (Hill) $b_L$','loading motor (Hill) s',...
                 'unlatching motor (linear) Fmax','unlatching motor (linear) motor Vmax','unlatching motor (linear) range of motion','unlatching motor (linear) voltage fraction'...
                 'unlatching motor (Hill) Fmax','unlatching motor (Hill) Vmax','unlatching motor (Hill) muscle length','unlatching motor (Hill) rate of activation','unlatching motor (Hill) motor $L_i$','unlatching motor (Hill) $a_L$','unlatching motor (Hill) $b_L$','unlatching motor (Hill) s'};
-            nonlatexlabels = {'load mass',...
-                'latch mass','latch mu','latch radius','latch v_0','min latching distance','max latching distance',...
+            nonlatexlabels = {'load mass','lever arm mass','EMA'...
+                'latch mass','latch mu','latch radius','latch v_0','min latching distance','max latching distance','runway length'...
                 'linear spring k','linear spring mass','linear spring Fmax',...
                 'exponential spring k_0','exponential spring characteristic length','exponential spring Fmax','exponential spring mass',...
                 'spring E','spring A','spring L','spring rho','spring sigma_f',...
@@ -967,9 +1046,10 @@ classdef plot_app < matlab.apps.AppBase
             app.dropdown_items_dict = containers.Map(varnames,nonlatexlabels);
             app.dropdown_items_opposite_dict = containers.Map(nonlatexlabels,varnames);
 
+            app.sensitivity_vars.Multiselect = 'on';
             
-            app.load_vars = {'load_mass_mass'};
-            app.latch_vars = {'latch_mass','latch_coeff_fric','latch_radius','latch_v_0','min_latching_dist','max_latching_dist'};
+            app.load_vars = {'load_mass_mass','load_m_rod','load_EMA'};
+            app.latch_vars = {'latch_mass','latch_coeff_fric','latch_radius','latch_v_0','min_latching_dist','max_latching_dist','runway_length'};
             app.spring_vars = {'exp_spring_k','exp_spring_char_len','exp_spring_Fmax','exp_spring_mass'};
             %app.spring_vars = {'linear_spring_k','linear_spring_mass','linear_spring_Fmax'};
             %app.lm_vars = {'lm_linear_motor_Fmax','lm_linear_motor_Vmax','lm_linear_motor_range_of_motion','lm_linear_motor_voltage_frac'};
@@ -1002,6 +1082,8 @@ classdef plot_app < matlab.apps.AppBase
                 one_D_plot(app);
             elseif (app.graphing_corner.SelectedTab == app.graphing_corner_kinematics)
                 kinematics(app);
+            elseif (app.graphing_corner.SelectedTab == app.graphing_corner_sensitivity)
+                sensitivity(app);
             end
         end
 
@@ -1593,7 +1675,7 @@ classdef plot_app < matlab.apps.AppBase
 
             % Create load_EMA
             app.load_EMA = uieditfield(app.load_mass, 'numeric');
-            app.load_EMA.Limits = [0 Inf];
+            app.load_EMA.Limits = [0.001 Inf];
             app.load_EMA.Tooltip = {'effective mechanical advantage'};
             app.load_EMA.Position = [374 18 48 22];
             app.load_EMA.Value = 1;
@@ -2100,6 +2182,67 @@ classdef plot_app < matlab.apps.AppBase
             app.y_log_space.Items = {'lin', 'log'};
             app.y_log_space.Position = [251 222 27 12];
             app.y_log_space.Value = 'lin';
+
+            % Create graphing_corner_sensitivity
+            app.graphing_corner_sensitivity = uitab(app.graphing_corner);
+            app.graphing_corner_sensitivity.Title = 'Sensitivity';
+            app.graphing_corner_sensitivity.BackgroundColor = [1 1 0.6392];
+
+            % Create VariablesListBoxLabel
+            app.VariablesListBoxLabel = uilabel(app.graphing_corner_sensitivity);
+            app.VariablesListBoxLabel.HorizontalAlignment = 'right';
+            app.VariablesListBoxLabel.Position = [16 314 54 22];
+            app.VariablesListBoxLabel.Text = 'Variables';
+
+            % Create sensitivity_vars
+            app.sensitivity_vars = uilistbox(app.graphing_corner_sensitivity);
+            app.sensitivity_vars.Position = [85 124 225 214];
+
+            % Create pressCTRLtoselectmultipleLabel
+            app.pressCTRLtoselectmultipleLabel = uilabel(app.graphing_corner_sensitivity);
+            app.pressCTRLtoselectmultipleLabel.Position = [26 238 51 73];
+            app.pressCTRLtoselectmultipleLabel.Text = {'(press '; 'CTRL to '; 'select '; 'multiple)'};
+
+            % Create MetricButtonGroup
+            app.MetricButtonGroup = uibuttongroup(app.graphing_corner_sensitivity);
+            app.MetricButtonGroup.Title = 'Metric';
+            app.MetricButtonGroup.Position = [10 13 303 98];
+
+            % Create ymaxButton
+            app.ymaxButton = uiradiobutton(app.MetricButtonGroup);
+            app.ymaxButton.Text = 'ymax';
+            app.ymaxButton.Position = [11 51 58 22];
+
+            % Create yunlatchButton
+            app.yunlatchButton = uiradiobutton(app.MetricButtonGroup);
+            app.yunlatchButton.Text = 'yunlatch';
+            app.yunlatchButton.Position = [11 29 74 22];
+
+            % Create tLButton
+            app.tLButton = uiradiobutton(app.MetricButtonGroup);
+            app.tLButton.Text = 'tL';
+            app.tLButton.Position = [11 7 65 22];
+
+            % Create vtoButton
+            app.vtoButton = uiradiobutton(app.MetricButtonGroup);
+            app.vtoButton.Text = 'vto';
+            app.vtoButton.Position = [118 51 58 22];
+
+            % Create PmaxButton
+            app.PmaxButton = uiradiobutton(app.MetricButtonGroup);
+            app.PmaxButton.Text = 'Pmax';
+            app.PmaxButton.Position = [118 29 65 22];
+            app.PmaxButton.Value = true;
+
+            % Create ttoButton
+            app.ttoButton = uiradiobutton(app.MetricButtonGroup);
+            app.ttoButton.Text = 'tto';
+            app.ttoButton.Position = [118 7 65 22];
+
+            % Create KEmaxButton
+            app.KEmaxButton = uiradiobutton(app.MetricButtonGroup);
+            app.KEmaxButton.Text = 'KEmax';
+            app.KEmaxButton.Position = [221 51 68 22];
 
             % Create go
             app.go = uibutton(app.UIFigure, 'push');
