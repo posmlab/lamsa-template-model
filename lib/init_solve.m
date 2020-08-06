@@ -7,7 +7,7 @@
 
 function output = init_solve(lm, um, ld, lt, sp, x0, metric)
     if nargin==5
-        metric=='Pmax';
+        metric = 'Pmax';
     end
     
     loading_motor = lm(x0);

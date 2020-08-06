@@ -166,20 +166,18 @@ classdef plot_app < matlab.apps.AppBase
         n                               matlab.ui.control.NumericEditField
         x_log_space                     matlab.ui.control.Switch
         y_log_space                     matlab.ui.control.Switch
-        SensitivityTab                  matlab.ui.container.Tab
+        graphing_corner_sensitivity     matlab.ui.container.Tab
         VariablesListBoxLabel           matlab.ui.control.Label
         sensitivity_vars                matlab.ui.control.ListBox
         pressCTRLtoselectmultipleLabel  matlab.ui.control.Label
-        ButtonGroup                     matlab.ui.container.ButtonGroup
-        y_maxButton                     matlab.ui.control.RadioButton
-        y_unlatchButton                 matlab.ui.control.RadioButton
-        t_LButton                       matlab.ui.control.RadioButton
-        v_toButton                      matlab.ui.control.RadioButton
+        MetricButtonGroup               matlab.ui.container.ButtonGroup
+        ymaxButton                      matlab.ui.control.RadioButton
+        yunlatchButton                  matlab.ui.control.RadioButton
+        tLButton                        matlab.ui.control.RadioButton
+        vtoButton                       matlab.ui.control.RadioButton
         PmaxButton                      matlab.ui.control.RadioButton
-        t_toButton                      matlab.ui.control.RadioButton
-        v_toButton_2                    matlab.ui.control.RadioButton
-        PmaxButton_2                    matlab.ui.control.RadioButton
-        t_toButton_2                    matlab.ui.control.RadioButton
+        ttoButton                       matlab.ui.control.RadioButton
+        KEmaxButton                     matlab.ui.control.RadioButton
         go                              matlab.ui.control.Button
         ShowModelSchematicButton        matlab.ui.control.Button
         Image                           matlab.ui.control.Image
@@ -930,6 +928,54 @@ classdef plot_app < matlab.apps.AppBase
             end
             
         end
+        
+        function sensitivity(app)
+            labels = strings([1 length(app.sensitivity_vars.Value)]);
+            x0 = zeros([1 length(labels)]);
+            for i=1:length(labels)
+                labels(i) = app.sensitivity_vars.Value(i);
+                x0(i) = eval(['app.' app.dropdown_items_opposite_dict(labels(i)) '.Value;']);
+            end
+            load_str = "mass = @(x0)load_mass(app.load_mass_mass.Value,app.load_m_rod.Value,app.load_EMA.Value);";
+            
+            latch_str = "latch = @(x0)rounded_latch(app.latch_radius.Value,app.latch_mass.Value,app.latch_coeff_fric.Value, app.latch_v_0.Value, app.min_latching_dist.Value, app.max_latching_dist.Value, app.runway_length.Value);";
+            
+            if (app.spring.SelectedTab == app.linear_spring)
+                spring_str = "spring_fun = @(x0)linear_spring(app.linear_spring_k.Value,app.linear_spring_mass.Value,app.linear_spring_Fmax.Value);";
+            elseif (app.spring.SelectedTab == app.exponential_spring)
+                spring_str = "spring_fun = @(x0)exponential_spring(app.exp_spring_k.Value,app.exp_spring_char_len.Value,app.exp_spring_mass.Value,app.exp_spring_Fmax.Value);";
+            elseif (app.spring.SelectedTab == app.linear_elastic_extensional_spring)
+                spring_str = "spring_fun = @(x0)linear_elastic_extensional_spring(app.lee_spring_E.Value,app.lee_spring_A.Value,app.lee_spring_L.Value,app.lee_spring_rho.Value,app.lee_spring_sigma_f.Value);";
+            end
+
+            if (app.loading_motor.SelectedTab == app.lm_linear_motor)
+                loading_motor_str = "loading_motor = @(x0)linear_motor(app.lm_linear_motor_Fmax.Value,app.lm_linear_motor_Vmax.Value,app.lm_linear_motor_range_of_motion.Value,app.lm_linear_motor_voltage_frac.Value);";
+            elseif (app.loading_motor.SelectedTab == app.lm_hill_muscle_motor)
+                loading_motor_str = "loading_motor = @(x0)hill_muscle_motor(app.lm_hill_motor_muscle_length.Value,app.lm_hill_motor_Fmax.Value,app.lm_hill_motor_Vmax.Value,app.lm_hill_motor_rate_of_activation.Value,app.lm_hill_motor_L_i.Value,app.lm_hill_motor_a_L.Value,app.lm_hill_motor_b_L.Value,app.lm_hill_motor_s.Value);";
+            end
+
+            if (app.unlatching_motor.SelectedTab == app.um_linear_motor)
+                unlatching_motor_str = "unlatching_motor = @(x0)linear_motor(app.um_linear_motor_Fmax.Value,app.um_linear_motor_Vmax.Value,app.um_linear_motor_range_of_motion.Value,app.um_linear_motor_voltage_frac.Value);";
+            elseif (app.unlatching_motor.SelectedTab == app.um_hill_muscle_motor)
+                unlatching_motor_str = "unlatchin_motor = @(x0)hill_muscle_motor(app.um_hill_motor_muscle_length.Value,app.um_hill_motor_Fmax.Value,app.um_hill_motor_Vmax.Value,app.um_hill_motor_rate_of_activation.Value,app.um_hill_motor_L_i.Value,app.um_hill_motor_a_L.Value,app.um_hill_motor_b_L.Value,app.um_hill_motor_s.Value);";
+            end
+            
+            for i=1:length(labels)
+                load_str = strrep(load_str,strcat("app.",app.dropdown_items_opposite_dict(labels(i)),".Value"),strcat("x0(",num2str(i),")"));
+                latch_str = strrep(latch_str,strcat("app.",app.dropdown_items_opposite_dict(labels(i)),".Value"),strcat("x0(",num2str(i),")"));
+                spring_str = strrep(spring_str,strcat("app.",app.dropdown_items_opposite_dict(labels(i)),".Value"),strcat("x0(",num2str(i),")"));
+                loading_motor_str = strrep(loading_motor_str,strcat("app.",app.dropdown_items_opposite_dict(labels(i)),".Value"),strcat("x0(",num2str(i),")"));
+                unlatching_motor_str = strrep(unlatching_motor_str,strcat("app.",app.dropdown_items_opposite_dict(labels(i)),".Value"),strcat("x0(",num2str(i),")"));
+            end
+            eval(load_str);
+            eval(latch_str);
+            eval(spring_str);
+            eval(loading_motor_str);
+            eval(unlatching_motor_str);
+            [a,b] = sensitivity_analysis(loading_motor,unlatching_motor,mass,latch,spring_fun,x0,app.MetricButtonGroup.SelectedObject.Text,labels);
+            disp(a)
+            disp(b)
+        end
     end
     
 
@@ -1018,6 +1064,8 @@ classdef plot_app < matlab.apps.AppBase
                 one_D_plot(app);
             elseif (app.graphing_corner.SelectedTab == app.graphing_corner_kinematics)
                 kinematics(app);
+            elseif (app.graphing_corner.SelectedTab == app.graphing_corner_sensitivity)
+                sensitivity(app);
             end
         end
 
@@ -2117,76 +2165,66 @@ classdef plot_app < matlab.apps.AppBase
             app.y_log_space.Position = [251 222 27 12];
             app.y_log_space.Value = 'lin';
 
-            % Create SensitivityTab
-            app.SensitivityTab = uitab(app.graphing_corner);
-            app.SensitivityTab.Title = 'Sensitivity';
-            app.SensitivityTab.BackgroundColor = [1 1 0.6392];
+            % Create graphing_corner_sensitivity
+            app.graphing_corner_sensitivity = uitab(app.graphing_corner);
+            app.graphing_corner_sensitivity.Title = 'Sensitivity';
+            app.graphing_corner_sensitivity.BackgroundColor = [1 1 0.6392];
 
             % Create VariablesListBoxLabel
-            app.VariablesListBoxLabel = uilabel(app.SensitivityTab);
+            app.VariablesListBoxLabel = uilabel(app.graphing_corner_sensitivity);
             app.VariablesListBoxLabel.HorizontalAlignment = 'right';
             app.VariablesListBoxLabel.Position = [16 314 54 22];
             app.VariablesListBoxLabel.Text = 'Variables';
 
             % Create sensitivity_vars
-            app.sensitivity_vars = uilistbox(app.SensitivityTab);
+            app.sensitivity_vars = uilistbox(app.graphing_corner_sensitivity);
             app.sensitivity_vars.Position = [85 124 225 214];
 
             % Create pressCTRLtoselectmultipleLabel
-            app.pressCTRLtoselectmultipleLabel = uilabel(app.SensitivityTab);
+            app.pressCTRLtoselectmultipleLabel = uilabel(app.graphing_corner_sensitivity);
             app.pressCTRLtoselectmultipleLabel.Position = [26 238 51 73];
             app.pressCTRLtoselectmultipleLabel.Text = {'(press '; 'CTRL to '; 'select '; 'multiple)'};
 
-            % Create ButtonGroup
-            app.ButtonGroup = uibuttongroup(app.SensitivityTab);
-            app.ButtonGroup.Title = 'Button Group';
-            app.ButtonGroup.Position = [7 13 303 98];
+            % Create MetricButtonGroup
+            app.MetricButtonGroup = uibuttongroup(app.graphing_corner_sensitivity);
+            app.MetricButtonGroup.Title = 'Metric';
+            app.MetricButtonGroup.Position = [10 13 303 98];
 
-            % Create y_maxButton
-            app.y_maxButton = uiradiobutton(app.ButtonGroup);
-            app.y_maxButton.Text = 'y_max';
-            app.y_maxButton.Position = [11 51 58 22];
-            app.y_maxButton.Value = true;
+            % Create ymaxButton
+            app.ymaxButton = uiradiobutton(app.MetricButtonGroup);
+            app.ymaxButton.Text = 'ymax';
+            app.ymaxButton.Position = [11 51 58 22];
+            app.ymaxButton.Value = true;
 
-            % Create y_unlatchButton
-            app.y_unlatchButton = uiradiobutton(app.ButtonGroup);
-            app.y_unlatchButton.Text = 'y_unlatch';
-            app.y_unlatchButton.Position = [11 29 74 22];
+            % Create yunlatchButton
+            app.yunlatchButton = uiradiobutton(app.MetricButtonGroup);
+            app.yunlatchButton.Text = 'yunlatch';
+            app.yunlatchButton.Position = [11 29 74 22];
 
-            % Create t_LButton
-            app.t_LButton = uiradiobutton(app.ButtonGroup);
-            app.t_LButton.Text = 't_L';
-            app.t_LButton.Position = [11 7 65 22];
+            % Create tLButton
+            app.tLButton = uiradiobutton(app.MetricButtonGroup);
+            app.tLButton.Text = 'tL';
+            app.tLButton.Position = [11 7 65 22];
 
-            % Create v_toButton
-            app.v_toButton = uiradiobutton(app.ButtonGroup);
-            app.v_toButton.Text = 'v_to';
-            app.v_toButton.Position = [121 51 58 22];
+            % Create vtoButton
+            app.vtoButton = uiradiobutton(app.MetricButtonGroup);
+            app.vtoButton.Text = 'vto';
+            app.vtoButton.Position = [118 51 58 22];
 
             % Create PmaxButton
-            app.PmaxButton = uiradiobutton(app.ButtonGroup);
+            app.PmaxButton = uiradiobutton(app.MetricButtonGroup);
             app.PmaxButton.Text = 'Pmax';
-            app.PmaxButton.Position = [121 29 65 22];
+            app.PmaxButton.Position = [118 29 65 22];
 
-            % Create t_toButton
-            app.t_toButton = uiradiobutton(app.ButtonGroup);
-            app.t_toButton.Text = 't_to';
-            app.t_toButton.Position = [121 7 65 22];
+            % Create ttoButton
+            app.ttoButton = uiradiobutton(app.MetricButtonGroup);
+            app.ttoButton.Text = 'tto';
+            app.ttoButton.Position = [118 7 65 22];
 
-            % Create v_toButton_2
-            app.v_toButton_2 = uiradiobutton(app.ButtonGroup);
-            app.v_toButton_2.Text = 'v_to';
-            app.v_toButton_2.Position = [225 51 58 22];
-
-            % Create PmaxButton_2
-            app.PmaxButton_2 = uiradiobutton(app.ButtonGroup);
-            app.PmaxButton_2.Text = 'Pmax';
-            app.PmaxButton_2.Position = [225 29 65 22];
-
-            % Create t_toButton_2
-            app.t_toButton_2 = uiradiobutton(app.ButtonGroup);
-            app.t_toButton_2.Text = 't_to';
-            app.t_toButton_2.Position = [225 7 65 22];
+            % Create KEmaxButton
+            app.KEmaxButton = uiradiobutton(app.MetricButtonGroup);
+            app.KEmaxButton.Text = 'KEmax';
+            app.KEmaxButton.Position = [221 51 68 22];
 
             % Create go
             app.go = uibutton(app.UIFigure, 'push');
