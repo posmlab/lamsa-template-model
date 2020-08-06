@@ -1010,7 +1010,7 @@ classdef plot_app < matlab.apps.AppBase
             addpath(fullfile(pathname));
             mlapp2classdef("plot_app.mlapp");
             
-            varnames = {'load_mass_mass','lever_arm_mass','load_EMA',...
+            varnames = {'load_mass_mass','load_m_rod','load_EMA',...
                 'latch_mass','latch_coeff_fric','latch_radius','latch_v_0','min_latching_dist','max_latching_dist','runway_length'...
                 'linear_spring_k','linear_spring_mass','linear_spring_Fmax',...
                 'exp_spring_k','exp_spring_char_len','exp_spring_Fmax','exp_spring_mass',...
@@ -1044,7 +1044,7 @@ classdef plot_app < matlab.apps.AppBase
 
             app.sensitivity_vars.Multiselect = 'on';
             
-            app.load_vars = {'load_mass_mass','lever_arm_mass','load_EMA'};
+            app.load_vars = {'load_mass_mass','load_m_rod','load_EMA'};
             app.latch_vars = {'latch_mass','latch_coeff_fric','latch_radius','latch_v_0','min_latching_dist','max_latching_dist','runway_length'};
             app.spring_vars = {'exp_spring_k','exp_spring_char_len','exp_spring_Fmax','exp_spring_mass'};
             %app.spring_vars = {'linear_spring_k','linear_spring_mass','linear_spring_Fmax'};
@@ -1671,7 +1671,7 @@ classdef plot_app < matlab.apps.AppBase
 
             % Create load_EMA
             app.load_EMA = uieditfield(app.load_mass, 'numeric');
-            app.load_EMA.Limits = [0 Inf];
+            app.load_EMA.Limits = [0.001 Inf];
             app.load_EMA.Tooltip = {'effective mechanical advantage'};
             app.load_EMA.Position = [374 18 48 22];
             app.load_EMA.Value = 1;
