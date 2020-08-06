@@ -19,7 +19,7 @@ function [combos, var_list] = sensitivity_analysis(lm,um,ld,lt,sp,x0,metric,labe
     pca_accuracy = 2;
     pca_range = 0.01;
     
-    [ax,pac] = sensitive_axes(wrapper_func,x0,0.01,0.01,1E-5,2);
+    [ax,pac] = sensitive_axes(wrapper_func,x0,0.01,0.01,0.01,8);
     first_axis = ax(:,1).^2*100+100;
     for i=1:length(start)
         if first_axis(i) == 100

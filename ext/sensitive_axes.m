@@ -4,17 +4,17 @@ function [axes,pac] = sensitive_axes(fun,x0,grad_pct,mesh_pct,pca_pct,pca_N)
     if nargin == 4 %Set default value for pca_N
         pca_N = 5;
     end
+    
     %% Find gradient and find tangent plane
     %Evaluate the gradient
     f0 = feval(fun,x0);
-    grad = ndimgrad(fun,x0,grad_pct);
+    grad = relative_gradient(fun,x0,grad_pct);
     %If the gradient is small, call it zero
-    if 2*grad_pct*x0'.*grad/f0<1e-4 %If the total variation is less than some small percentage
+    if 2*grad_pct*grad/f0<1e-4 %If the total variation is less than some small percentage
         grad = zeros(length(x0),1);
     end
     %Determine the matrix U that maps to the tangent plane
     nullBasis = null(grad');
-    f_plane = @(u) feval(fun,x0+(nullBasis*u)'); %New function- fun restricted to plane
     
     %% Create mesh in input space
     dim = size(nullBasis,2);
@@ -25,8 +25,8 @@ function [axes,pac] = sensitive_axes(fun,x0,grad_pct,mesh_pct,pca_pct,pca_N)
     %Create axes in input space
     input_ax_vals = zeros(length(x0),pca_N);
     for i = 1:length(x0)
-        low_bound = x0(i)*(1-mesh_pct);
-        up_bound = x0(i)*(1+mesh_pct);
+        low_bound = -mesh_pct;
+        up_bound = +mesh_pct;
         input_ax_vals(i,:) = linspace(low_bound,up_bound,pca_N);
     end
     
@@ -57,7 +57,7 @@ function [axes,pac] = sensitive_axes(fun,x0,grad_pct,mesh_pct,pca_pct,pca_N)
     %Find min and max values on each nullspace axis
     for i = 1:dim
         for j = 1:numel(p{1})
-            null_proj_pts(i,j) = dot(input_mesh_pts(:,j)-x0',nullBasis(:,i));
+            null_proj_pts(i,j) = dot(input_mesh_pts(:,j),nullBasis(:,i));
         end
     end
     min_vals = min(null_proj_pts,[],2); %Column vector of the minimum value of each nullspace dimension
@@ -95,8 +95,8 @@ function [axes,pac] = sensitive_axes(fun,x0,grad_pct,mesh_pct,pca_pct,pca_N)
     crds_to_pca = zeros(dim,0);
     for i = 1:numel(q{1})
         progress = i/(numel(q{1}));
-        F = f_plane(null_mesh_pts(:,i));
-        pct_diff = abs(F/f0-1);
+          F = feval(fun,x0.*(1+nullBasis*null_mesh_pts(:,i))');
+          pct_diff = abs(F/f0-1);
         if pct_diff<pca_pct
             num_pca_points = num_pca_points + 1;
             crds_to_pca(:,num_pca_points) = null_mesh_pts(:,i);
