@@ -972,19 +972,23 @@ classdef plot_app < matlab.apps.AppBase
             eval(spring_str);
             eval(loading_motor_str);
             eval(unlatching_motor_str);
+            
+            [combos,var_list] = sensitivity_analysis(loading_motor,unlatching_motor,mass,latch,spring_fun,x0,app.MetricButtonGroup.SelectedObject.Text,labels);
+            commandwindow;
             disp(' ');
             disp('----------------------');
             disp('Sensitivity Analysis');
             disp('----------------------');
             disp(' ');
-            disp('List of Parameter Axes');
-            for i=1:length(labels)
-                disp(labels(i));
+            column_labels = strings([1, size(combos,2)]);
+            for i=1:length(column_labels)
+                column_labels(i) = "combo #"+num2str(i);
             end
-            [combos,var_list] = sensitivity_analysis(loading_motor,unlatching_motor,mass,latch,spring_fun,x0,app.MetricButtonGroup.SelectedObject.Text,labels);
-            disp(' ');
+            column_labels
+            temp_table = combos
+            combo_table = array2table(combos,'RowNames',labels,'VariableNames',column_labels);
             disp('Most Sensitive Combinations of Parameters')
-            disp(combos);
+            disp(combo_table);
             disp('Most Sensitive Parameter Axes')
             for i=1:length(var_list)
                 disp(var_list(i));

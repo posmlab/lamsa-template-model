@@ -8,20 +8,17 @@ function [axes,pac] = sensitive_axes(fun,x0,grad_pct,mesh_pct,pca_pct,pca_N)
     %% Find gradient and find tangent plane
     %Evaluate the gradient
     f0 = feval(fun,x0);
-    grad = relative_gradient(fun,x0,grad_pct)
+    grad = relative_gradient(fun,x0,grad_pct);
     %If the gradient is small, call it zero
     if 2*grad_pct*grad/f0<1e-4 %If the total variation is less than some small percentage
         grad = zeros(length(x0),1);
     end
     %Determine the matrix U that maps to the tangent plane
-    nullBasis = null(grad')
+    nullBasis = null(grad');
     
     %% Create mesh in input space
     dim = size(nullBasis,2);
-    %build axis vectors
-    sz = pca_N*ones(1,dim);
-    perf = zeros(sz);
-    
+        
     %Create axes in input space
     input_ax_vals = zeros(length(x0),pca_N);
     for i = 1:length(x0)
@@ -93,16 +90,21 @@ function [axes,pac] = sensitive_axes(fun,x0,grad_pct,mesh_pct,pca_pct,pca_N)
     %% Evaluate function on the mesh and select coordinates for pca
     num_pca_points = 0;
     crds_to_pca = zeros(dim,0);
+     % initializing waitbar
+     processing_bar = waitbar(0,'Please wait...');
+     
     for i = 1:numel(q{1})
+        
         progress = i/(numel(q{1}));
-          F = feval(fun,x0.*(1+nullBasis*null_mesh_pts(:,i))')
-          f0
-          pct_diff = abs(F/f0-1)
+        waitbar(progress,processing_bar,'Processing...');
+        F = feval(fun,x0.*(1+nullBasis*null_mesh_pts(:,i))');
+        pct_diff = abs(F/f0-1);
         if pct_diff<pca_pct
             num_pca_points = num_pca_points + 1;
             crds_to_pca(:,num_pca_points) = null_mesh_pts(:,i);
         end
     end
+    
     %Now perform PCA on the resulting points
     s = size(crds_to_pca);
     if s(2) == 0
@@ -122,4 +124,5 @@ function [axes,pac] = sensitive_axes(fun,x0,grad_pct,mesh_pct,pca_pct,pca_N)
     end
     buck=buck(2:end);
     pac=(1-buck.^2)/sum(1-buck.^2)*100;
+    close(processing_bar);
 end
