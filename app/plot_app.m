@@ -929,7 +929,13 @@ classdef plot_app < matlab.apps.AppBase
             
         end
         
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
         function sensitivity(app)
+            f = waitbar(1/4,'Please wait...');
+            load_bar_value = 1/4;
+            load_bar_increment = 1/4;
+            
             labels = strings([1 length(app.sensitivity_vars.Value)]);
             x0 = zeros([1 length(labels)]);
             for i=1:length(labels)
@@ -960,6 +966,9 @@ classdef plot_app < matlab.apps.AppBase
                 unlatching_motor_str = "unlatchin_motor = @(x0)hill_muscle_motor(app.um_hill_motor_muscle_length.Value,app.um_hill_motor_Fmax.Value,app.um_hill_motor_Vmax.Value,app.um_hill_motor_rate_of_activation.Value,app.um_hill_motor_L_i.Value,app.um_hill_motor_a_L.Value,app.um_hill_motor_b_L.Value,app.um_hill_motor_s.Value);";
             end
             
+            load_bar_value = load_bar_value + load_bar_increment;
+            waitbar(load_bar_value,f,'Processing...');
+            
             for i=1:length(labels)
                 load_str = strrep(load_str,strcat("app.",app.dropdown_items_opposite_dict(labels(i)),".Value"),strcat("x0(",num2str(i),")"));
                 latch_str = strrep(latch_str,strcat("app.",app.dropdown_items_opposite_dict(labels(i)),".Value"),strcat("x0(",num2str(i),")"));
@@ -973,6 +982,9 @@ classdef plot_app < matlab.apps.AppBase
             eval(loading_motor_str);
             eval(unlatching_motor_str);
             
+            load_bar_value = load_bar_value + load_bar_increment;
+            waitbar(load_bar_value,f,'Processing...');
+            
             [combos,var_list] = sensitivity_analysis(loading_motor,unlatching_motor,mass,latch,spring_fun,x0,app.MetricButtonGroup.SelectedObject.Text,labels);
             commandwindow;
             disp(' ');
@@ -984,8 +996,6 @@ classdef plot_app < matlab.apps.AppBase
             for i=1:length(column_labels)
                 column_labels(i) = "combo #"+num2str(i);
             end
-            column_labels
-            temp_table = combos
             combo_table = array2table(combos,'RowNames',labels,'VariableNames',column_labels);
             disp('Most Sensitive Combinations of Parameters')
             disp(combo_table);
@@ -993,6 +1003,7 @@ classdef plot_app < matlab.apps.AppBase
             for i=1:length(var_list)
                 disp(var_list(i));
             end
+            close(f)
         end
     end
     
@@ -1156,9 +1167,22 @@ classdef plot_app < matlab.apps.AppBase
 
         % Button pushed function: ShowModelSchematicButton
         function ShowModelSchematicButtonPushed(app, event)
-            image = imread('lamsa.PNG');
-            figure
-            imshow(image,'Border','tight','InitialMagnification','fit')
+%             image = imread('model.pdf');
+%             figure
+%             imshow(image,'Border','tight','InitialMagnification','fit')
+              winopen("model.pdf");
+        end
+
+        % Selection change function: graphing_corner
+        function graphing_cornerSelectionChanged(app, event)
+            selectedTab = app.graphing_corner.SelectedTab;
+            if (selectedTab == app.graphing_corner_sensitivity)
+                set(app.savesolutionCheckBox,'visible','off');
+                app.go.Text = 'Compute!';
+            else
+                set(app.savesolutionCheckBox,'visible','on');
+                app.go.Text = 'Graph!';
+            end
         end
     end
 
@@ -1874,6 +1898,7 @@ classdef plot_app < matlab.apps.AppBase
             % Create graphing_corner
             app.graphing_corner = uitabgroup(app.UIFigure);
             app.graphing_corner.AutoResizeChildren = 'off';
+            app.graphing_corner.SelectionChangedFcn = createCallbackFcn(app, @graphing_cornerSelectionChanged, true);
             app.graphing_corner.Position = [783 218 322 390];
 
             % Create graphing_corner_kinematics
