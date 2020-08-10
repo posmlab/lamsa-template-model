@@ -1021,8 +1021,8 @@ classdef plot_app < matlab.apps.AppBase
             nameLength = strlength("plot_app.mlapp");
             correctIndex = lastIndex-nameLength;
             pathname = pathname(1:correctIndex);
-            pathname = pathname +"/../ext";
-            addpath(fullfile(pathname));
+            pathname = pathname +"/..";
+            addpath(genpath(fullfile(pathname)));
             mlapp2classdef("plot_app.mlapp");
             
             varnames = {'load_mass_mass','load_m_rod','load_EMA',...
@@ -1084,7 +1084,6 @@ classdef plot_app < matlab.apps.AppBase
 
         % Button pushed function: go
         function goButtonPushed(app, event)
-            addpath(genpath(fullfile(pwd,'..')));
             lastwarn('');
             
             if (app.graphing_corner.SelectedTab == app.graphing_corner_heatmap)
