@@ -6,6 +6,9 @@ LaMSA model implemented in MATLAB.
 
 See this [YouTube video on Using the MATLAB LaMSA Model](https://youtu.be/c-lTELC9GgM) to get started with the graphical user interface.
 
+[![DOI](https://zenodo.org/badge/263460081.svg)](https://zenodo.org/badge/latestdoi/263460081)
+
+
 ## Code details
 
 get_metrics.m is a helper function to extract kinematic metrics (e.g. vmax, amax) from the solution (t,x,v)
