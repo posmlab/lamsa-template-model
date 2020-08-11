@@ -34,5 +34,5 @@ function spring = exponential_spring(k_0,characteristic_length, varargin)
     % only works for compressing the spring
     spring.Force = @(t,x)min(characteristic_length*k_0*(exp(-x(1)/characteristic_length)-1),realmax).*(abs(characteristic_length*k_0*(exp(-x(1)/characteristic_length)-1))<F_spring_max);
     spring.mass = m_s;
-    spring.range= characteristic_length*log((F_spring_max/(characteristic_length*k_0))-1);
+    spring.range= characteristic_length*log((F_spring_max/(characteristic_length*k_0))+1);
 end

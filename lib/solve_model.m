@@ -1,7 +1,6 @@
 function [sol,transition_times] = solve_model(loading_motor,unlatching_motor,load,latch,spring, outputDirectory)
 %Solve set of differential equations for loading, unlatching, and launching
 %   phases of LAMSA motion
-LARGE_NUM = 1E10; % subtract a large number in fzero function to trick fzero into identifying points where motor or spring suddnely go to 0
 m_eff = load.mass + spring.mass/3;
 
 
