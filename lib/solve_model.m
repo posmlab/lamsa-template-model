@@ -6,7 +6,7 @@ m_eff = load.mass + spring.mass/3;
 
 %% Loading phase: Fs vs. Fin
 
-N_points = 1000;
+N_points = 10000;
 
 rangeBound = min([latch.max_latching_dist, spring.range, loading_motor.range, 0.1*realmax]);
 
