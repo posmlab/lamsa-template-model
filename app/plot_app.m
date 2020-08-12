@@ -122,7 +122,7 @@ classdef plot_app < matlab.apps.AppBase
         LoadingphaseLabel               matlab.ui.control.Label
         UnlatchingandlaunchingphaseLabel  matlab.ui.control.Label
         graphing_corner_one_D           matlab.ui.container.Tab
-        OD_minunlatchingmotorforceCheckBox  matlab.ui.control.CheckBox
+        OD_a_maxCheckBox                matlab.ui.control.CheckBox
         xaxisLabel_2                    matlab.ui.control.Label
         OD_y_maxCheckBox                matlab.ui.control.CheckBox
         OD_y_unlatchCheckBox            matlab.ui.control.CheckBox
@@ -140,8 +140,9 @@ classdef plot_app < matlab.apps.AppBase
         xmaxEditFieldLabel_2            matlab.ui.control.Label
         OD_xmax                         matlab.ui.control.NumericEditField
         OD_x_log_space                  matlab.ui.control.Switch
+        ComparetoDirectActuationCheckBox  matlab.ui.control.CheckBox
         graphing_corner_heatmap         matlab.ui.container.Tab
-        minunlatchingmotorforceCheckBox  matlab.ui.control.CheckBox
+        a_maxCheckBox                   matlab.ui.control.CheckBox
         xaxisLabel                      matlab.ui.control.Label
         yaxisLabel                      matlab.ui.control.Label
         y_maxCheckBox                   matlab.ui.control.CheckBox
@@ -166,6 +167,7 @@ classdef plot_app < matlab.apps.AppBase
         n                               matlab.ui.control.NumericEditField
         x_log_space                     matlab.ui.control.Switch
         y_log_space                     matlab.ui.control.Switch
+        MakeLaMSAZonePlotCheckBox       matlab.ui.control.CheckBox
         graphing_corner_sensitivity     matlab.ui.container.Tab
         VariablesListBoxLabel           matlab.ui.control.Label
         sensitivity_vars                matlab.ui.control.ListBox
@@ -335,10 +337,10 @@ classdef plot_app < matlab.apps.AppBase
                 metrics_names{end+1} = 'tto';
                 metrics_labels{end+1} = '$t_{\textrm{to}}$';
             end
-            if app.minunlatchingmotorforceCheckBox.Value
-                metrics{end+1} = 'minumforce';
-                metrics_names{end+1} = 'minumforce';
-                metrics_labels{end+1} = 'min unlatching force';
+            if app.a_maxCheckBox.Value
+                metrics{end+1} = 'amax';
+                metrics_names{end+1} = 'amax';
+                metrics_labels{end+1} = '$a_{\textrm{max}}$';
             end
             if app.KE_maxCheckBox.Value
                 metrics{end+1} = 'KEmax';
@@ -388,6 +390,7 @@ classdef plot_app < matlab.apps.AppBase
                     %% initializing LaMSA component structs
                     
                     % load mass struct initialization
+                    % coupling for mass used in the paper: app.load_mass_mass.Value = (app.lm_hill_motor_Fmax.Value/86.2)^1.5;
                     load = load_mass(app.load_mass_mass.Value,app.load_m_rod.Value,app.load_EMA.Value);
                     
                     % latch struct initialization
@@ -397,11 +400,6 @@ classdef plot_app < matlab.apps.AppBase
                     if (app.spring.SelectedTab == app.linear_spring)
                         spring = linear_spring(app.linear_spring_k.Value,app.linear_spring_mass.Value,app.linear_spring_Fmax.Value);
                     elseif (app.spring.SelectedTab == app.exponential_spring)
-%                         disp("THIS IS THE APP CODE")
-%                         app.exp_spring_k.Value
-%                         app.exp_spring_char_len.Value
-%                         app.exp_spring_mass.Value
-%                         app.exp_spring_Fmax.Value
                         spring = exponential_spring(app.exp_spring_k.Value,app.exp_spring_char_len.Value,app.exp_spring_mass.Value,app.exp_spring_Fmax.Value);
                     elseif (app.spring.SelectedTab == app.linear_elastic_extensional_spring)
                         spring = linear_elastic_extensional_spring(app.lee_spring_E.Value,app.lee_spring_A.Value,app.lee_spring_L.Value,app.lee_spring_rho.Value,app.lee_spring_sigma_f.Value);
@@ -446,41 +444,23 @@ classdef plot_app < matlab.apps.AppBase
                             latch_vi_a_zero = warndlg("The latch's initial velocity and acceleration are both zero.",'Warning');
                         end
                     end
+                   
 
-                    
                     met_dict=get_metrics(sol,transition_times,load,metrics);
                     for ii=1:length(metrics)
-                        % the KE_Ratio gets special treatment because it's
-                        % weird. This is the ratio of the load mass's final
-                        % kinetic energy in braking vs. non-braking
-                        % scenarios. The difference between these scenarios
-                        % is that in one scenario, we allow a linear
-                        % unlatching motor to behave as normal (exerts a
-                        % negative force on the latch if the motor moves
-                        % faster than vmax), whereas in the other, we
-                        % specify that if the unlatching motor is moving so
-                        % fast that it would normally brake, we
-                        % artificially set the force to 0 instead. 
-                        % Comparing these two physical scenarios requires a
-                        % second call to solve_model, hence the special
-                        % treatment.
-%                         if (strcmp(metrics{ii},'KE_Ratio') && app.unlatching_motor.SelectedTab == app.um_linear_motor)
-% 
-%                             unlatching_motor_no_braking = linear_motor(app.um_linear_motor_Fmax.Value,app.um_linear_motor_Vmax.Value,app.um_linear_motor_range_of_motion.Value,app.um_linear_motor_voltage_frac.Value, true);
-%                             [sol_no_braking, tt_no_braking] = solve_model(loading_motor,unlatching_motor_no_braking,load,latch,spring,output_directory);
-%                             
-%                             KE_no_braking = (0.5*load.mass*(sol_no_braking(end,3)^2));
-%                             KE_braking = (0.5*load.mass*(sol(end,3)^2));
-%                             ratio = KE_no_braking/KE_braking;
-%                             outval{ii}(i,j)=ratio;
-%                         elseif (strcmp(metrics{ii},'KE_Ratio') && app.unlatching_motor.SelectedTab ~= app.um_linear_motor)
-%                             error("The KE_Ratio metric is only available for a linear unlatching motor (for now!)")
-%                         else
-%                             outval{ii}(i,j)=met_dict(metrics{ii});
-%                         end
                         outval{ii}(i,j)=met_dict(metrics{ii});
-                        metrics{ii};
                     end
+                    
+                    % Run direct actuation model if MakeLaMSAZonePlotCheckBox
+                    % is selected
+                    if (app.MakeLaMSAZonePlotCheckBox.Value)
+                        [direct_sol, direct_transition_times] = solve_direct_actuation(loading_motor,load);
+                        direct_met_dict=get_metrics(direct_sol,direct_transition_times,load,metrics);
+                        for ii=1:length(metrics)
+                            direct_outval{ii}(i,j)=direct_met_dict(metrics{ii});
+                        end
+                    end
+                    
                 end
                 disp(['row ' num2str(i) ' of ' num2str(N)]);
                 load_bar_value = load_bar_value + load_bar_increment;
@@ -493,23 +473,27 @@ classdef plot_app < matlab.apps.AppBase
             eval(['app.' app.dropdown_items_opposite_dict(app.IV2DropDown.Value) '.Value = looping_param_y_value;']);
             
             % plot output
-            fh = figure('Name','Heatmaps');
+            fh = figure('Name','LaMSA Heatmaps');
             fh.WindowState = 'maximized';
             subplot_rows = floor(sqrt(length(metrics)));
             subplot_cols = ceil(length(metrics)/floor(sqrt(length(metrics))));
             for ii=1:length(metrics)
                 subplot(subplot_rows,subplot_cols,ii);
                 
-                % so that you can click on the heatplot and have a
-                % kinematics
-                % plot show up
+                % use an imageHandle so that you can click on the heatplot 
+                % and have a kinematics plot show up
                 imageHandle = imagesc(xrange,yrange,outval{ii});
                 set(gca,'YDir','normal');
                 xlabel(app.axis_labels_dict(xname),'Interpreter', 'Latex');
                 ylabel(app.axis_labels_dict(yname), 'Interpreter', 'Latex');
                 
                 c = colorbar;
-                colormap(linspecer);
+                % make "better performance" a darker blue
+                if (strcmp(metrics_names{ii},'tto')) 
+                    colormap(gca,flipud(linspecer('blue'))); % for tto - smaller means better, so flip
+                else
+                    colormap(gca,linspecer('blue')); % otherwise, higher is better
+                end
                 c.Label.Interpreter = 'Latex';
                 set(c,'TickLabelInterpreter','Latex');
                 c.Label.String = metrics_dict(metrics_names{ii});
@@ -540,6 +524,130 @@ classdef plot_app < matlab.apps.AppBase
                 
             end
             
+            % plot direct actuation output
+            if (app.MakeLaMSAZonePlotCheckBox.Value)
+
+                fh = figure('Name','Direct Actuation Heatmaps');
+                fh.WindowState = 'maximized';
+                subplot_rows = floor(sqrt(length(metrics)));
+                subplot_cols = ceil(length(metrics)/floor(sqrt(length(metrics))));
+                for ii=1:length(metrics)
+                    subplot(subplot_rows,subplot_cols,ii);
+                    
+                    imagesc(xrange,yrange,direct_outval{ii});
+                    set(gca,'YDir','normal');
+                    xlabel(app.axis_labels_dict(xname),'Interpreter', 'Latex');
+                    ylabel(app.axis_labels_dict(yname), 'Interpreter', 'Latex');
+                    
+                    c = colorbar;
+                    % make "better performance" a darker red
+                    if (strcmp(metrics_names{ii},'tto')) 
+                        colormap(gca,flipud(linspecer('red'))); % for tto - smaller means better, so flip
+                    else
+                        colormap(gca,linspecer('red')); % otherwise, higher is better
+                    end
+                 
+                    c.Label.Interpreter = 'Latex';
+                    set(c,'TickLabelInterpreter','Latex');
+                    c.Label.String = metrics_dict(metrics_names{ii});
+                    
+                    
+                    % makes the x and y axes in log scale
+                    set(gca,'TickLabelInterpreter','Latex');
+                    
+                    xtick = get(gca,'XTick');
+                    ytick = get(gca,'YTick');
+                    xticklabel = get(gca,'XTickLabel');
+                    yticklabel = get(gca,'YTickLabel');
+                    if strcmp(app.x_log_space.Value,'log')
+                        for i=1:length(xticks)
+                            xticklabel{i} = strcat('$10^{',num2str(xtick(i)),'}$');
+                        end
+                    end
+                    set(gca,'XTickLabel',xticklabel);
+                    set(gca,'XTick',xtick);
+                    if strcmp(app.y_log_space.Value,'log')
+                        for j=1:length(yticks)
+                            yticklabel{j} = strcat('$10^{',num2str(ytick(j)),'}$');
+                        end
+                    end
+                    set(gca,'YTickLabel',yticklabel);
+                    set(gca,'YTick',ytick);
+                end
+                
+                
+                fh = figure('Name','LaMSA Zone Heatmaps');
+                fh.WindowState = 'maximized';
+                subplot_rows = floor(sqrt(length(metrics)));
+                subplot_cols = ceil(length(metrics)/floor(sqrt(length(metrics))));
+                for ii=1:length(metrics)
+                    subplot(subplot_rows,subplot_cols,ii);
+                    
+                    % calculate LaMSA Zone ratio
+                    if (strcmp(metrics_names{ii},'tto')) 
+                        LaMSAval = direct_outval{ii}./outval{ii};
+                    else
+                        LaMSAval = outval{ii}./direct_outval{ii};
+                    end
+            
+                    max_output = max(2,max(LaMSAval,[],'all'));
+                    min_output = min(0.5,min(LaMSAval,[],'all'));
+                    
+                    % map output onto the range 0 to 2 for the colormap to
+                    % have an even spread between LaMSA and non-LaMSA
+                    scaledval = LaMSAval;
+                    idx = find(scaledval>1);
+                    scaledval(idx) = (scaledval(idx)-1)/(max_output-1) + 1;
+                    idx = find(scaledval<1);
+                    scaledval(idx) = 1 - (1-scaledval(idx))/(1-min_output);
+                    
+                    % dispay scaled value of LaMSA ratio
+                    imagesc(xrange,yrange,scaledval);
+                    set(gca,'YDir','normal');
+                    xlabel(app.axis_labels_dict(xname),'Interpreter', 'Latex');
+                    ylabel(app.axis_labels_dict(yname), 'Interpreter', 'Latex');
+                    
+                    c = colorbar;
+                    % make a LaMSA Zone colormap going red-->white-->blue
+                    rval = [.42 0.03 0.13]; % starting red value
+                    wval = [ 1 1 1];
+                    bval = [0.03 0.18 .42]; % ending blue value
+                    colmap_res = 100; % number of colors in each range of the colormap
+                    bcolmap = [linspace(rval(1),wval(1),colmap_res)',linspace(rval(2),wval(2),colmap_res)',linspace(rval(3),wval(3),colmap_res)'];
+                    rcolmap = [linspace(wval(1),bval(1),colmap_res)',linspace(wval(2),bval(2),colmap_res)',linspace(wval(3),bval(3),colmap_res)'];
+                    colmap = [bcolmap;rcolmap];
+                    colormap(gca,colmap);
+                    caxis([0,2]);
+                    set(c,'YTick',[0,1,2]);
+                    set(c,'YTickLabel',{strcat('1/',num2str(1/min_output,'%.0f')),'1',num2str(max_output,'%.0f')});
+                    c.Label.Interpreter = 'Latex';
+                    set(c,'TickLabelInterpreter','Latex');
+                    c.Label.String = strcat("LaMSA Zone Ratio for ", metrics_dict(metrics_names{ii}));
+                    
+                    
+                    % makes the x and y axes in log scale
+                    set(gca,'TickLabelInterpreter','Latex');
+                    
+                    xtick = get(gca,'XTick');
+                    ytick = get(gca,'YTick');
+                    xticklabel = get(gca,'XTickLabel');
+                    yticklabel = get(gca,'YTickLabel');
+                    if strcmp(app.x_log_space.Value,'log')
+                        for i=1:length(xticks)
+                            xticklabel{i} = strcat('$10^{',num2str(xtick(i)),'}$');
+                        end
+                    end
+                    set(gca,'XTickLabel',xticklabel);
+                    set(gca,'XTick',xtick);
+                    if strcmp(app.y_log_space.Value,'log')
+                        for j=1:length(yticks)
+                            yticklabel{j} = strcat('$10^{',num2str(ytick(j)),'}$');
+                        end
+                    end
+                    set(gca,'YTickLabel',yticklabel);
+                    set(gca,'YTick',ytick);
+                end
+            end
         end
         
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -619,26 +727,20 @@ classdef plot_app < matlab.apps.AppBase
             if app.OD_t_toCheckBox.Value
                 metrics{end+1} = 'tto';
             end
-            if app.OD_minunlatchingmotorforceCheckBox.Value
-                metrics{end+1} = 'minumforce';
+            if app.OD_a_maxCheckBox.Value
+                metrics{end+1} = 'amax';
             end
             if app.OD_KE_maxCheckBox.Value
                 metrics{end+1} = 'KEmax';
             end
-%             if app.OD_KE_ratioCheckBox.Value
-%                 metrics{end+1} = 'KE_Ratio';
-%             end
-%             if app.OD_unlatchingmotorworkdoneCheckBox.Value
-%                 metrics{end+1} = 'unlatching_motor_work_done';
-%             end
-            
+
             if isempty(metrics)
                 warndlg('You must pick at least one output option','Error');
                 return
             end
             
-            metrics_names = {'ymax','yunlatch','tL','vto','Pmax','tto','minumforce','KEmax', 'KE_Ratio', 'unlatching_motor_work_done'};
-            metrics_labels = {'$y_{\textrm{max}}$','$y_{\textrm{unlatch}}$','$t_L$','$v_{\textrm{to}}$','$P_{\textrm{max}}$','$t_{\textrm{to}}$','min unlatching force','$KE_{\textrm{max}}$', 'KE Ratio', 'unlatching motor work done'};
+            metrics_names = {'ymax','yunlatch','tL','vto','Pmax','tto','amax','KEmax', 'KE_Ratio', 'unlatching_motor_work_done'};
+            metrics_labels = {'$y_{\textrm{max}}$','$y_{\textrm{unlatch}}$','$t_L$','$v_{\textrm{to}}$','$P_{\textrm{max}}$','$t_{\textrm{to}}$','$a_\textrm{max}$','$KE_{\textrm{max}}$', 'KE Ratio', 'unlatching motor work done'};
             metrics_dict = containers.Map(metrics_names,metrics_labels);
             
             for ii=1:length(metrics)
@@ -650,6 +752,7 @@ classdef plot_app < matlab.apps.AppBase
                 %% initializing LaMSA component structs
         
                 % load mass struct initialization
+                % coupling for mass used in the paper: app.load_mass_mass.Value = (app.lm_hill_motor_Fmax.Value/86.2)^1.5;
                 load = load_mass(app.load_mass_mass.Value,app.load_m_rod.Value,app.load_EMA.Value);
                 
                 % latch struct initialization
@@ -703,35 +806,22 @@ classdef plot_app < matlab.apps.AppBase
                     end
                 end
                 
+                
+                
                 met_dict=get_metrics(sol,transition_times,load,metrics);
                 for ii=1:length(metrics)
-                    % the KE_Ratio gets special treatment because it's
-                    % weird. This is the ratio of the load mass's final
-                    % kinetic energy in braking vs. non-braking
-                    % scenarios. The difference between these scenarios
-                    % is that in one scenario, we allow a linear
-                    % unlatching motor to behave as normal (exerts a
-                    % negative force on the latch if the motor moves
-                    % faster than vmax), whereas in the other, we
-                    % specify that if the unlatching motor is moving so
-                    % fast that it would normally brake, we
-                    % artificially set the force to 0 instead. 
-                    % Comparing these two physical scenarios requires a
-                    % second call to solve_model, hence the special
-                    % treatment.
-                    if (strcmp(metrics{ii},'KE_Ratio') && app.unlatching_motor.SelectedTab == app.um_linear_motor)
-                        
-                        unlatching_motor_no_braking = linear_motor(app.um_linear_motor_Fmax.Value,app.um_linear_motor_Vmax.Value,app.um_linear_motor_range_of_motion.Value,app.um_linear_motor_voltage_frac.Value, true);
-                        [sol_no_braking, tt_no_braking] = solve_model(loading_motor,unlatching_motor_no_braking,load,latch,spring,output_directory);
-                        KE_no_braking = (0.5*load.mass*(sol_no_braking(end,3)^2));
-                        
-                        KE_braking = (0.5*load.mass*(sol(end,3)^2));
-                        ratio = KE_no_braking/KE_braking;
-                        outval{ii}(i)=ratio;
-                    elseif (strcmp(metrics{ii},'KE_Ratio') && app.unlatching_motor.SelectedTab ~= app.um_linear_motor)
-                        error("The KE_Ratio metric is only available for a linear unlatching motor (for now!)")
-                    else
-                        outval{ii}(i)=met_dict(metrics{ii});
+                    outval{ii}(i)=met_dict(metrics{ii});
+                end
+                
+                
+                
+                % Run direct actuation model if ComparetoDirectActuationCheckBox
+                % is selected
+                if (app.ComparetoDirectActuationCheckBox.Value)
+                    [direct_sol, direct_transition_times] = solve_direct_actuation(loading_motor,load);
+                    direct_met_dict=get_metrics(direct_sol,direct_transition_times,load,metrics);
+                    for ii=1:length(metrics)
+                        direct_outval{ii}(i)=direct_met_dict(metrics{ii});
                     end
                 end
                 
@@ -740,7 +830,7 @@ classdef plot_app < matlab.apps.AppBase
                 waitbar(load_bar_value,f,'Processing...');
             end
 
-            close(f)
+            close(f);
             eval(['app.' app.dropdown_items_opposite_dict(app.OD_IV1DropDown.Value) '.Value = looping_param_x_value;']);
             
             % plot output
@@ -750,7 +840,12 @@ classdef plot_app < matlab.apps.AppBase
             subplot_cols = ceil(length(metrics)/floor(sqrt(length(metrics))));
             for ii=1:length(metrics)
                 subplot(subplot_rows,subplot_cols,ii);
-                plot(looping_value_x,outval{ii},'.'); 
+                plot(looping_value_x,outval{ii},'-b'); 
+                if (app.ComparetoDirectActuationCheckBox.Value)
+                    hold on;
+                    plot(looping_value_x,direct_outval{ii},'-r');
+                    legend({'LaMSA','Direct Actuation'},'Location','Best');
+                end
                 xlabel(app.axis_labels_dict(xname),'Interpreter', 'Latex');
                 ylabel(metrics_dict(metrics{ii}), 'Interpreter', 'Latex');
                 ylim_range = max(outval{ii})-min(outval{ii});
@@ -1013,8 +1108,14 @@ classdef plot_app < matlab.apps.AppBase
 
         % Code that executes after component creation
         function startupFcn(app)
+            f = waitbar(0,'Initializing...');
+            waitbar_increments = 5;
+            waitbar_counter = 1;
             drawnow;
             app.UIFigure.WindowState = 'maximized';
+            
+            waitbar(waitbar_counter/waitbar_increments,f,'Finding components-library...');
+            waitbar_counter = waitbar_counter + 1;
             % makes comparing changes in the app in github easier
             pathname = char(which("plot_app.mlapp"));
             lastIndex = strlength(pathname);
@@ -1024,6 +1125,9 @@ classdef plot_app < matlab.apps.AppBase
             pathname = pathname +"/..";
             addpath(genpath(fullfile(pathname)));
             mlapp2classdef("plot_app.mlapp");
+            
+            waitbar(waitbar_counter/waitbar_increments,f,'Setting up graphing options...');
+            waitbar_counter = waitbar_counter + 1;
             
             varnames = {'load_mass_mass','load_m_rod','load_EMA',...
                 'latch_mass','latch_coeff_fric','latch_radius','latch_v_0','min_latching_dist','max_latching_dist','runway_length'...
@@ -1070,6 +1174,8 @@ classdef plot_app < matlab.apps.AppBase
             
             app.IV2DropDown.Items(ismember(app.IV2DropDown.Items,app.IV1DropDown.Value)) = [];
             
+            waitbar(waitbar_counter/waitbar_increments,f,'Setting parameter defaults...');
+            waitbar_counter = waitbar_counter + 1;
             % parameter defaults
             app.spring.SelectedTab = app.exponential_spring;
             app.loading_motor.SelectedTab = app.lm_hill_muscle_motor;
@@ -1080,6 +1186,8 @@ classdef plot_app < matlab.apps.AppBase
             % 2D plots defaults
             app.IV1DropDown.Value = 'exponential spring k_0';
             app.IV2DropDown.Value = 'loading motor (Hill) Fmax';
+            
+            close(f);
         end
 
         % Button pushed function: go
@@ -1505,7 +1613,7 @@ classdef plot_app < matlab.apps.AppBase
             app.lm_hill_motor_rate_of_activation.Limits = [0 Inf];
             app.lm_hill_motor_rate_of_activation.Tooltip = {''};
             app.lm_hill_motor_rate_of_activation.Position = [605 51 48 22];
-            app.lm_hill_motor_rate_of_activation.Value = Inf;
+            app.lm_hill_motor_rate_of_activation.Value = 200;
 
             % Create initiallengthLabel
             app.initiallengthLabel = uilabel(app.lm_hill_muscle_motor);
@@ -1946,10 +2054,10 @@ classdef plot_app < matlab.apps.AppBase
             app.graphing_corner_one_D.Title = '1D Plot';
             app.graphing_corner_one_D.BackgroundColor = [0.9608 0.7804 0.3647];
 
-            % Create OD_minunlatchingmotorforceCheckBox
-            app.OD_minunlatchingmotorforceCheckBox = uicheckbox(app.graphing_corner_one_D);
-            app.OD_minunlatchingmotorforceCheckBox.Text = 'min unlatching motor force';
-            app.OD_minunlatchingmotorforceCheckBox.Position = [127 173 164 22];
+            % Create OD_a_maxCheckBox
+            app.OD_a_maxCheckBox = uicheckbox(app.graphing_corner_one_D);
+            app.OD_a_maxCheckBox.Text = 'a_max';
+            app.OD_a_maxCheckBox.Position = [127 173 164 22];
 
             % Create xaxisLabel_2
             app.xaxisLabel_2 = uilabel(app.graphing_corner_one_D);
@@ -2033,6 +2141,7 @@ classdef plot_app < matlab.apps.AppBase
             % Create OD_xmin
             app.OD_xmin = uieditfield(app.graphing_corner_one_D, 'numeric');
             app.OD_xmin.Position = [68 298 40 22];
+            app.OD_xmin.Value = 0.01;
 
             % Create xmaxEditFieldLabel_2
             app.xmaxEditFieldLabel_2 = uilabel(app.graphing_corner_one_D);
@@ -2043,7 +2152,7 @@ classdef plot_app < matlab.apps.AppBase
             % Create OD_xmax
             app.OD_xmax = uieditfield(app.graphing_corner_one_D, 'numeric');
             app.OD_xmax.Position = [169 298 40 22];
-            app.OD_xmax.Value = 42;
+            app.OD_xmax.Value = 12;
 
             % Create OD_x_log_space
             app.OD_x_log_space = uiswitch(app.graphing_corner_one_D, 'slider');
@@ -2051,16 +2160,23 @@ classdef plot_app < matlab.apps.AppBase
             app.OD_x_log_space.Position = [251 303 27 12];
             app.OD_x_log_space.Value = 'lin';
 
+            % Create ComparetoDirectActuationCheckBox
+            app.ComparetoDirectActuationCheckBox = uicheckbox(app.graphing_corner_one_D);
+            app.ComparetoDirectActuationCheckBox.Text = 'Compare to Direct Actuation';
+            app.ComparetoDirectActuationCheckBox.Position = [32 3 173 22];
+            app.ComparetoDirectActuationCheckBox.Value = true;
+
             % Create graphing_corner_heatmap
             app.graphing_corner_heatmap = uitab(app.graphing_corner);
             app.graphing_corner_heatmap.AutoResizeChildren = 'off';
             app.graphing_corner_heatmap.Title = '2D Plot';
             app.graphing_corner_heatmap.BackgroundColor = [0.9804 0.6941 0.0275];
 
-            % Create minunlatchingmotorforceCheckBox
-            app.minunlatchingmotorforceCheckBox = uicheckbox(app.graphing_corner_heatmap);
-            app.minunlatchingmotorforceCheckBox.Text = 'min unlatching motor force';
-            app.minunlatchingmotorforceCheckBox.Position = [127 100 164 22];
+            % Create a_maxCheckBox
+            app.a_maxCheckBox = uicheckbox(app.graphing_corner_heatmap);
+            app.a_maxCheckBox.Text = 'a_max';
+            app.a_maxCheckBox.Position = [127 100 164 22];
+            app.a_maxCheckBox.Value = true;
 
             % Create xaxisLabel
             app.xaxisLabel = uilabel(app.graphing_corner_heatmap);
@@ -2095,6 +2211,7 @@ classdef plot_app < matlab.apps.AppBase
             app.v_toCheckBox = uicheckbox(app.graphing_corner_heatmap);
             app.v_toCheckBox.Text = 'v_to';
             app.v_toCheckBox.Position = [32 76 45 22];
+            app.v_toCheckBox.Value = true;
 
             % Create P_maxCheckBox
             app.P_maxCheckBox = uicheckbox(app.graphing_corner_heatmap);
@@ -2106,6 +2223,7 @@ classdef plot_app < matlab.apps.AppBase
             app.t_toCheckBox = uicheckbox(app.graphing_corner_heatmap);
             app.t_toCheckBox.Text = 't_to';
             app.t_toCheckBox.Position = [127 124 42 22];
+            app.t_toCheckBox.Value = true;
 
             % Create KE_maxCheckBox
             app.KE_maxCheckBox = uicheckbox(app.graphing_corner_heatmap);
@@ -2138,7 +2256,7 @@ classdef plot_app < matlab.apps.AppBase
             % Create xmin
             app.xmin = uieditfield(app.graphing_corner_heatmap, 'numeric');
             app.xmin.Position = [68 294 43 22];
-            app.xmin.Value = 500;
+            app.xmin.Value = 100;
 
             % Create xmaxEditFieldLabel
             app.xmaxEditFieldLabel = uilabel(app.graphing_corner_heatmap);
@@ -2149,7 +2267,7 @@ classdef plot_app < matlab.apps.AppBase
             % Create xmax
             app.xmax = uieditfield(app.graphing_corner_heatmap, 'numeric');
             app.xmax.Position = [174 294 42 22];
-            app.xmax.Value = 8000;
+            app.xmax.Value = 300000;
 
             % Create yminLabel
             app.yminLabel = uilabel(app.graphing_corner_heatmap);
@@ -2160,7 +2278,7 @@ classdef plot_app < matlab.apps.AppBase
             % Create ymin
             app.ymin = uieditfield(app.graphing_corner_heatmap, 'numeric');
             app.ymin.Position = [68 217 43 22];
-            app.ymin.Value = 0.5;
+            app.ymin.Value = 1;
 
             % Create ymaxLabel
             app.ymaxLabel = uilabel(app.graphing_corner_heatmap);
@@ -2171,7 +2289,7 @@ classdef plot_app < matlab.apps.AppBase
             % Create ymax
             app.ymax = uieditfield(app.graphing_corner_heatmap, 'numeric');
             app.ymax.Position = [174 217 42 22];
-            app.ymax.Value = 15;
+            app.ymax.Value = 1000;
 
             % Create HeatmapOutputOptionsLabel
             app.HeatmapOutputOptionsLabel = uilabel(app.graphing_corner_heatmap);
@@ -2193,19 +2311,25 @@ classdef plot_app < matlab.apps.AppBase
             app.n.RoundFractionalValues = 'on';
             app.n.ValueDisplayFormat = '%.0f';
             app.n.Position = [224 34 39 22];
-            app.n.Value = 30;
+            app.n.Value = 20;
 
             % Create x_log_space
             app.x_log_space = uiswitch(app.graphing_corner_heatmap, 'slider');
             app.x_log_space.Items = {'lin', 'log'};
             app.x_log_space.Position = [251 299 27 12];
-            app.x_log_space.Value = 'lin';
+            app.x_log_space.Value = 'log';
 
             % Create y_log_space
             app.y_log_space = uiswitch(app.graphing_corner_heatmap, 'slider');
             app.y_log_space.Items = {'lin', 'log'};
             app.y_log_space.Position = [251 222 27 12];
-            app.y_log_space.Value = 'lin';
+            app.y_log_space.Value = 'log';
+
+            % Create MakeLaMSAZonePlotCheckBox
+            app.MakeLaMSAZonePlotCheckBox = uicheckbox(app.graphing_corner_heatmap);
+            app.MakeLaMSAZonePlotCheckBox.Text = 'Make LaMSA Zone Plot';
+            app.MakeLaMSAZonePlotCheckBox.Position = [32 3 149 22];
+            app.MakeLaMSAZonePlotCheckBox.Value = true;
 
             % Create graphing_corner_sensitivity
             app.graphing_corner_sensitivity = uitab(app.graphing_corner);
