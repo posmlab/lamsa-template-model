@@ -1,12 +1,12 @@
 # MATLAB LaMSA Model
 
-LaMSA model implemented in MATLAB. 
+[![DOI](https://zenodo.org/badge/263460081.svg)](https://zenodo.org/badge/latestdoi/263460081)
 
 **Open app/plot_app.mlapp in MATLAB for a graphical user interface to run the model.**
 
 See this [YouTube video on Using the MATLAB LaMSA Model](https://youtu.be/c-lTELC9GgM) to get started with the graphical user interface.
 
-[![DOI](https://zenodo.org/badge/263460081.svg)](https://zenodo.org/badge/latestdoi/263460081)
+[![See this YouTube video on Using the MATLAB LaMSA Model to get started with the graphical user interface.](UsingtheLaMSAModel.png)](https://youtu.be/c-lTELC9GgM "Instructions for Getting Started with the MATLAB LaMSA Model")
 
 
 ## Code details
