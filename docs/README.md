@@ -41,7 +41,7 @@ The ext subdirectory contains all of the files outside of the project that we us
   - A helper function for sensitive_axes.m, which calculates the gradient of a multi-dimensional function as a percent change of the input
 
 **lib**
-The lib subdirectory is where the majority of the code that actually runs the model is stored. The main files in this directory that you will use are:
+The lib subdirectory is where the majority of the code that actually runs the model is stored. The main files in this directory are:
 + heatmap_demo.m
   + creates a 2D heatmap of the LaMSA system performance by iterating over component parameters; calls solve_model.m and get_metrics.m for each combination of component parameters
 + LaMSA_zone.m
