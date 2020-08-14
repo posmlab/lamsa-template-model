@@ -27,12 +27,12 @@ In the app subdirectory you will find all the necessary files for the GUI to run
 
 **ext**
 The ext subdirectory contains all of the files outside of the project that we used when writing the code for the model. Here is a quick summary of the files that can be found here:
-+ linspecer.m - A function allowing us to make nicer colormaps for our LaMSA zone plots
-+ prettyjson.m - A function to make the parameter output file from solve_model.m more readable
-+ metsol_eval.m - 
-+ relative_gradient.m - 
-+ sensitive_axes.m -
-+ mlapp2classdef.m -
++ [linspecer.m](https://www.mathworks.com/matlabcentral/fileexchange/42673-beautiful-and-distinguishable-line-colors-colormap) - A function allowing us to make nicer colormaps for our LaMSA zone plots
++ [prettyjson.m](https://github.com/ybnd/prettyjson.m) - A function to make the parameter output file from solve_model.m more readable
++ [mlapp2classdef.m](https://github.com/StackOverflowMATLABchat/mlapp2classdef) - A function we use to update the GUI code from plot_app.mlapp into a human-readable plot_app.m file (used for tracking changes in Github) 
++ sensitive_axes.m - A function for performing a sensitivity analysis on the model output. This code is still under development, use at your own risk!
++ metsol_eval.m - A helper function that provides a wrapper for the LaMSA model to be passed into the sensitive_axes.m function
++ relative_gradient.m - A helper function for sensitive_axes.m, which calculates the gradient of a multi-dimensional function as a percent change of the input
 
 **lib**
 The lib subdirectory is where the majority of the code that actually runs the model is stored. The main files in this directory that you will use are:
@@ -83,5 +83,5 @@ As we see here, we can call out specific kinematic metrics using the different k
 
 
 ## Contact Information
-Hopefully this file has been helpful but if you still have any questions regarding the model feel free to send them our way! Contact us at:
+Hopefully this file has been helpful but if you still have any questions regarding the model feel free to send them our way! Contact us at: milton@hmc.edu
 
