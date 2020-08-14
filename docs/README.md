@@ -41,6 +41,7 @@ The lib subdirectory is where the majority of the code that actually runs the mo
 + sensitivity_analysis.m
 + get_metrics.m
 + solve_model.m
+
 solve_model.m is the actual file that runs an individual simulation, while heatmap_demo.m and LaMSA_zone.m both run numerous calls to the model to create heatmaps. get_metrics.m allows for kinematic data to be extracted from a given solve_model.m run. We will take a closer look at a run of solve_model.m a bit further down. All of the remaining files in this subdirectory are helper functions for the model: 
 + launching_ode.m
 + launching_end.m
