@@ -16,8 +16,6 @@ With the GUI open, you will see a small diagram of the system in the bottom righ
 
 However, in order to best understand the capabilities of the GUI it is highly recommended you watch this [YouTube video on Using the MATLAB LaMSA Model](https://youtu.be/c-lTELC9GgM) detailing the different kinds of plots that can be made and how to access them.
 
-<iframe src="https://youtu.be/c-lTELC9GgM" width="667" height="500" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe> 
-
 
 ## The Repository
 
@@ -69,19 +67,20 @@ solve_model.m has 5 required inputs and a final optional input with the followin
 ```
 As you can see, solve_model.m uses many of the components outlined above as its inputs. Taking a peak inside heatmap_demo.m, we can see how to initialize some of these structs for input:
 
-(Defining the spring)[spring_values.png]
+[Defining the spring](spring_values.png)
 
 This is just an example for the spring, but to take a quick look at the actual input values used in this run we have:
 
-(a look at the inputs)[inputs.png]
+[a look at the inputs](inputs.png)
 
 Now, when we run solve model for the assigned components, we get the two outputs of sol and transition_times. sol is an 11 column matrix where each individual row represents the position, speed, and force values for the latch and load at an individual time value. transition_times is 2 value row vector where the first value is the unlatching time and the second is the launch time. If the unlatching time is 0, then you have instantaneous unlatching! Now, we can call solve_model.m using the defined components and begin to look at the kinematic metrics of the run using get_metrics.m:
 
-(here's a look at the metrics)[metrics.png]
+[here's a look at the metrics](metrics.png)
 
 As we see here, we can call out specific kinematic metrics using the different keys in metrics. These aren't all of the keys in get_metrics.m, so if you would like to see some of the others you can find them there. The first value in our list is tto or takeoff time, which is the same as launch time, and as we can see here the value matches with the time reported in transition_times! Then, as we move down to our second key in metrics we have our velocity at takeoff, and so on. Note in this call to solve_model.m, we did not include an outputDirectory, however, if you choose to add this the model will export two files: a .csv file with all of the info in sol, and a .json file with a list of the parameters used for the run. Also, if the outputDirectory submitted does not already exist, the model will make it for you.
 
 **NOTE: This final input is left out in the calls to solve_model in both heatmap_demo.m and LaMSA_zone.m so that you do not accidentally fill up your storage with these .csv files as even a run at resolution of 100 pixels will take up several GB of storage.**
+
 
 ## Contact Information
 Hopefully this file has been helpful but if you still have any questions regarding the model feel free to send them our way! Contact us at:
