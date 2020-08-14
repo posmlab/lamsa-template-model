@@ -59,7 +59,7 @@ Load-Masses         | load mass with Effective Mechanical Advantage
 Latches             | rounded-quarter-circle latch
 
 **docs**
-The docs directory stores all of the documentation files for the repository (including this one!).
+The docs directory stores all of the documentation files for the repository (including this one).
 
 ### Example Call of solve_model.m
 solve_model.m has 5 required inputs and a final optional input with the following argument syntax:
