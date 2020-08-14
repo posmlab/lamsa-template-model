@@ -9,7 +9,9 @@ See this [YouTube video on Using the MATLAB LaMSA Model](https://youtu.be/c-lTEL
 [![DOI](https://zenodo.org/badge/263460081.svg)](https://zenodo.org/badge/latestdoi/263460081)
 
 
-## Code details
+## Code Details
+
+### Model Code
 
 get_metrics.m is a helper function to extract kinematic metrics (e.g. vmax, amax) from the solution (t,x,v)
 
@@ -24,6 +26,10 @@ unlatching_end.m
 writeInfoToFile.m
 /components-library
 
+### Sensitivity Code
+
+sensitivity_analysis.m creates a wrapper function that is fed into sensitive_axes.m
+sensitive_axes.m is the main file that analyzes the sensitivity of the kinematic output to various input parameters
 
 Message from Andres Cook:
 
@@ -118,3 +124,6 @@ Step 2: There are clearly marked required and optional fields for each component
 Step 3: Select the two independent variables you want to vary over in the Graphing Corner. Fill in the range that you want to vary over for each variable. Pick the resolution that you want your plots in. Keep in mind that the higher the resolution, the longer it takes for the program to run.
 
 Step 4: Hit Graph! and enjoy your plots.
+
+###### Sensitivity
+Follow steps 1 and 2 listed above, but select the Sensitivity tab in the Graphing Corner. Select the variables that you want to calculate the sensitive variables of, holding down the CTRL (or Command on Mac) key to select multiple variables. Then select the metric you want to calculate sensitivity on. Finally, hit Compute! for a list of the variables in order of sensitivity.
