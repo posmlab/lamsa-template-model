@@ -31,7 +31,7 @@ The ext subdirectory contains all of the files outside of the project that we us
 + [prettyjson.m](https://github.com/ybnd/prettyjson.m) - A function to make the parameter output file from solve_model.m more readable
 + [mlapp2classdef.m](https://github.com/StackOverflowMATLABchat/mlapp2classdef) - A function we use to update the GUI code from plot_app.mlapp into a human-readable plot_app.m file (used for tracking changes in Github) 
 + sensitive_axes.m - A function for performing a sensitivity analysis on the model output. This code is still under development, use at your own risk!
-+ metsol_eval.m - A helper function that provides a wrapper for the LaMSA model to be passed into the sensitive_axes.m function
++ metsol_eval.m - A helper function that provides a wrapper for the LaMSA model to be used with the sensitive_axes.m function
 + relative_gradient.m - A helper function for sensitive_axes.m, which calculates the gradient of a multi-dimensional function as a percent change of the input
 
 **lib**
