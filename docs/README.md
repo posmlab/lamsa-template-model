@@ -16,7 +16,8 @@ With the GUI open, you will see a small diagram of the system in the bottom righ
 
 However, in order to best understand the capabilities of the GUI it is highly recommended you watch this [YouTube video on Using the MATLAB LaMSA Model](https://youtu.be/c-lTELC9GgM) detailing the different kinds of plots that can be made and how to access them.
 
-
+When the "Graph!" button is pressed on the GUI, the code executes according to this function dependency graph:
+![Function dependency graph](lamsa-model-dependency-graph.png)
 ## The Repository
 
 ### Navigating the Repository
