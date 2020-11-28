@@ -18,7 +18,7 @@ However, in order to best understand the capabilities of the GUI it is highly re
 <iframe width="560" height="315" src="https://www.youtube.com/embed/c-lTELC9GgM" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
 </iframe>
 
-<br> 
+<br> <br>
 
 When the "Graph!" button is pressed on the GUI, the code executes according to this function dependency graph:
 ![Function dependency graph](lamsa-model-dependency-graph.png)
