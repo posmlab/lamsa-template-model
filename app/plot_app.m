@@ -347,31 +347,13 @@ classdef plot_app < matlab.apps.AppBase
                 metrics_names{end+1} = 'KEmax';
                 metrics_labels{end+1} = '$KE_{\textrm{max}}$';
             end
-%             if app.KERatioCheckBox.Value
-%                 metrics{end+1} = 'KE_Ratio';
-%                 metrics_names{end+1} = 'KE_Ratio';
-%                 metrics_labels{end+1} = 'KE Ratio';
-%             end
-%             if app.unlatchingmotorworkdoneCheckBox.Value
-%                 metrics{end+1} = 'unlatching_motor_work_done';
-%                 metrics_names{end+1} = 'unlatching_motor_work_done';
-%                 metrics_labels{end+1} = 'unlatching motor work done';
-%             end
-            
             
             if isempty(metrics)
                 warndlg('You must pick at least one output option','Error');
                 return
             end
             
-            
-            metrics_dict = containers.Map(metrics_names,metrics_labels);
-            
-            
-%             looping_param_x = app.dropdown_items_opposite_dict(app.IV1DropDown.Value);
-%             looping_param_y = app.dropdown_items_opposite_dict(app.IV2DropDown.Value);
-%             eval(['looping_param_x_value = app.' app.dropdown_items_opposite_dict(app.IV1DropDown.Value) '.Value;']);
-%             eval(['looping_param_y_value = app.' app.dropdown_items_opposite_dict(app.IV2DropDown.Value) '.Value;']);
+            metrics_dict = containers.Map(metrics_names,metrics_labels);           
             
             % ensures that both independent variables that we are varying over are not the same
             if (strcmp(looping_param_y,looping_param_x))
@@ -390,7 +372,6 @@ classdef plot_app < matlab.apps.AppBase
                     %% initializing LaMSA component structs
                     
                     % load mass struct initialization
-                    % coupling for mass used in the paper: app.load_mass_mass.Value = (app.lm_hill_motor_Fmax.Value/86.2)^1.5;
                     load = load_mass(app.load_mass_mass.Value,app.load_m_rod.Value,app.load_EMA.Value);
                     
                     % latch struct initialization
@@ -1758,7 +1739,6 @@ classdef plot_app < matlab.apps.AppBase
 
             % Create runway_length
             app.runway_length = uieditfield(app.rounded_latch, 'numeric');
-            app.runway_length.Limits = [0 Inf];
             app.runway_length.Tooltip = {'coefficient of friction between the latch and load mass'};
             app.runway_length.Position = [475 19 52 22];
 

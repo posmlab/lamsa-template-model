@@ -1,7 +1,6 @@
 function dx = unlatching_ode(t,x,m_eff,y0,latch,spring,unlatching_motor)
-%function dx = unlatching_ode(t,x,m_eff,m_L,F_s,F_out,y0,y_L, coeff_fric)
 % ODE for the unlatching phase
-y=latch.y_L{1}(x(1))+y0;
+y=(latch.y_L{1}(x(1))-latch.y_L{1}(0))+y0;
 yL_prime = latch.y_L{2}(x(1));
 yL_doubleprime = latch.y_L{3}(x(1));
 Y=[y,yL_prime*x(2)];

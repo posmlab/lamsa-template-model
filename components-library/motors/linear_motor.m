@@ -13,20 +13,20 @@
 %                        resulting in a new Force vs Velocity 'curve' (its
 %                        just linear) (optional)
 %     no_braking       - this is an optional boolean flag. The default
-%                        value is false. When set to false, the linear
-%                        motor will give a negative force value when the
-%                        motor's velocity is greater than vmax, as implied
-%                        by a 'real' linear force-velocity tradeoff. 
-%                        If set to true, the motor will mostly obey a
+%                        value is true. When set to true, the motor will mostly obey a
 %                        linear force-velocity tradeoff, but in the special
 %                        case where the motor's velocity is greater than
-%                        vmax, the motor force will just be zero. 
+%                        vmax, the motor force will just be zero.
+%                        If set to false, the linear motor will give a 
+%                        negative force value when the
+%                        motor's velocity is greater than vmax.
+%                        
 % min # arguments = 3
 
 function motor = linear_motor(F_motor_max, v_motor_max, range_of_motion,varargin)
     % optional parameters
     varargin_param_names = {'voltage_fraction','no_braking'};
-    varargin_default_values = {1, false};
+    varargin_default_values = {1, true};
 
     % check and assign optional parameters
     if (nargin < 3)
@@ -55,7 +55,5 @@ function motor = linear_motor(F_motor_max, v_motor_max, range_of_motion,varargin
         motor.Force = @(t,x)max((motor.max_force*(1-x(2)/motor.velocity)) .* (abs(x(1))<=range_of_motion), 0);
     else
         motor.Force = @(t,x)(motor.max_force*(1-x(2)/motor.velocity)) .* (abs(x(1))<=range_of_motion);
-    end
-    
-    % if the force expression comes out negative, sets it to 0
+    end    
 end 

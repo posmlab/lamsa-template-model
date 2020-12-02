@@ -1,7 +1,5 @@
 function [value,isterminal,direction] = unlatching_end(t,x,m_eff,y0,latch,spring,unlatching_motor)
 %End condition for unlatching
-%First we find the second time derivative of x
-
 if (x(1) > latch.max_width)
    value = 0;
    isterminal = 1;
@@ -9,7 +7,7 @@ if (x(1) > latch.max_width)
    return
 end
 
-yL=latch.y_L{1}(x(1))+y0;
+yL=(latch.y_L{1}(x(1))-latch.y_L{1}(0))+y0;
 yL_prime = latch.y_L{2}(x(1));
 yL_doubleprime = latch.y_L{3}(x(1));
 y=[yL yL_prime*x(2)];

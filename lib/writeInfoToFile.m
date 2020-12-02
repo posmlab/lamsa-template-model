@@ -1,6 +1,4 @@
 function writeInfoToFile(m_eff, transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory)
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
 params = struct();
 
 params.m_L = latch.mass;
@@ -26,7 +24,7 @@ params.unlatch_time = transition_times(1);
 params.launch_time = transition_times(2);
 
 %% Making output directory
-if ~isdir(outputDirectory)%checks for and possibly creates output directory
+if ~isfolder(outputDirectory)%checks for and possibly creates output directory
     mkdir(outputDirectory)
 end
 
@@ -43,15 +41,6 @@ fwrite(fileID, pretty, 'char');
 fclose(fileID);
 
 %% save solution data to csv and json files
-
-
-
-%replace spaces with underscores
-dateString = string(datetime);
-cleanDateString = regexprep(dateString, " ", "_");
-cleanDateString = regexprep(cleanDateString, ":", "_");%creates file friendly output name
-
-
 csvFilePath = outputDirectory + "/raw_data--" + timeStampString + ".csv";%same as above for json file, ensures location
 
 headers = ["Time", "y", "ydot", "x", "xdot", "normal force on latch x", ...
