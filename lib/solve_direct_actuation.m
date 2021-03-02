@@ -22,12 +22,13 @@ tspan=linspace(0,t_guess,1000);
 y0=[0,0];
 [t,y]=ode45(ode,tspan,y0,launch_opts);
 
-
-if (t(end) <= tspan(end))
-    t_guess = t(end);
-    tspan=linspace(0,t_guess,1000); 
+% run ode45 until the projectile launches
+while (t(end) == tspan(end))
+    t_guess = 10 *t_guess;
+    tspan = linspace(0, t_guess,1000);
+    [t,y]=ode45(ode,tspan,y0,launch_opts);
 end
-[t,y]=ode45(ode,tspan,y0,launch_opts);
+
 T=[t];
 Y=[y];
 
