@@ -12,7 +12,8 @@ classdef LinearElasticExtensionalSpring < LinearSpring
     methods(Static)
         % the necessary parameters to make a LinearElasticExtensionalSpring
         function parameters = parameters()
-            parameters = ["E" "A" "L" "rho" "sigma_f"];
+            parameters = ["E" "A" "L" "rho" "sigma_f";
+                "0.5" "0.5" "0.001" "10" "Inf"];
         end
     end
     

@@ -13,9 +13,10 @@ classdef ExponentialSpring < Spring
     
     methods(Static)
         
-        % the necessary parameters to make a LinearSpring
+        % the necessary parameters and default values for a LinearSpring
         function parameters = parameters()
-            parameters = ["k_0" "characteristic_length" "m_s" "F_spring_max"];
+            parameters = ["k_0" "characteristic_length" "m_s" "F_spring_max";
+                "2000" "0.001" "0.002" "20"];
         end
     end
     

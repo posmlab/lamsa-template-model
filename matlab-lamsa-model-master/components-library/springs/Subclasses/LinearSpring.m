@@ -12,7 +12,8 @@ classdef LinearSpring < Spring
     methods(Static)
         % the necessary parameters to make a LinearSpring
         function parameters = parameters()
-            parameters = ["k" "m_s" "F_spring_max"];
+            parameters = ["k" "m_s" "F_spring_max";
+                "0.5" "0" "Inf"];
         end
     end
     
