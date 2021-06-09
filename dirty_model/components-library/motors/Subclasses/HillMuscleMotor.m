@@ -16,10 +16,12 @@ classdef HillMuscleMotor < Motor
         % second row contains default values for the loading motor
         % third row contains default values for the unlatching motor
         function parameters = parameters()
-            parameters = ["muscle_length" "Fmax" "Vmax" "rate_of_activation"...
-                          "initial_length" "a_L" "b_L" "s";
+            parameters = ["muscle length" "Fmax" "Vmax" "rate of activation"...
+                          "initial length" "a_L" "b_L" "s";
                 "0.01" "4" "1" "200" "0.01" "2.08" "-2.89" "-0.75";
-                "4" "10" "10" "2" "4" "2.08" "-2.89" "-0.75"];
+                "4" "10" "10" "2" "4" "2.08" "-2.89" "-0.75";
+                "0" "0" "0" "0" "0" "-Inf" "-Inf" "-Inf";
+                "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
         end
     end
     

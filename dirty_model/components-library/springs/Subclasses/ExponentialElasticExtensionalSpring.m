@@ -1,16 +1,19 @@
-%% LinearElasticExtensionalSpring class definition
-% arguments in required order:
-%     E - modulus
-%     A - cross sectional area
-%     L - length
-%     rho - density (optional)
-%     sigma_f - failure strength in Pascals (optional)
-% min # arguments = 1
+%% ExponentialElasticExtensionalSpring class definition
 
-classdef LinearElasticExtensionalSpring < LinearSpring
+% arguments in required order:
+%     k_0 - initial spring constant
+%     characteristic_length - exponential growth constant of force
+%     m_s - mass of the spring
+%     (optional)
+%     F_spring_max - maximum amount of force the spring can exert
+%     (optional)
+% min # arguments = 3
+
+classdef ExponentialElasticExtensionalSpring < ExponentialSpring
     
     methods(Static)
-        % the necessary parameters to make a LinearElasticExtensionalSpring
+        
+        % the necessary parameters and default values for a LinearSpring
         function parameters = parameters()
             parameters = ["E" "A" "L" "rho" "sigma_f";
                 "0.5" "0.5" "0.001" "10" "Inf";
@@ -20,14 +23,14 @@ classdef LinearElasticExtensionalSpring < LinearSpring
     end
     
     methods
-        % constructor
-        function obj = LinearElasticExtensionalSpring(E, A, L, varargin)
+        
+        function obj = ExponentialElasticExtensionalSpring(E, A, L, varargin)
             varargin_param_names = {'rho','sigma_f'};
             varargin_default_values = {0,Inf};
 
             % check and assign optional parameters
-            if (nargin < 1)
-                error('Linear elastic extensional spring requires at least 1 argument.');
+            if (nargin < 3)
+                error('Exponential elastic extensional spring requires at least 3 argument.');
             end
             if (length(varargin)>length(varargin_param_names))
                 error('Too many input parameters');
@@ -41,9 +44,9 @@ classdef LinearElasticExtensionalSpring < LinearSpring
 
             k = (E*A)/L;
             m = rho*A*L;
-            F_spring_max = sigma_f*A;
+            Fmax = sigma_f*A;
             
-            obj = obj@LinearSpring(k, m, F_spring_max);
+            obj = obj@ExponentialSpring(k, L, m, Fmax);
         end
     end
 end

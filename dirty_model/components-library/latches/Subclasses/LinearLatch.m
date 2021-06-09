@@ -16,20 +16,20 @@
 %     just the same shape as the latch) 
 % min # arguments = 2
 
-classdef RoundedLatch < Latch
+classdef LinearLatch < Latch
     
     methods (Static)
         function parameters = parameters()
-            parameters = ["radius" "mass" "μ" "v_0" "min latching dist" "max latching dist" "runway length";
-                "0.005" "0.003" "0" "0" "0" "Inf" "0";
-                "0" "0" "0" "0" "0" "0" "-Inf";
-                "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
+            parameters = ["slope" "width" "mass" "μ" "v_0" "min latching dist" "max latching dist" "runway length";
+                "1" ".005" "0.003" "0" "0" "0" "Inf" "0";
+                "0" "0" "0" "0" "0" "0" "0" "-Inf";
+                "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
         end
     end
     
     methods
         % constructor
-        function obj = RoundedLatch(R, m_L, varargin)
+        function obj = LinearLatch(slope, width, m_L, varargin)
             % optional parameters
             varargin_param_names = {'coeff_fric', 'v_0','min_latching_dist','max_latching_dist','runway_length'};
             varargin_default_values = {0,0,0,Inf,0};
@@ -49,12 +49,12 @@ classdef RoundedLatch < Latch
             end
 
             % model
-            max_width = R + runway_length;
+            max_width = width + runway_length;
             mass = m_L;
 
-            yL = @(x) (x>=runway_length)*(R*(1-sqrt(1-(x-runway_length)^2/R^2)));
-            yL_prime = @(x) (x>=runway_length)*min(abs(((x-runway_length)/(R*sqrt(1-((x-runway_length)/(R))^2)))), realmax);
-            yL_doubleprime = @(x) (x >= runway_length)*min(abs((((1-((x-runway_length)/(R))^2)*(R^2)+((x-runway_length)^2))/( ((1-((x-runway_length)/(R))^2)^(3/2))*(R^3)))),realmax);
+            yL = @(x) (x>=runway_length)*((x-runway_length)*slope);
+            yL_prime = @(x) (x>=runway_length)*slope;
+            yL_doubleprime = @(x) 0;
 
             y_L = {yL, yL_prime, yL_doubleprime}; % stores yL and its derivatives
             min_latching_dist = abs(min_latching_dist);

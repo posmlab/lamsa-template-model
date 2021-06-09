@@ -2,6 +2,7 @@ function grad = relative_gradient(fun,x0,grad_pct)
     if nargin==2 %Set default value for grad_pct if not specified
         grad_pct=0.01;
     end
+    
     dim=length(x0); %fun has one argument for each dimension of the parspace
     grad=zeros(dim,1);
     for i=1:dim %iterate over each dimension of the parameter space

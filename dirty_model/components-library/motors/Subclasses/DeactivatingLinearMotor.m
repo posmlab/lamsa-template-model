@@ -23,7 +23,7 @@
 %                        
 % min # arguments = 3
 
-classdef LinearMotor < Motor
+classdef DeactivatingLinearMotor < LinearMotor
     
     methods (Static)
         % first row contains parameter names
@@ -31,7 +31,7 @@ classdef LinearMotor < Motor
         % third row contains default values for the unlatching motor
         function parameters = parameters()
             parameters = ["Fmax" "Vmax" "range of motion" "voltage fraction";
-                "10" "10" "0.005"  "1";
+                "10" "10" "0.005"  "1" ;
                 "0.25" "1" "0.005"  "1";
                 "0" "0" "0" "0";
                 "Inf" "Inf" "Inf" "Inf"];
@@ -39,7 +39,7 @@ classdef LinearMotor < Motor
     end
     
     methods
-        function obj = LinearMotor(F_motor_max, v_motor_max, range_of_motion,varargin)
+        function obj = DeactivatingLinearMotor(F_motor_max, v_motor_max, range_of_motion,varargin)
             % optional parameters
             varargin_param_names = {'voltage_fraction','no_braking'};
             varargin_default_values = {1, true};
@@ -68,11 +68,12 @@ classdef LinearMotor < Motor
             velocity = voltage_fraction*v_motor_max;
 
             if (no_braking)
-                Force = @(t,x)max((max_force*(1-x(2)/velocity)) .* (abs(x(1))<=range_of_motion), 0);
+                Force = @(t,x)-max((max_force*(1-x(2)/velocity)) .* (abs(x(1))<=range_of_motion), 0);
             else
-                Force = @(t,x)(max_force*(1-x(2)/velocity)) .* (abs(x(1))<=range_of_motion);
+                Force = @(t,x)-(max_force*(1-x(2)/velocity)) .* (abs(x(1))<=range_of_motion);
             end
-            obj = obj@Motor(max_force, range, velocity, Force);
+            %"Fmax" "Vmax" "range of motion" "voltage fraction
+            obj = obj@LinearMotor(max_force, range, velocity, Force);
         end 
     end
 end

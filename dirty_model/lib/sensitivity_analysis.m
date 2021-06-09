@@ -13,7 +13,7 @@ function [combos, var_list] = sensitivity_analysis(lm,um,ld,lt,sp,x0,metric,labe
     start = x0;
     
     %%Function
-    wrapper_func = @(x0)init_solve(lm,um,ld,lt,sp,x0,metric);
+    wrapper_func = @(x0)init_solve(lm,um,ld,lt,sp,x0,metric)
     
     %%Data Dynamics
     pca_accuracy = 2;
@@ -26,6 +26,7 @@ function [combos, var_list] = sensitivity_analysis(lm,um,ld,lt,sp,x0,metric,labe
             first_axis(i) = pac(i);
         end
     end
+    
     [~,R]=sort(first_axis,'descend');
     R=R';
     ordered_vars = strings(size(R));
