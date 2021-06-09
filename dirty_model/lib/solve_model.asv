@@ -67,14 +67,13 @@ if (abs(y0) < latch.min_latching_dist)
     return
 end
 if isa(unlatching_motor, 'DeactivatingLinearMotor')
-    angle = atan(latch.y_L{2}(0));
+    angle = atan(latch.y_L{2});
     N = unlatching_motor.max_force*sin(angle)+spring.Force(0, y0)*cos(angle);
     q1 = latch.coeff_fric*(N)+unlatching_motor.max_force*cos(angle);
     q2 = spring.Force(0, y0)*sin(angle);
     condition = q1 < q2;
 else
-    condition = latch.coeff_fric < latch.y_L{2}(0);
-end
+    condition = latch.coeff_fric < latch.y_L{2}
 if (condition)
     warning('Loading failed. Latch slope is too large at x=0 for the given coefficient of friction.');
     y0 = 0;
