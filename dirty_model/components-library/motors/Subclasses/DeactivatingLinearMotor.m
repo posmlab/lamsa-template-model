@@ -23,7 +23,7 @@
 %                        
 % min # arguments = 3
 
-classdef DeactivatingLinearMotor < LinearMotor
+classdef DeactivatingLinearMotor < Motor
     
     methods (Static)
         % first row contains parameter names
@@ -63,16 +63,19 @@ classdef DeactivatingLinearMotor < LinearMotor
                 warning("v_max argument must be nonzero, setting to Inf")
             end
 
-%             max_force = voltage_fraction*F_motor_max;
-%             range = range_of_motion;
-%             velocity = voltage_fraction*v_motor_max;
-% 
+            max_force = -voltage_fraction*F_motor_max;
+            range = range_of_motion;
+            velocity = voltage_fraction*v_motor_max;
+
 %             if (no_braking)
 %                 Force = @(t,x)-max((max_force*(1-x(2)/velocity)) .* (abs(x(1))<=range_of_motion), 0);
 %             else
 %                 Force = @(t,x)-(max_force*(1-x(2)/velocity)) .* (abs(x(1))<=range_of_motion);
 %             end
-            obj = obj@LinearMotor(-F_motor_max, v_motor_max, range_of_motion, voltage_fraction, no_braking);
+            Force = @(t,x)max_force*(t==0);
+            
+            obj = obj@Motor(max_force, range, velocity, Force);
+            %obj = obj@LinearMotor(-max_force, v_motor_max, range_of_motion, voltage_fraction, false);
         end 
     end
 end

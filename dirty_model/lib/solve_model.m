@@ -68,8 +68,8 @@ if (abs(y0) < latch.min_latching_dist)
 end
 if isa(unlatching_motor, 'DeactivatingLinearMotor')
     angle = atan(latch.y_L{2}(0));
-    N = unlatching_motor.max_force*sin(angle)+spring.Force(0, y0)*cos(angle);
-    q1 = latch.coeff_fric*(N)+unlatching_motor.max_force*cos(angle);
+    N = -unlatching_motor.max_force*sin(angle)+spring.Force(0, y0)*cos(angle);
+    q1 = latch.coeff_fric*(N)-unlatching_motor.max_force*cos(angle);
     q2 = spring.Force(0, y0)*sin(angle);
     condition = q1 < q2;
 else
@@ -119,11 +119,11 @@ catch ME
             rethrow(ME)
     end
 end
-if inst_check>0 
+if inst_check>0  % not instantaneous unlatching
     unlatch_opts=odeset('Events',@(t,y) unlatching_end(t,y,m_eff(load,spring,y),y0,latch,spring,unlatching_motor),'RelTol',1E-7,'AbsTol',1E-10);
     ode=@(t,y) unlatching_ode(t,y,m_eff(load,spring,y),y0,latch,spring,unlatching_motor);
     
-    a_0L = unlatching_motor.max_force / latch.mass;
+    a_0L = abs(unlatching_motor.max_force / latch.mass);
     
     if (a_0L ~= 0)
         % calculate t_L_guess using quadratic formula

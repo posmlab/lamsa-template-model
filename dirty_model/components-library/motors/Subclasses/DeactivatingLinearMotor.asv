@@ -23,7 +23,7 @@
 %                        
 % min # arguments = 3
 
-classdef DeactivatingLinearMotor < LinearMotor
+classdef DeactivatingLinearMotor < Motor
     
     methods (Static)
         % first row contains parameter names
@@ -72,8 +72,9 @@ classdef DeactivatingLinearMotor < LinearMotor
             else
                 Force = @(t,x)-(max_force*(1-x(2)/velocity)) .* (abs(x(1))<=range_of_motion);
             end
-            %"Fmax" "Vmax" "range of motion" "voltage fraction
-            obj = obj@LinearMotor(F_motor_max, V_motor_max, range_of, Force);
+            Force = @(t,x)-max_force
+            obj = obj@Motor(max_force, range, velocity, Force);
+            %obj = obj@LinearMotor(-max_force, v_motor_max, range_of_motion, voltage_fraction, false);
         end 
     end
 end
