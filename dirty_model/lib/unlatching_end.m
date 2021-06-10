@@ -31,6 +31,8 @@ stuck_threshold = 1E-10;
 if ((x(2) < stuck_threshold) && (xL_doubledot < stuck_threshold))
     if (~isa(unlatching_motor, 'DeactivatingMotor') && t==0 && spring.Force(0,[y0,0])*latch.coeff_fric > unlatching_motor.max_force)
         error('Latch gets stuck!');
+    elseif (~isa(unlatching_motor, 'DeactivatingLinearMotor') && t==0 && spring.Force(0,[y0,0])*latch.coeff_fric > unlatching_motor.max_force)
+        error('Latch gets stuck!');
     elseif (unlatching_motor.Force(t, x) >= unlatching_motor.Force(t + stuck_threshold,x))
         error('Latch gets stuck!');
     else
