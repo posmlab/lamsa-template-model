@@ -66,7 +66,7 @@ if (abs(y0) < latch.min_latching_dist)
     end
     return
 end
-if isa(unlatching_motor, 'DeactivatingLinearMotor')
+if isa(unlatching_motor, 'DeactivatingMotor')
     angle = atan(latch.y_L{2}(0));
     N = -unlatching_motor.max_force*sin(angle)+spring.Force(0, y0)*cos(angle);
     q1 = latch.coeff_fric*(N)-unlatching_motor.max_force*cos(angle);
