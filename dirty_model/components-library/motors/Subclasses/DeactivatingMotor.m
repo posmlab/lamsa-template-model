@@ -33,8 +33,8 @@ classdef DeactivatingMotor < Motor
         % third row contains default values for the unlatching motor
         function parameters = parameters()
             parameters = ["Fmax" "Vmax" "range of motion" "deactivation rate" "voltage fraction";
-                "10" "10" "0.005" "Inf" "1" ;
-                "0.25" "1" "0.005" "Inf" "1";
+                "10" "10" "0.005" "1E7" "1" ;
+                "0.25" "1" "0.005" "1E7" "1";
                 "0" "0" "0" "0" "0";
                 "Inf" "Inf" "Inf" "Inf" "Inf"];
         end
@@ -80,7 +80,7 @@ classdef DeactivatingMotor < Motor
 %               ((1-(abs(x(2))/v_motor_max))/(1+(abs(x(2))/(v_motor_max/4)))) .* (min(r_activation*t,1));
 %old force from deactivating
 %            Force = @(t,x)max_force*(t==0);
-            Force = @(t,x) F_motor_max * exp(-((min(r_deactivation*t,1))));
+            Force = @(t,x) max_force * exp(-r_deactivation*t);
             obj = obj@Motor(max_force, range, velocity, Force);
             %obj = obj@LinearMotor(-max_force, v_motor_max, range_of_motion, voltage_fraction, false);
         end 
