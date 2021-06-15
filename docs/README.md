@@ -106,14 +106,17 @@ As we see here, we can call out specific kinematic metrics using the different k
 
 ## Creating New Components
 Components in the LaMSA model follow an object-oriented approach to maximize extensibility. Hence, any new class definition for a new component should inherit from the relevant object type. For example, a new spring class called “NewSpring” would have the following class definition:
-    classdef NewSpring < Spring
 
+``` matlab
+classdef NewSpring < Spring
+```
 Each class definition for a new component must include a static method named parameters() and a constructor with behavior specified below. For additional information see the existing component scripts as examples.
 
 ### parameters()
 The parameters section has a constant structure no matter the component. This function must return a string array with 5 (or 6, for motors) rows and as many columns as there are desired parameters for the new type of component. The first row must list the titles of the desired inputs. The second row must list the default inputs, in the same order. Note: the motors have three lines of parameters, with the first listing the titles of desired inputs, the second the default inputs for the loading motor, and the third listing the default inputs for the unlatching motor. The last two rows should contain minimum and maximum values for each parameter, respectively. For example, we could have the following parameters function:
 
-  methods (static)
+``` matlab
+methods (static)
       function params = parameters()
           params = [“param 1” “param 2” “param 3”;
                   “default 1” “default 2” “default 3”;
@@ -121,14 +124,15 @@ The parameters section has a constant structure no matter the component. This fu
               “max 1” “max 2” “max 3”];
       end
   end
+``` 
 
 ### constructor
 The constructor for each component must take the parameters specified in the parameters function in the order defined in the parameters function. The only other requirement for the constructor is that it returns an object (which is the type of the parent object from which the new object inherits). In order to do this, then, the constructor must define certain properties, which are simply the properties of the parent object. For example, a new Spring object needs to define Force (as a function of t and x), mass, and range. Once these are defined, one can return a new Spring object by calling the parent constructor with the following:
 
-  obj = obj@Spring(Force, mass, range);
-
-
-
+``` matlab
+ obj = obj@Spring(Force, mass, range);
+```
+ 
 ## Contact Information
 Hopefully this file has been helpful but if you still have any questions regarding the model feel free to send them our way! Contact us at: milton@hmc.edu
 
