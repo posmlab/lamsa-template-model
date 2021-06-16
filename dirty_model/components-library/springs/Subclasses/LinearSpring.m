@@ -27,7 +27,7 @@ classdef LinearSpring < Spring
             varargin_default_values = {0,Inf};
             % check and assign optional parameters
             if (nargin < 2)
-                error('Exponential spring requires at least 2 arguments.');
+                error('Exponential spring requires at least 1 argument.');
             end
             if (length(varargin)>length(varargin_param_names))
                 error('Too many input parameters');
@@ -49,6 +49,7 @@ classdef LinearSpring < Spring
             mass = m_s;
             range = F_spring_max/k;
             
+            % call parent constructor
             obj = obj@Spring(Force, mass, range);
         end
     end

@@ -7,6 +7,7 @@
 % Motor
 %       LinearMotor
 %       HillMuscleMotor
+%       DeactivatingMotor
 
 classdef Motor
     

@@ -23,7 +23,7 @@ classdef ExponentialSpring < Spring
     end
     
     methods
-        
+        % constructor
         function obj = ExponentialSpring(k_0,characteristic_length, varargin)
             % optional parameters
             varargin_param_names = {'m_s','F_spring_max'};
@@ -52,6 +52,7 @@ classdef ExponentialSpring < Spring
             mass = m_s;
             range= characteristic_length*log((F_spring_max/(characteristic_length*k_0))+1);
             
+            % call parent constructor
             obj = obj@Spring(Force, mass, range);
         end
     end

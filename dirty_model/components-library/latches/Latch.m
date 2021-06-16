@@ -6,6 +6,7 @@
 %
 % Latch
 %       RoundedLatch
+%       ParabolicLatch
 
 classdef Latch
     

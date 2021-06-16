@@ -1,4 +1,4 @@
-%% HillMuscleMotor object
+%% HillMuscleMotor class definition
 % arguments in required order:
 %     muscle_length - rest length of the muscle
 %     F_motor_max - maximum amount of force the spring can exert
@@ -60,6 +60,7 @@ classdef HillMuscleMotor < Motor
         %     motor.range=muscle_length;
             velocity=v_motor_max;
             
+            % call parent constructor
             obj = obj@Motor(max_force, range, velocity, Force);
         end  
     end

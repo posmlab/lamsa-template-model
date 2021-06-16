@@ -1,6 +1,6 @@
-%% parabolic_latch object
+%% ParabolicLatch class definition
 % arguments in required order:
-%     coeff_parabola - coefficient of x^2 in the parabolic shape definition
+%     coeff_parabola - coefficient of x^2 to define the parabolic shape
 %     parabola_width - distance past the end of the runway the parabolic
 %     latch extends
 %     m_L - mass of the latch
@@ -22,7 +22,7 @@ classdef ParabolicLatch < Latch
     
     methods (Static)
         function parameters = parameters()
-            parameters = ["coeff_parabola" "parabola_width" "mass" "mu" "v_0" "min_latching_dist" "max_latching_dist" "runway_length";
+            parameters = ["coeff_parabola" "parabola_width" "mass" "μ" "v_0" "min_latching_dist" "max_latching_dist" "runway_length";
                 "150" "0.005" "0.003" "0" "0" "0" "Inf" "0";
                 "0" "0" "0" "0" "0" "0" "0" "0";
                 "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
@@ -53,16 +53,17 @@ classdef ParabolicLatch < Latch
             % model
             max_width = parabola_width + runway_length;
             mass = m_L;
-%maybe put this back (x>=(parabola_width+runway_length))*realmax
-            yL = @(x) (x>=runway_length)*(coeff_parabola*(x-runway_length)^2);%+(x>=(parabola_width+runway_length))*100000;
-            yL_prime = @(x) (x>=runway_length)*2*coeff_parabola*(x-runway_length); %+(x>=(parabola_width+runway_length))*100000;
-            yL_doubleprime = @(x) (x >= runway_length)*(2*coeff_parabola); %+(x>=(parabola_width+runway_length))*100000;
+            
+            yL = @(x) (x>=runway_length)*(coeff_parabola*(x-runway_length)^2);
+            yL_prime = @(x) (x>=runway_length)*2*coeff_parabola*(x-runway_length);
+            yL_doubleprime = @(x) (x >= runway_length)*(2*coeff_parabola);
 
             y_L = {yL, yL_prime, yL_doubleprime}; % stores yL and its derivatives
             min_latching_dist = abs(min_latching_dist);
             max_latching_dist = abs(max_latching_dist);
             runway_length = runway_length;
             
+            % call parent constructor
             obj = obj@Latch(coeff_fric, v_0, max_width, mass, y_L, min_latching_dist, max_latching_dist, runway_length);
         end
     end

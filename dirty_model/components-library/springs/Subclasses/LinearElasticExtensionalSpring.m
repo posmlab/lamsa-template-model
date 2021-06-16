@@ -38,11 +38,13 @@ classdef LinearElasticExtensionalSpring < LinearSpring
             for i=(length(varargin)+1):length(varargin_param_names)
                 eval([varargin_param_names{i} '=varargin_default_values{i};'])
             end
-
+            
+            % model
             k = (E*A)/L;
             m = rho*A*L;
             F_spring_max = sigma_f*A;
             
+            % call parent constructor
             obj = obj@LinearSpring(k, m, F_spring_max);
         end
     end

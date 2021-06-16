@@ -6,6 +6,7 @@
 %
 % Spring
 %       ExponentialSpring
+%               ExponentialElasticExtensionalSpring
 %       LinearSpring
 %               LinearElasticExtensionalSpring
 

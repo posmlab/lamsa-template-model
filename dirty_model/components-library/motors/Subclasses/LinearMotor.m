@@ -1,4 +1,4 @@
-%% LinearMotor object
+%% LinearMotor class definition
 % arguments in required order:
 %     F_motor_max_max  - maximum amount of force the spring can exert AT MAX
 %                        VOLTAGE, i.e. voltage_fraction = 1 the F_motor_max 
@@ -62,7 +62,8 @@ classdef LinearMotor < Motor
                 v_motor_max = Inf;
                 warning("v_max argument must be nonzero, setting to Inf")
             end
-
+            
+            % model
             max_force = voltage_fraction*F_motor_max;
             range = range_of_motion;
             velocity = voltage_fraction*v_motor_max;
@@ -72,6 +73,8 @@ classdef LinearMotor < Motor
             else
                 Force = @(t,x)(max_force*(1-x(2)/velocity)) .* (abs(x(1))<=range_of_motion);
             end
+            
+            % call parent constructor
             obj = obj@Motor(max_force, range, velocity, Force);
         end 
     end

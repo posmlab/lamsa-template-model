@@ -1,4 +1,4 @@
-%% rounded_latch object
+%% RoundedLatch class definition
 % arguments in required order:
 %     R - raduis of the latch
 %     m_L - mass of the latch
@@ -60,7 +60,8 @@ classdef RoundedLatch < Latch
             min_latching_dist = abs(min_latching_dist);
             max_latching_dist = abs(max_latching_dist);
             runway_length = runway_length;
-
+            
+            % call parent constructor
             obj = obj@Latch(coeff_fric, v_0, max_width, mass, y_L, min_latching_dist, max_latching_dist, runway_length);
         end
     end

@@ -1,4 +1,9 @@
-%% DeactivatingMotor object
+%% DeactivatingMotor class definition
+%
+% Instead of pulling the latch out of the way, this deactivating motor
+% pushes latch in place during loading and then deactivates to allow mass
+% past during the unlatching phase.
+%
 % arguments in required order:
 %     F_motor_max      - maximum amount of force the spring can exert AT MAX
 %                        VOLTAGE, i.e. voltage_fraction = 1 the F_motor_max 
@@ -64,25 +69,15 @@ classdef DeactivatingMotor < Motor
                 v_motor_max = Inf;
                 warning("v_max argument must be nonzero, setting to Inf")
             end
-
+            
+            % model
             max_force = -voltage_fraction*F_motor_max;
             range = range_of_motion;
             velocity = voltage_fraction*v_motor_max;
-
-%             if (no_braking)
-%                 Force = @(t,x)-max((max_force*(1-x(2)/velocity)) .* (abs(x(1))<=range_of_motion), 0);
-%             else
-%                 Force = @(t,x)-(max_force*(1-x(2)/velocity)) .* (abs(x(1))<=range_of_motion);
-%             end
-% what they did with acitivation rate in HillMuscleMotor
-%    Force = @(t,x) (x(1)<=(L_initial-(0.7*muscle_length))) * (x(1)>=(L_initial-(1.3*muscle_length))) 
-%               * F_motor_max * exp(-((abs(((((L_initial-x(1))/muscle_length)^b_L)-1)/s))^a_L)) * 
-%               ((1-(abs(x(2))/v_motor_max))/(1+(abs(x(2))/(v_motor_max/4)))) .* (min(r_activation*t,1));
-%old force from deactivating
-%            Force = @(t,x)max_force*(t==0);
             Force = @(t,x) max_force * exp(-r_deactivation*t);
+            
+            % call parent constructor
             obj = obj@Motor(max_force, range, velocity, Force);
-            %obj = obj@LinearMotor(-max_force, v_motor_max, range_of_motion, voltage_fraction, false);
         end 
     end
 end
