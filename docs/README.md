@@ -127,7 +127,16 @@ methods (static)
 ``` 
 
 ### constructor
-The constructor for each component must take the parameters specified in the parameters function in the order defined in the parameters function. The only other requirement for the constructor is that it returns an object (which is the type of the parent object from which the new object inherits). In order to do this, then, the constructor must define certain properties, which are simply the properties of the parent object. For example, a new Spring object needs to define Force (as a function of t and x), mass, and range. Once these are defined, one can return a new Spring object by calling the parent constructor with the following:
+The constructor for each component must take the parameters specified in the parameters function in the order defined in the parameters function. The only other requirement for the constructor is that it returns an object (which is the type of the parent object from which the new object inherits). In order to do this, then, the constructor must define certain properties, which are simply the properties of the parent object. 
+
+Parent Object | Properties
+------------- | ----------
+Mass | mass, EMA
+Latch | coeff_fric, v_0, max_width, mass, y_L, min_latching_dist, max_latching_dist, runway_length
+Motor | max_force, range, velocity, Force
+Spring | Force, mass, range
+
+For example, a new Spring object needs to define Force (as a function of t and x), mass, and range. Once these are defined, one can return a new Spring object by calling the parent constructor with the following:
 
 ``` matlab
  obj = obj@Spring(Force, mass, range);
