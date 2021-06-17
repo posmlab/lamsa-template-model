@@ -143,7 +143,7 @@ For example, a new Spring object needs to define Force (as a function of t and x
 ```
 
 ## Example Component Construction: Parabolic Latch
-To demonstrate the process of constructing a new component, let's step through the process of making the parabolic latch. The parabolic latch only differs from the rounded latch in it's shape, so we can use the rounded latch code as a template:
+To demonstrate the process of constructing a new component, let's step through the process of making the parabolic latch. The parabolic latch only differs from the rounded latch in its shape, so we can use the rounded latch code as a template:
 ```matlab
 %% rounded_latch object
 % arguments in required order:
@@ -284,7 +284,7 @@ classdef ParabolicLatch < Latch
     end
 end
 ```
-Now let's edit the input arguments. Instead of needing a radius input, the parabolic latch needs an argument describing the coefficient of the parabolic equation and one adjusting how far the parabola extends. The order of arguments here and throughout the component code should remain the same. If this changes the minimum number of arguments, edit min # arguments as well.
+Now, let's edit the input arguments. Instead of needing a radius input, the parabolic latch needs arguments describing the coefficient of the parabolic equation and adjusting how far the parabola extends. The order of arguments here and throughout the component code should remain the same. If this changes the minimum number of arguments, edit min # arguments as well.
 ```matlab
 %% parabolic_latch object
 % arguments in required order:
@@ -320,7 +320,8 @@ classdef ParabolicLatch < Latch
         end
     end
   ```
-Now let's go look at the first part of the constructor, and update "varargin" (variable arguments in) to include any new optional arguments and their corresponding assigned variables. Note: in this case we leave them as is.
+
+Now let's look at the first part of the constructor and update "varargin" (variable arguments in) to include any new optional arguments and their corresponding assigned variables. Note: in this case we leave them as is.
 ```matlab
 % constructor
         function obj = ParabolicLatch(coeff_parabola, parabola_width, m_L, varargin)
@@ -342,7 +343,8 @@ Now let's go look at the first part of the constructor, and update "varargin" (v
                 eval([varargin_param_names{i} '=varargin_default_values{i};'])
             end
   ```
-Now go to the modeling section of the constructor to include edits to relevant equations. In this case, the yL values dramatically change. Then check that the equations setting the final values of the object attributes are still valid.
+
+Now, let's go to the modeling section of the constructor to edit relevant equations. In this case, the yL, yL_prime, and yL_doubleprime equations dramatically change. Then let's check that the equations setting the final values of the object attributes are still valid.
 ```matlab
  % model
             max_width = parabola_width + runway_length;
@@ -356,7 +358,7 @@ Now go to the modeling section of the constructor to include edits to relevant e
             max_latching_dist = abs(max_latching_dist);
             runway_length = runway_length;
 ```
-Check that your component still has all the arguments of its object type.
+Let's check that our new component still has all the arguments of its object type.
 
 ```matlab
  obj = obj@Latch(coeff_fric, v_0, max_width, mass, y_L, min_latching_dist, max_latching_dist, runway_length);
@@ -364,6 +366,7 @@ Check that your component still has all the arguments of its object type.
     end
 end
 ```
+
 This gives us the complete code for ParabolicLatch:
 ```matlab
 %% parabolic_latch object
