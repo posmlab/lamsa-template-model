@@ -143,7 +143,10 @@ For example, a new Spring object needs to define Force (as a function of t and x
 ```
 
 ## Example Component Construction: Parabolic Latch
-To demonstrate the process of constructing a new component, let's step through the process of making the parabolic latch. The parabolic latch only differs from the rounded latch in its shape, so we can use the rounded latch code as a template:
+To demonstrate the process of constructing a new component, let's step through the process of making the parabolic latch. Here's a diagram to show how it looks:
+![Parabolic Latch Diagram](paraboliclatch_diagram.jpg)
+
+The parabolic latch only differs from the rounded latch in its shape, so we can use the rounded latch code as a template:
 ```matlab
 %% rounded_latch object
 % arguments in required order:
@@ -358,7 +361,7 @@ Now, let's go to the modeling section of the constructor to edit relevant equati
             max_latching_dist = abs(max_latching_dist);
             runway_length = runway_length;
 ```
-Let's check that our new component still has all the arguments of its object type.
+Let's check the final part of the constructor. Our object of the parent object type Latch has the defined properties: coeff_fric, v_0, max_width, mass, y_L, min_latching_dist, max_latching_dist, runway_length. Checking against the Latch properties list, we can see that the ParabolicLatch has all the necessary properties. 
 
 ```matlab
  obj = obj@Latch(coeff_fric, v_0, max_width, mass, y_L, min_latching_dist, max_latching_dist, runway_length);
