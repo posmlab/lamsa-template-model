@@ -131,10 +131,10 @@ The constructor for each component must take the parameters specified in the par
 
 Parent Object | Properties
 ------------- | ----------
-Mass | mass, EMA
-Latch | coeff_fric, v_0, max_width, mass, y_L, min_latching_dist, max_latching_dist, runway_length
-Motor | max_force, range, velocity, Force
-Spring | Force, mass, range
+Mass | mass(y), EMA(y)
+Latch | coeff_fric, v_0, max_width, mass, y_L(x), min_latching_dist, max_latching_dist, runway_length
+Motor | max_force, range, velocity, Force(t,x)
+Spring | Force(t,x), mass, range
 
 For example, a new Spring object needs to define Force (as a function of t and x), mass, and range. Once these are defined, one can return a new Spring object by calling the parent constructor with the following:
 
