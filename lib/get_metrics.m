@@ -5,9 +5,12 @@ function metrics = get_metrics(sol,transition_times,load,met_names)
     len = length(sol(:,1));
     m = zeros(len,1);
     EMA = zeros(len,1);
+    time = sol(:,1);
+    t0 = find(time == transition_times(1), 1);
+    y0 = sol(t0, 2);
     for i = 1:len
-        m(i) = load.mass([sol(i,1) sol(i,2)]);
-        EMA(i) = load.EMA([sol(i,1) sol(i,2)]);
+        m(i) = load.mass([y0, sol(i,1)]);
+        EMA(i) = load.EMA([sol(i,1), sol(i,2)]);
     end
     sol(:,2:3)=sol(:,2:3)./EMA;
     %define acceleration and kinetic energy as function of time 

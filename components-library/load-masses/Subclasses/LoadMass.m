@@ -36,6 +36,7 @@ classdef LoadMass < Mass
             end
             
             % model
+            % takes y as [y0 y]
             mass = @(y) m_end/(EMA^2) + m_rod*( (1+1/EMA)^2 + 3*(1/EMA-1)^2 ) /12;
             EMA = @(y) EMA;
             

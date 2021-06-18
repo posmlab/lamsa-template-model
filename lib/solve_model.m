@@ -62,7 +62,7 @@ if (abs(y0) < latch.min_latching_dist)
             unlatching_motor.Force(0,[0,0])];
     transition_times = [inf,inf];
     if (nargin >= 6)
-        writeInfoToFile(m_eff(load,spring,[0 0]), transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
+        writeInfoToFile(m_eff(load,spring,y0,y0), transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
     end
     return
 end
@@ -83,7 +83,7 @@ if (condition)
             unlatching_motor.Force(0,[0,0])];
     transition_times = [inf,inf];
     if (nargin >= 6)
-        writeInfoToFile(m_eff(load,spring,[0 0]), transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
+        writeInfoToFile(m_eff(load,spring,y0,y0), transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
     end
     return
 elseif (abs(y0) > latch.max_latching_dist)
@@ -102,7 +102,7 @@ if (unlatching_motor.max_force==0 && latch.v_0 == 0)
     return
 end
 try
-    [inst_check,~,~]=unlatching_end(0,[0,latch.v_0],m_eff(load,spring,[0 0]),y0,latch,spring,unlatching_motor);
+    [inst_check,~,~]=unlatching_end(0,[0,latch.v_0],m_eff(load,spring,y0,y0),y0,latch,spring,unlatching_motor);
 catch ME
     switch ME.message
         case 'Latch gets stuck!'
@@ -112,7 +112,7 @@ catch ME
                     unlatching_motor.Force(0,[0,0])];
             transition_times = [inf,inf];
             if (nargin >= 6)
-                writeInfoToFile(m_eff(load,spring,[0 0]), transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
+                writeInfoToFile(m_eff(load,spring,y0,y0), transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
             end
             return
         otherwise
@@ -120,8 +120,8 @@ catch ME
     end
 end
 if inst_check>0  % not instantaneous unlatching
-    unlatch_opts=odeset('Events',@(t,y) unlatching_end(t,y,m_eff(load,spring,y),y0,latch,spring,unlatching_motor),'RelTol',1E-7,'AbsTol',1E-10);
-    ode=@(t,y) unlatching_ode(t,y,m_eff(load,spring,y),y0,latch,spring,unlatching_motor);
+    unlatch_opts=odeset('Events',@(t,y) unlatching_end(t,y,m_eff(load,spring,y0,y0),y0,latch,spring,unlatching_motor),'RelTol',1E-7,'AbsTol',1E-10);
+    ode=@(t,y) unlatching_ode(t,y,m_eff(load,spring,y0,y0),y0,latch,spring,unlatching_motor);
     
     a_0L = abs(unlatching_motor.max_force / latch.mass);
     
@@ -152,7 +152,7 @@ if inst_check>0  % not instantaneous unlatching
                 unlatching_motor.Force(0,[0,0])];
             transition_times = [inf,inf];
             if (nargin >= 6)
-                writeInfoToFile(m_eff(load,spring,[0 0]), transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
+                writeInfoToFile(m_eff(load,spring,y0,y0), transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
             end
             return
             otherwise
@@ -196,11 +196,11 @@ y_unlatch = real(y_unlatch);
 F_n = zeros(size(x_unlatch, 1),1);
 for i=1:size(x_unlatch, 1)% For derivation of this equation for F_n see Overleaf doc with LaMSA derivation
     num1 = (latch.mass*spring.Force(t_unlatch(i), y_unlatch(i, :))) - ...
-        (m_eff(load,spring,y_unlatch)*latch.y_L{3}(x_unlatch(i,1))*(x_unlatch(i,2)^2)*latch.mass) - ...
-        (unlatching_motor.Force(t_unlatch(i), x_unlatch(i,:))*m_eff(load,spring,y_unlatch)*latch.y_L{2}(x_unlatch(i,1)));
+        (m_eff(load,spring,y0,y_unlatch)*latch.y_L{3}(x_unlatch(i,1))*(x_unlatch(i,2)^2)*latch.mass) - ...
+        (unlatching_motor.Force(t_unlatch(i), x_unlatch(i,:))*m_eff(load,spring,y0,y_unlatch)*latch.y_L{2}(x_unlatch(i,1)));
     rad = 1 + ((latch.y_L{2}(x_unlatch(i,1)))^2);
     num2 = sqrt(rad);
-    den1 = m_eff(load,spring,y_unlatch)*latch.y_L{2}(x_unlatch(i,1))*(latch.y_L{2}(x_unlatch(i,1)) - latch.coeff_fric);
+    den1 = m_eff(load,spring,y0,y_unlatch)*latch.y_L{2}(x_unlatch(i,1))*(latch.y_L{2}(x_unlatch(i,1)) - latch.coeff_fric);
     den2 = latch.mass*(1+latch.coeff_fric*latch.y_L{2}(x_unlatch(i,1)));
     F_n(i) =(num1*num2)/(den1 + den2);%filling in the F_n vector until unlatch time
 end
@@ -235,10 +235,10 @@ F_comp = [F_nx F_ny F_fx F_fy];
 %guess launch times by treating the spring as ideal-ish and getting the
 %   frequency
 stiffness = abs(( spring.Force(0,y_unlatch(end,:))-spring.Force(0,y_unlatch(end,:)+(100*eps)) ) / (100*eps)); 
-nat_freq=sqrt(stiffness/m_eff(load,spring,y_unlatch));
+nat_freq=sqrt(stiffness/m_eff(load,spring,y0,y_unlatch));
 t_launch_guess=pi/nat_freq;
 launch_opts=odeset('Events',@(t,y) launching_end(t,y,spring));
-ode=@(t,y) launching_ode(t,y,m_eff(load,spring,y),spring);
+ode=@(t,y) launching_ode(t,y,m_eff(load,spring,y0,y),spring);
 tspan=linspace(0,t_launch_guess,1E3);
 y0=y_unlatch(end,:)';
 [t_launch,y_launch]=ode45(ode,tspan,y0,launch_opts);
@@ -289,13 +289,13 @@ sol=[T Y X F_comp fSpring fUnlatchingMotor];
 
 %% Establishing Parameters for .json output
 if (nargin >= 6)
-writeInfoToFile(m_eff(load,spring,[0 0]), transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
+writeInfoToFile(m_eff(load,spring,y0,y0), transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
 end
 
 end
 
-function mass = m_eff(load, spring, y)
-
-mass = load.mass(y) + spring.mass/3;
+function mass = m_eff(load, spring, y0, y)
+%sz = size(y)
+mass = load.mass([y0,y(1)]) + spring.mass/3;
 
 end

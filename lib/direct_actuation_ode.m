@@ -2,5 +2,5 @@ function dy=direct_actuation_ode(t,y,load,motor)
 %ODE for direct actuation: a=F/m
 dy=zeros(2,1);
 dy(1)=y(2);
-dy(2)=motor.Force(t,y)/load.mass(y);
+dy(2)=motor.Force(t,y)/load.mass([0,0]); %y(1) for second input
 end

@@ -13,8 +13,8 @@ function [sol, transition_times] = solve_direct_actuation(motor,load)
 launch_opts=odeset('Events',@(t,y) direct_actuation_end(t,y,motor),'RelTol',1E-7,'AbsTol',1E-10);
 ode=@(t,y) direct_actuation_ode(t,y,load,motor);
 
-t_guess_v=(motor.velocity*load.mass([0 0]))/motor.max_force;
-t_guess_pos=sqrt((2*motor.range*load.mass([0 0]))/motor.max_force);
+t_guess_v=(motor.velocity*load.mass([0,0]))/motor.max_force;
+t_guess_pos=sqrt((2*motor.range*load.mass([0,0]))/motor.max_force);
 
 t_guess=max(t_guess_v,t_guess_pos);
 tspan=linspace(0,t_guess,1000);

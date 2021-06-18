@@ -14,7 +14,7 @@ classdef NewMass < Mass
     
     methods (Static)
         function parameters = parameters()
-            parameters = ["mass" "mass of lever arm" "L1" "L2" "x_rest" "theta initial";
+            parameters = ["mass" "mass of lever arm" "L1" "L2" "x_rest" "theta";
                 "0.01" "0" "0.001" "0.001" "0.001" "0";
                 "0" "0" "0" "0" "0" "0";
                 "Inf" "Inf" "Inf" "Inf" "Inf" "1.57"];
