@@ -6,39 +6,6 @@ function showKinematics(axesHandle,evnt, xAxisVariable, yAxisVariable, app)
 % properties(axesHandle)
 xClick = evnt.IntersectionPoint(1);
 yClick = evnt.IntersectionPoint(2);
-varnames = {'load_mass_mass',...
-                'latch_mass','latch_coeff_fric','latch_radius','latch_v_0','min_latching_dist','max_latching_dist',...
-                'linear_spring_k','linear_spring_mass','linear_spring_Fmax',...
-                'exp_spring_k','exp_spring_char_len','exp_spring_Fmax','exp_spring_mass',...
-                'lee_spring_E','lee_spring_A','lee_spring_L','lee_spring_rho','lee_spring_sigma_f',...
-                'lm_linear_motor_Fmax','lm_linear_motor_Vmax','lm_linear_motor_range_of_motion','lm_linear_motor_voltage_frac'...
-                'lm_hill_motor_Fmax','lm_hill_motor_Vmax','lm_hill_motor_muscle_length','lm_hill_motor_rate_of_activation','lm_hill_motor_L_i','lm_hill_motor_a_L','lm_hill_motor_b_L','lm_hill_motor_s',...
-                'um_linear_motor_Fmax','um_linear_motor_Vmax','um_linear_motor_range_of_motion','um_linear_motor_voltage_frac'...
-                'um_hill_motor_Fmax','um_hill_motor_Vmax','um_hill_motor_muscle_length','um_hill_motor_rate_of_activation','um_hill_motor_L_i','um_hill_motor_a_L','um_hill_motor_b_L','um_hill_motor_s'};
-            latexlabels = {'load mass',...
-                'latch mass','latch $\mu$','latch radius','latch $v_0$','min latching distance','max latching distance',...
-                'linear spring k','linear spring mass','linear spring Fmax',...
-                'exponential spring $k_0$','exponential spring characteristic length','exponential spring Fmax','exponential spring mass',...
-                'spring E','spring A','spring L','spring $\rho$','spring $\sigma_f$',...
-                'loading motor (linear) Fmax','loading motor (linear) motor Vmax','loading motor (linear) range of motion','loading motor (linear) voltage fraction'...
-                'loading motor (Hill) Fmax','loading motor (Hill) Vmax','loading motor (Hill) muscle length','loading motor (Hill) rate of activation','loading motor (Hill) motor $L_i$','loading motor (Hill) $a_L$','loading motor (Hill) $b_L$','loading motor (Hill) s',...
-                'unlatching motor (linear) Fmax','unlatching motor (linear) motor Vmax','unlatching motor (linear) range of motion','unlatching motor (linear) voltage fraction'...
-                'unlatching motor (Hill) Fmax','unlatching motor (Hill) Vmax','unlatching motor (Hill) muscle length','unlatching motor (Hill) rate of activation','unlatching motor (Hill) motor $L_i$','unlatching motor (Hill) $a_L$','unlatching motor (Hill) $b_L$','unlatching motor (Hill) s'};
-            nonlatexlabels = {'load mass',...
-                'latch mass','latch mu','latch radius','latch v_0','min latching distance','max latching distance',...
-                'linear spring k','linear spring mass','linear spring Fmax',...
-                'exponential spring k_0','exponential spring characteristic length','exponential spring Fmax','exponential spring mass',...
-                'spring E','spring A','spring L','spring rho','spring sigma_f',...
-                'loading motor (linear) Fmax','loading motor (linear) motor Vmax','loading motor (linear) range of motion', 'loading motor (linear) voltage fraction'...
-                'loading motor (Hill) Fmax','loading motor (Hill) Vmax','loading motor (Hill) muscle length','loading motor (Hill) rate of activation','loading motor (Hill) motor L_i','loading motor (Hill) a_L','loading motor (Hill) b_L','loading motor (Hill) s',...
-                'unlatching motor (linear) Fmax','unlatching motor (linear) motor Vmax','unlatching motor (linear) range of motion','unlatching motor (linear) voltage fraction'...
-                'unlatching motor (Hill) Fmax','unlatching motor (Hill) Vmax','unlatching motor (Hill) muscle length','unlatching motor (Hill) rate of activation','unlatching motor (Hill) motor $L_i$','unlatching motor (Hill) $a_L$','unlatching motor (Hill) $b_L$','unlatching motor (Hill) s'};
-            
-axis_labels_dict = containers.Map(varnames,latexlabels);
-dropdown_items_dict = containers.Map(varnames,nonlatexlabels);
-dropdown_items_opposite_dict = containers.Map(nonlatexlabels,varnames);
-
-
 
 %% using the user's click to calculate and use the closest pixel value. 
 if strcmp(app.x_log_space.Value,'log')
@@ -53,8 +20,10 @@ else
 end
 [minimum_distance_x, indexOfValue_x] = min(clickDistances);
 xUsed = looping_values_x(indexOfValue_x);
-eval(['app.' xAxisVariable '.Value = ' num2str(xUsed) ';']);
 
+[~, xindex] = ismember(xAxisVariable, app.IV1DropDown.Items);
+xefIndex = ddIndexToefIndex(app, xindex, xAxisVariable);
+changeEditField(app, xAxisVariable, xefIndex, xUsed);
 
 if strcmp(app.y_log_space.Value,'log')
     yrange = [log10(app.ymin.Value) log10(app.ymax.Value)];
@@ -70,42 +39,13 @@ end
 
 [minimum_distance_y, indexOfValue_y] = min(clickDistances);
 yUsed = looping_values_y(indexOfValue_y);
-eval(['app.' yAxisVariable '.Value = ' num2str(yUsed) ';']);
+
+[~, yindex] = ismember(yAxisVariable, app.IV1DropDown.Items);
+yefIndex = ddIndexToefIndex(app, yindex, yAxisVariable);
+changeEditField(app, yAxisVariable, yefIndex, yUsed);
 
 %% initializing LaMSA component structs
-% load mass struct initialization
-load = load_mass(app.load_mass_mass.Value,app.load_m_rod.Value,app.load_EMA.Value);
-
-% latch struct initialization
-latch = rounded_latch(app.latch_radius.Value,app.latch_mass.Value,app.latch_coeff_fric.Value, app.latch_v_0.Value, app.min_latching_dist.Value, app.max_latching_dist.Value, app.runway_length.Value);
-
-% spring struct initialization
-if (app.spring.SelectedTab == app.linear_spring)
-    spring = linear_spring(app.linear_spring_k.Value,app.linear_spring_mass.Value,app.linear_spring_Fmax.Value);
-elseif (app.spring.SelectedTab == app.exponential_spring)
-%     disp("THIS IS THE SHOW KINEMATICS CODE")
-%     app.exp_spring_k.Value
-%     app.exp_spring_char_len.Value
-%     app.exp_spring_mass.Value
-%     app.exp_spring_Fmax.Value
-    spring = exponential_spring(app.exp_spring_k.Value,app.exp_spring_char_len.Value,app.exp_spring_mass.Value,app.exp_spring_Fmax.Value);
-elseif (app.spring.SelectedTab == app.linear_elastic_extensional_spring)
-    spring = linear_elastic_extensional_spring(app.lee_spring_E.Value,app.lee_spring_A.Value,app.lee_spring_L.Value,app.lee_spring_rho.Value,app.lee_spring_sigma_f.Value);
-end
-
-% loading motor struct initialization
-if (app.loading_motor.SelectedTab == app.lm_linear_motor)
-    loading_motor = linear_motor(app.lm_linear_motor_Fmax.Value,app.lm_linear_motor_Vmax.Value,app.lm_linear_motor_range_of_motion.Value,app.lm_linear_motor_voltage_frac.Value);
-elseif (app.loading_motor.SelectedTab == app.lm_hill_muscle_motor)
-    loading_motor = hill_muscle_motor(app.lm_hill_motor_muscle_length.Value,app.lm_hill_motor_Fmax.Value,app.lm_hill_motor_Vmax.Value,app.lm_hill_motor_rate_of_activation.Value,app.lm_hill_motor_L_i.Value,app.lm_hill_motor_a_L.Value,app.lm_hill_motor_b_L.Value,app.lm_hill_motor_s.Value);
-end
-
-% unlatching motor struct initialization
-if (app.unlatching_motor.SelectedTab == app.um_linear_motor)
-    unlatching_motor = linear_motor(app.um_linear_motor_Fmax.Value,app.um_linear_motor_Vmax.Value,app.um_linear_motor_range_of_motion.Value,app.um_linear_motor_voltage_frac.Value);
-elseif (app.unlatching_motor.SelectedTab == app.um_hill_muscle_motor)
-    unlatching_motor = hill_muscle_motor(app.um_hill_motor_muscle_length.Value,app.um_hill_motor_Fmax.Value,app.um_hill_motor_Vmax.Value,app.um_hill_motor_rate_of_activation.Value,app.um_hill_motor_L_i.Value,app.um_hill_motor_a_L.Value,app.um_hill_motor_b_L.Value,app.um_hill_motor_s.Value);
-end
+[spring, loading_motor, unlatching_motor, load, latch] = initialize_components(app);
 
 % calling solve model
 [sol,transition_times] = solve_model(loading_motor,unlatching_motor,load,latch,spring);
