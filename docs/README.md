@@ -74,10 +74,10 @@ The components-library directory stores several structs used in calls to solve_m
 
 Model Component     | Component Types   
 ------------------- | ------------------
-Springs             | linear spring, exponential spring, linear-elastic-extensional spring
-Motors              | linear motor, hill-muscle motor
-Load-Masses         | load mass with Effective Mechanical Advantage
-Latches             | rounded-quarter-circle latch
+Springs             | linear spring, exponential spring, linear-elastic-extensional spring, exponential-elastic-extensional spring
+Motors              | linear motor, hill-muscle motor, deactivating motor
+Load-Masses         | load mass with Effective Mechanical Advantage, new mass
+Latches             | rounded-quarter-circle latch, parabolic latch
 
 **docs**
 The docs directory stores all of the documentation files for the repository (including this one!).
