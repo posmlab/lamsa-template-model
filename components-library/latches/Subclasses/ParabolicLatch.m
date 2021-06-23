@@ -68,4 +68,3 @@ classdef ParabolicLatch < Latch
         end
     end
 end
-
