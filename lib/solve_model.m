@@ -62,19 +62,11 @@ if (abs(y0) < latch.min_latching_dist)
             unlatching_motor.Force(0,[0,0])];
     transition_times = [inf,inf];
     if (nargin >= 6)
-<<<<<<< HEAD
         writeInfoToFile(m_eff(load,spring,y0,y0), transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
     end
     return
 end
 if isa(unlatching_motor, 'DeactivatingMotor')
-=======
-        writeInfoToFile(m_eff(load,spring,[0 0]), transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
-    end
-    return
-end
-if isa(unlatching_motor, 'DeactivatingLinearMotor')
->>>>>>> gui-coupling-april
     angle = atan(latch.y_L{2}(0));
     N = -unlatching_motor.max_force*sin(angle)+spring.Force(0, y0)*cos(angle);
     q1 = latch.coeff_fric*(N)-unlatching_motor.max_force*cos(angle);
@@ -110,11 +102,7 @@ if (unlatching_motor.max_force==0 && latch.v_0 == 0)
     return
 end
 try
-<<<<<<< HEAD
     [inst_check,~,~]=unlatching_end(0,[0,latch.v_0],m_eff(load,spring,y0,y0),y0,latch,spring,unlatching_motor);
-=======
-    [inst_check,~,~]=unlatching_end(0,[0,latch.v_0],m_eff(load,spring,[0 0]),y0,latch,spring,unlatching_motor);
->>>>>>> gui-coupling-april
 catch ME
     switch ME.message
         case 'Latch gets stuck!'
