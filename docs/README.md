@@ -144,7 +144,7 @@ For example, a new Spring object needs to define Force (as a function of t and x
 
 ## Example Component Construction: Parabolic Latch
 To demonstrate the process of constructing a new component, let's step through the process of making the parabolic latch. Here's a diagram to show how it looks:
-![Parabolic Latch Diagram](paraboliclatch_diagram.jpg)
+![Parabolic Latch Diagram](parabolic_latch_new1.png)
 
 The parabolic latch only differs from the rounded latch in its shape, so we can use the rounded latch code as a template:
 ```matlab
