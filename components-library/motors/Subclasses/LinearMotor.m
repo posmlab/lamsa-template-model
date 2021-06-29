@@ -30,19 +30,19 @@ classdef LinearMotor < Motor
         % second row contains default values for the loading motor
         % third row contains default values for the unlatching motor
         function parameters = parameters()
-            parameters = ["Fmax" "Vmax" "range of motion" "voltage fraction";
-                "10" "10" "0.005"  "1";
-                "0.25" "1" "0.005"  "1";
-                "0" "0" "0" "0";
-                "Inf" "Inf" "Inf" "Inf"];
+            parameters = ["Fmax" "Vmax" "range of motion" "voltage fraction" "muscle length";
+                "10" "10" "0.005"  "1" "1";
+                "0.25" "1" "0.005"  "1" "1";
+                "0" "0" "0" "0" "0";
+                "Inf" "Inf" "Inf" "Inf" "Inf"];
         end
     end
     
     methods
         function obj = LinearMotor(F_motor_max, v_motor_max, range_of_motion,varargin)
             % optional parameters
-            varargin_param_names = {'voltage_fraction','no_braking'};
-            varargin_default_values = {1, true};
+            varargin_param_names = {'voltage_fraction','no_braking','muscle_length'};
+            varargin_default_values = {1, true, 1};
 
             % check and assign optional parameters
             if (nargin < 3)
@@ -67,7 +67,6 @@ classdef LinearMotor < Motor
             max_force = voltage_fraction*F_motor_max;
             range = range_of_motion;
             velocity = voltage_fraction*v_motor_max;
-            rest_length = 100;
 
             if (no_braking)
                 Force = @(t,x)max((max_force*(1-x(2)/velocity)) .* (abs(x(1))<=range_of_motion), 0);
@@ -76,7 +75,7 @@ classdef LinearMotor < Motor
             end
             
             % call parent constructor
-            obj = obj@Motor(max_force, range, velocity, Force, rest_length);
+            obj = obj@Motor(max_force, range, velocity, Force, muscle_length);
         end 
     end
 end
