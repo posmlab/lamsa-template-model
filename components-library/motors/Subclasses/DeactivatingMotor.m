@@ -75,9 +75,10 @@ classdef DeactivatingMotor < Motor
             range = range_of_motion;
             velocity = voltage_fraction*v_motor_max;
             Force = @(t,x) max_force * exp(-r_deactivation*t);
+            rest_length = 100;
             
             % call parent constructor
-            obj = obj@Motor(max_force, range, velocity, Force);
+            obj = obj@Motor(max_force, range, velocity, Force, rest_length);
         end 
     end
 end

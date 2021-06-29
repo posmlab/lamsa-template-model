@@ -48,9 +48,10 @@ classdef LinearSpring < Spring
             Force = @(t,x) min(realmax,-k*x(1)) .* (abs(k*x(1))<F_spring_max);
             mass = m_s;
             range = F_spring_max/k;
+            rest_length = 100;
             
             % call parent constructor
-            obj = obj@Spring(Force, mass, range);
+            obj = obj@Spring(Force, mass, range, rest_length);
         end
     end
 end

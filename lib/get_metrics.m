@@ -2,16 +2,9 @@ function metrics = get_metrics(sol,transition_times,load,met_names)
 %Takes solution matrix (columns time, position, velocity)and the effective 
 %    mass and returns the metrics specified in met_names
     % should m be load.mass+spring.mass?
-    len = length(sol(:,1));
-    m = zeros(len,1);
-    EMA = zeros(len,1);
-    time = sol(:,1);
-    t0 = find(time == transition_times(1), 1);
-    y0 = sol(t0, 2);
-    for i = 1:len
-        m(i) = load.mass([y0, sol(i,1)]);
-        EMA(i) = load.EMA([sol(i,1), sol(i,2)]);
-    end
+    m = load.real_mass;
+    EMA = load.EMA([0 0]);
+
     sol(:,2:3)=sol(:,2:3)./EMA;
     %define acceleration and kinetic energy as function of time 
     if size(sol,1) < 2

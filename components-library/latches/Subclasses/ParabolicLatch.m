@@ -24,7 +24,7 @@ classdef ParabolicLatch < Latch
         function parameters = parameters()
             parameters = ["coeff_parabola" "parabola_width" "mass" "μ" "v_0" "min_latching_dist" "max_latching_dist" "runway_length";
                 "150" "0.005" "0.003" "0" "0" "0" "Inf" "0";
-                "0" "0" "0" "0" "0" "0" "0" "0";
+                "0" "0" "0" "0" "0" "0" "0" "-Inf";
                 "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
         end
     end
@@ -68,3 +68,4 @@ classdef ParabolicLatch < Latch
         end
     end
 end
+

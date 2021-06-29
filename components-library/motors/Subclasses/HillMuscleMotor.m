@@ -61,7 +61,7 @@ classdef HillMuscleMotor < Motor
             velocity=v_motor_max;
             
             % call parent constructor
-            obj = obj@Motor(max_force, range, velocity, Force);
+            obj = obj@Motor(max_force, range, velocity, Force, muscle_length);
         end  
     end
 end
