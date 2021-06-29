@@ -100,7 +100,7 @@ if (unlatching_motor.max_force==0 && latch.v_0 == 0)
     return
 end
 try
-    [inst_check,~,~]=unlatching_end(0,[0,latch.v_0],m_eff(load,spring,y0,y0),y0,latch,spring,unlatching_motor);
+    [inst_check,~,~]=unlatching_end(0,[0,latch.v_0],@(y)m_eff(load,spring,y0,y),y0,latch,spring,unlatching_motor);
 catch ME
     switch ME.message
         case 'Latch gets stuck!'
@@ -167,7 +167,6 @@ if inst_check>0  % not instantaneous unlatching
     % t_unlatch(end) ~= tspan(end), which indicates that the 
     % integration stopped early because we've activated 'unlatching_end'
     while (t_unlatch(end) == tspan(end))
-        % disp('yo');
         t_L_guess = 10 * t_L_guess;
         tspan = linspace(0, t_L_guess,1000);
         [t_unlatch,x_unlatch]=ode45(ode,tspan,[0 latch.v_0],unlatch_opts);
@@ -295,6 +294,20 @@ end
 
 end
 
+function dx = launching_ode(t,x,m_eff,spring)
+%ODE for the launching phase
+dx(1)=x(2,1);
+dx(2)=spring.Force(t,x)/m_eff;
+dx=dx';
+end
+
+function [value,isterminal,direction] = launching_end(t,y,spring)
+%End condition for loading
+value=spring.Force(t,y);
+isterminal=1;
+direction=0;
+end
+
 function dx = unlatching_ode(t,x,m_eff_fun,y0,latch,spring,unlatching_motor)
 % ODE for the unlatching phase
 y=(latch.y_L{1}(x(1))-latch.y_L{1}(0))+y0;
@@ -333,7 +346,6 @@ denom=latch.mass+m_eff*(yL_prime^2)+frictionDirection*latch.coeff_fric*(latch.ma
 num=unlatching_motor.Force(t,x)+yL_prime*spring.Force(t,y)+frictionDirection*latch.coeff_fric*(unlatching_motor.Force(t,x)*yL_prime-spring.Force(t,y))-(x(2)^2)*(m_eff*yL_prime*yL_doubleprime-m_eff*frictionDirection*latch.coeff_fric*yL_doubleprime);
 xL_doubledot=num/denom;
 
-%disp(x(2));
 
 % solving for normal force; when it's 0, unlatching is done
 value = spring.Force(t,y)-(m_eff*(yL_doubleprime*(x(2)^2)+(xL_doubledot*yL_prime)));
@@ -345,12 +357,9 @@ end
 
 stuck_threshold = 1E-9;
 if ((x(2) < stuck_threshold) && (xL_doubledot < stuck_threshold))
-    disp('yo');
     if (~isa(unlatching_motor, 'DeactivatingMotor') && t==0 && spring.Force(0,[y0,0])*latch.coeff_fric > unlatching_motor.max_force)
-        disp('case 1');
         error('Latch gets stuck!');
     elseif (unlatching_motor.Force(t, x) >= unlatching_motor.Force(t + stuck_threshold,x))
-        disp('case 2');
         error('Latch gets stuck!');
     else
         warning('System is moving slowly. Integration may take a long time.')
