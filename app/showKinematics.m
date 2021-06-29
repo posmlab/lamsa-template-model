@@ -25,6 +25,7 @@ xUsed = looping_values_x(indexOfValue_x);
 xefIndex = ddIndexToefIndex(app, xindex, xAxisVariable);
 changeEditField(app, xAxisVariable, xefIndex, xUsed);
 
+
 if strcmp(app.y_log_space.Value,'log')
     yrange = [log10(app.ymin.Value) log10(app.ymax.Value)];
     looping_values_y = logspace(yrange(1),yrange(2),app.n.Value);
@@ -43,6 +44,7 @@ yUsed = looping_values_y(indexOfValue_y);
 [~, yindex] = ismember(yAxisVariable, app.IV1DropDown.Items);
 yefIndex = ddIndexToefIndex(app, yindex, yAxisVariable);
 changeEditField(app, yAxisVariable, yefIndex, yUsed);
+%eval(['app.' yAxisVariable '.Value = ' num2str(yUsed) ';']);
 
 %% initializing LaMSA component structs
 [spring, loading_motor, unlatching_motor, load, latch] = initialize_components(app);
