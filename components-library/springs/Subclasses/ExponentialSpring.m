@@ -49,14 +49,12 @@ classdef ExponentialSpring < Spring
             
             % only works for compressing the spring
             Force = @(t,x)min(characteristic_length*k_0*(exp(-x(1)/characteristic_length)-1),realmax).*(abs(characteristic_length*k_0*(exp(-x(1)/characteristic_length)-1))<F_spring_max);
-
-            %Force = @(t,y)y(1)^2;
-            
             mass = m_s;
             range= characteristic_length*log((F_spring_max/(characteristic_length*k_0))+1);
+            rest_length = 100;
             
             % call parent constructor
-            obj = obj@Spring(Force, mass, range);
+            obj = obj@Spring(Force, mass, range, rest_length);
         end
     end
 end

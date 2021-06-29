@@ -18,8 +18,6 @@ rangeBound = min([latch.max_latching_dist, spring.range, loading_motor.range, 0.
 % the forces are equal 
 y_range=-logspace(log10(eps), log10(rangeBound),N_points);
 
-
-
 fmotor = zeros(size(y_range));
 fspring = zeros(size(y_range));
 for i=1:length(y_range)
@@ -103,7 +101,6 @@ if (unlatching_motor.max_force==0 && latch.v_0 == 0)
 end
 try
     [inst_check,~,~]=unlatching_end(0,[0,latch.v_0],m_eff(load,spring,y0,y0),y0,latch,spring,unlatching_motor);
-
 catch ME
     switch ME.message
         case 'Latch gets stuck!'
@@ -121,8 +118,8 @@ catch ME
     end
 end
 if inst_check>0  % not instantaneous unlatching
-    unlatch_opts=odeset('Events',@(t,y) unlatching_end(t,y,m_eff(load,spring,y0,y0),y0,latch,spring,unlatching_motor),'RelTol',1E-7,'AbsTol',1E-10);
-    ode=@(t,y) unlatching_ode(t,y,m_eff(load,spring,y0,y0),y0,latch,spring,unlatching_motor);
+    unlatch_opts=odeset('Events',@(t,y) unlatching_end(t,y,@(y)m_eff(load,spring,y0,y),y0,latch,spring,unlatching_motor),'RelTol',1E-7,'AbsTol',1E-10);
+    ode=@(t,y) unlatching_ode(t,y,@(y)m_eff(load,spring,y0,y),y0,latch,spring,unlatching_motor);
     
     a_0L = abs(unlatching_motor.max_force / latch.mass);
     
@@ -160,6 +157,7 @@ if inst_check>0  % not instantaneous unlatching
                 rethrow(ME)
         end
     end
+    
     % this while loop ensures that the system unlatches.
     % t_L_guess is a guess at the upper bound on the unlatching time.
     % Usually, integrating from t=0 to t=t_L_guess is a long enough
@@ -169,6 +167,7 @@ if inst_check>0  % not instantaneous unlatching
     % t_unlatch(end) ~= tspan(end), which indicates that the 
     % integration stopped early because we've activated 'unlatching_end'
     while (t_unlatch(end) == tspan(end))
+        % disp('yo');
         t_L_guess = 10 * t_L_guess;
         tspan = linspace(0, t_L_guess,1000);
         [t_unlatch,x_unlatch]=ode45(ode,tspan,[0 latch.v_0],unlatch_opts);
@@ -196,12 +195,13 @@ y_unlatch = real(y_unlatch);
 %% Solving for Normal Force in the unlatching phase
 F_n = zeros(size(x_unlatch, 1),1);
 for i=1:size(x_unlatch, 1)% For derivation of this equation for F_n see Overleaf doc with LaMSA derivation
+    y=(latch.y_L{1}(x_unlatch(i,1))-latch.y_L{1}(0))+y0;
     num1 = (latch.mass*spring.Force(t_unlatch(i), y_unlatch(i, :))) - ...
-        (m_eff(load,spring,y0,y_unlatch)*latch.y_L{3}(x_unlatch(i,1))*(x_unlatch(i,2)^2)*latch.mass) - ...
-        (unlatching_motor.Force(t_unlatch(i), x_unlatch(i,:))*m_eff(load,spring,y0,y_unlatch)*latch.y_L{2}(x_unlatch(i,1)));
+        (m_eff(load,spring,y0,y)*latch.y_L{3}(x_unlatch(i,1))*(x_unlatch(i,2)^2)*latch.mass) - ...
+        (unlatching_motor.Force(t_unlatch(i), x_unlatch(i,:))*m_eff(load,spring,y0,y)*latch.y_L{2}(x_unlatch(i,1)));
     rad = 1 + ((latch.y_L{2}(x_unlatch(i,1)))^2);
     num2 = sqrt(rad);
-    den1 = m_eff(load,spring,y0,y_unlatch)*latch.y_L{2}(x_unlatch(i,1))*(latch.y_L{2}(x_unlatch(i,1)) - latch.coeff_fric);
+    den1 = m_eff(load,spring,y0,y)*latch.y_L{2}(x_unlatch(i,1))*(latch.y_L{2}(x_unlatch(i,1)) - latch.coeff_fric);
     den2 = latch.mass*(1+latch.coeff_fric*latch.y_L{2}(x_unlatch(i,1)));
     F_n(i) =(num1*num2)/(den1 + den2);%filling in the F_n vector until unlatch time
 end
@@ -295,9 +295,82 @@ end
 
 end
 
+function dx = unlatching_ode(t,x,m_eff_fun,y0,latch,spring,unlatching_motor)
+% ODE for the unlatching phase
+y=(latch.y_L{1}(x(1))-latch.y_L{1}(0))+y0;
+m_eff = m_eff_fun(y);
+yL_prime = latch.y_L{2}(x(1));
+yL_doubleprime = latch.y_L{3}(x(1));
+Y=[y,yL_prime*x(2)];
+scaling = sign(x(2));
+denom=latch.mass+m_eff*(yL_prime^2)+scaling*latch.coeff_fric*(latch.mass*yL_prime-m_eff*yL_prime);
+num=unlatching_motor.Force(t,x)+yL_prime*spring.Force(t,y)+scaling*latch.coeff_fric*(unlatching_motor.Force(t,x)*yL_prime-spring.Force(t,y))-(x(2)^2)*(m_eff*yL_prime*yL_doubleprime-m_eff*scaling*latch.coeff_fric*yL_doubleprime);
+dx=[x(2);num/denom];
+%x = [x dx]
+% if x(2) < 0
+%     warning('Latch is moving backwards. Setting velocity to 0');
+%     dx=[0;num/denom];
+% end
+end
+
+function [value,isterminal,direction] = unlatching_end(t,x,m_eff_fun,y0,latch,spring,unlatching_motor)
+
+%End condition for unlatching
+if (x(1) > latch.max_width)
+   value = 0;
+   isterminal = 1;
+   direction = 0;
+   return
+end
+
+yL=(latch.y_L{1}(x(1))-latch.y_L{1}(0))+y0;
+yL_prime = latch.y_L{2}(x(1));
+yL_doubleprime = latch.y_L{3}(x(1));
+y=[yL yL_prime*x(2)];
+m_eff = m_eff_fun(yL);
+frictionDirection = sign(x(2));
+denom=latch.mass+m_eff*(yL_prime^2)+frictionDirection*latch.coeff_fric*(latch.mass*yL_prime-m_eff*yL_prime);
+num=unlatching_motor.Force(t,x)+yL_prime*spring.Force(t,y)+frictionDirection*latch.coeff_fric*(unlatching_motor.Force(t,x)*yL_prime-spring.Force(t,y))-(x(2)^2)*(m_eff*yL_prime*yL_doubleprime-m_eff*frictionDirection*latch.coeff_fric*yL_doubleprime);
+xL_doubledot=num/denom;
+
+%disp(x(2));
+
+% solving for normal force; when it's 0, unlatching is done
+value = spring.Force(t,y)-(m_eff*(yL_doubleprime*(x(2)^2)+(xL_doubledot*yL_prime)));
+
+if (imag(value))
+    warning('Complex value of Normal Force. ODE step size might be too large near the end of the latch');
+end
+
+
+stuck_threshold = 1E-9;
+if ((x(2) < stuck_threshold) && (xL_doubledot < stuck_threshold))
+    disp('yo');
+    if (~isa(unlatching_motor, 'DeactivatingMotor') && t==0 && spring.Force(0,[y0,0])*latch.coeff_fric > unlatching_motor.max_force)
+        disp('case 1');
+        error('Latch gets stuck!');
+    elseif (unlatching_motor.Force(t, x) >= unlatching_motor.Force(t + stuck_threshold,x))
+        disp('case 2');
+        error('Latch gets stuck!');
+    else
+        warning('System is moving slowly. Integration may take a long time.')
+    end
+end
+
+isterminal=1;
+direction=0;
+end
 
 function mass = m_eff(load, spring, y0, y)
-%sz = size(y)
-mass = load.mass([y0,y(1)]) + spring.mass/3;
+y = y(1);
+
+if y > 0
+    y = 0;
+end
+
+y1 = spring.rest_length + abs(y0);
+y2 = spring.rest_length + abs(y);
+
+mass = load.mass([y1,y2]) + spring.mass/3;
 
 end

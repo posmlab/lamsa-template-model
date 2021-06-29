@@ -67,6 +67,7 @@ classdef LinearMotor < Motor
             max_force = voltage_fraction*F_motor_max;
             range = range_of_motion;
             velocity = voltage_fraction*v_motor_max;
+            rest_length = 100;
 
             if (no_braking)
                 Force = @(t,x)max((max_force*(1-x(2)/velocity)) .* (abs(x(1))<=range_of_motion), 0);
@@ -75,7 +76,7 @@ classdef LinearMotor < Motor
             end
             
             % call parent constructor
-            obj = obj@Motor(max_force, range, velocity, Force);
+            obj = obj@Motor(max_force, range, velocity, Force, rest_length);
         end 
     end
 end
