@@ -12,10 +12,10 @@ classdef LinearSpring < Spring
     methods(Static)
         % the necessary parameters to make a LinearSpring
         function parameters = parameters()
-            parameters = ["k" "m_s" "F_spring_max";
-                "0.5" "0" "Inf";
-                "0" "0" "0";
-                "Inf" "Inf" "Inf"];
+            parameters = ["k" "m_s" "F_spring_max" "rest length";
+                "0.5" "0" "Inf" "1";
+                "0" "0" "0" "0";
+                "Inf" "Inf" "Inf" "Inf"];
         end
     end
     
@@ -23,8 +23,8 @@ classdef LinearSpring < Spring
         % constructor
         function obj = LinearSpring(k, varargin)
             % optional parameters
-            varargin_param_names = {'m_s','F_spring_max'};
-            varargin_default_values = {0,Inf};
+            varargin_param_names = {'m_s','F_spring_max','rest_length'};
+            varargin_default_values = {0,Inf,1};
             % check and assign optional parameters
             if (nargin < 2)
                 error('Exponential spring requires at least 1 argument.');
@@ -50,7 +50,7 @@ classdef LinearSpring < Spring
             range = F_spring_max/k;
             
             % call parent constructor
-            obj = obj@Spring(Force, mass, range);
+            obj = obj@Spring(Force, mass, range, rest_length);
         end
     end
 end

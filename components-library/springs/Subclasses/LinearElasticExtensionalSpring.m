@@ -45,7 +45,7 @@ classdef LinearElasticExtensionalSpring < LinearSpring
             F_spring_max = sigma_f*A;
             
             % call parent constructor
-            obj = obj@LinearSpring(k, m, F_spring_max);
+            obj = obj@LinearSpring(k, m, F_spring_max, L);
         end
     end
 end

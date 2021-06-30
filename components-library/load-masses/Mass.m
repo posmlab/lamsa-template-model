@@ -11,13 +11,14 @@ classdef Mass
     
     % common properties shared among all mass objects
     properties
-        mass, EMA
+        mass, real_mass, EMA
     end
     
     methods
         % constructor
-        function obj = Mass(mass, EMA)
+        function obj = Mass(mass, real_mass, EMA)
             obj.mass = mass;
+            obj.real_mass = real_mass;
             obj.EMA = EMA;
         end
     end
