@@ -13,18 +13,18 @@ classdef ExponentialElasticExtensionalSpring < ExponentialSpring
     methods(Static)
         % the necessary parameters and default values for a LinearSpring
         function parameters = parameters()
-            parameters = ["E" "A" "L" "rho" "sigma_f";
-                "0.5" "0.5" "0.001" "10" "Inf";
-                "0" "0" "0" "0" "0";
-                "Inf" "Inf" "Inf" "Inf" "Inf"];
+            parameters = ["E" "A" "L" "rho" "sigma_f" "characteristic length";
+                "0.5" "0.5" "0.01" "10" "Inf" "0.001";
+                "0" "0" "0" "0" "0" "0";
+                "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
         end
     end
     
     methods
         % constructor
         function obj = ExponentialElasticExtensionalSpring(E, A, L, varargin)
-            varargin_param_names = {'rho','sigma_f'};
-            varargin_default_values = {0,Inf};
+            varargin_param_names = {'rho','sigma_f','characteristic_length'};
+            varargin_default_values = {0,Inf,0.001};
 
             % check and assign optional parameters
             if (nargin < 3)
@@ -46,7 +46,7 @@ classdef ExponentialElasticExtensionalSpring < ExponentialSpring
             Fmax = sigma_f*A;
             
             % call parent constructor
-            obj = obj@ExponentialSpring(k, L, m, Fmax);
+            obj = obj@ExponentialSpring(k, characteristic_length, m, Fmax, L);
         end
     end
 end

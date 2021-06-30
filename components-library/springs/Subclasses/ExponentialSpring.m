@@ -15,10 +15,10 @@ classdef ExponentialSpring < Spring
         
         % the necessary parameters and default values for a LinearSpring
         function parameters = parameters()
-            parameters = ["k_0" "characteristic length" "mass" "Fmax";
-                "2000" "0.001" "0.002" "20";
-                "0" "0" "0" "0";
-                "Inf" "Inf" "Inf" "Inf"];
+            parameters = ["k_0" "characteristic length" "mass" "Fmax" "rest length";
+                "2000" "0.01" "0.002" "20" "0.01";
+                "0" "0" "0" "0" "0";
+                "Inf" "Inf" "Inf" "Inf" "Inf"];
         end
     end
     
@@ -26,8 +26,8 @@ classdef ExponentialSpring < Spring
         % constructor
         function obj = ExponentialSpring(k_0,characteristic_length, varargin)
             % optional parameters
-            varargin_param_names = {'m_s','F_spring_max'};
-            varargin_default_values = {0,Inf};
+            varargin_param_names = {'m_s','F_spring_max','rest_length'};
+            varargin_default_values = {0,Inf,0.01};
             % check and assign optional parameters
             if (nargin < 2)
                 error('Exponential spring requires at least 2 arguments.');
@@ -51,7 +51,6 @@ classdef ExponentialSpring < Spring
             Force = @(t,x)min(characteristic_length*k_0*(exp(-x(1)/characteristic_length)-1),realmax).*(abs(characteristic_length*k_0*(exp(-x(1)/characteristic_length)-1))<F_spring_max);
             mass = m_s;
             range= characteristic_length*log((F_spring_max/(characteristic_length*k_0))+1);
-            rest_length = 100;
             
             % call parent constructor
             obj = obj@Spring(Force, mass, range, rest_length);
