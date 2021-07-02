@@ -66,10 +66,13 @@ if (abs(y0) < latch.min_latching_dist)
 end
 if isa(unlatching_motor, 'DeactivatingMotor')
     angle = atan(latch.y_L{2}(0));
-    N = -unlatching_motor.max_force*sin(angle)+spring.Force(0, y0)*cos(angle);
-    q1 = latch.coeff_fric*(N)-unlatching_motor.max_force*cos(angle);
-    q2 = spring.Force(0, y0)*sin(angle);
-    condition = q1 < q2;
+    mu = latch.coeff_fric;
+    numer = mu*cos(angle)-sin(angle);
+    denom = cos(angle)+mu*sin(angle);
+    new_max = spring.Force(0, y0)*numer/denom;
+    unlatching_motor.max_force = new_max;
+    unlatching_motor.Force = @(t,x) new_max * exp(-unlatching_motor.r_deactivation*t);
+    condition = false; % we just found the necessary force to hold the latch
 else
     condition = latch.coeff_fric < latch.y_L{2}(0);
 end
@@ -118,7 +121,7 @@ catch ME
     end
 end
 if inst_check>0  % not instantaneous unlatching
-    unlatch_opts=odeset('Events',@(t,y) unlatching_end(t,y,@(y)m_eff(load,spring,y0,y),y0,latch,spring,unlatching_motor),'RelTol',1E-7,'AbsTol',1E-10);
+    unlatch_opts=odeset('Events',@(t,y) unlatching_end(t,y,@(y)m_eff(load,spring,y0,y),y0,latch,spring,unlatching_motor),'RelTol',1E-6,'AbsTol',1E-9);
     ode=@(t,y) unlatching_ode(t,y,@(y)m_eff(load,spring,y0,y),y0,latch,spring,unlatching_motor);
     
     a_0L = abs(unlatching_motor.max_force / latch.mass);
@@ -319,11 +322,6 @@ scaling = sign(x(2));
 denom=latch.mass+m_eff*(yL_prime^2)+scaling*latch.coeff_fric*(latch.mass*yL_prime-m_eff*yL_prime);
 num=unlatching_motor.Force(t,x)+yL_prime*spring.Force(t,y)+scaling*latch.coeff_fric*(unlatching_motor.Force(t,x)*yL_prime-spring.Force(t,y))-(x(2)^2)*(m_eff*yL_prime*yL_doubleprime-m_eff*scaling*latch.coeff_fric*yL_doubleprime);
 dx=[x(2);num/denom];
-%x = [x dx]
-% if x(2) < 0
-%     warning('Latch is moving backwards. Setting velocity to 0');
-%     dx=[0;num/denom];
-% end
 end
 
 function [value,isterminal,direction] = unlatching_end(t,x,m_eff_fun,y0,latch,spring,unlatching_motor)

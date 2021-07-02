@@ -44,7 +44,7 @@ classdef HillMuscleMotor < Motor
             for i=(length(varargin)+1):length(varargin_param_names)
                 eval([varargin_param_names{i} '=varargin_default_values{i};'])
             end
-                if (v_motor_max == 0)
+            if (v_motor_max == 0)
                 v_motor_max = Inf;
                 warning("v_max argument must be nonzero, setting to Inf")
             end

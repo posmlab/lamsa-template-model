@@ -5,9 +5,6 @@
 % past during the unlatching phase.
 %
 % arguments in required order:
-%     F_motor_max      - maximum amount of force the spring can exert AT MAX
-%                        VOLTAGE, i.e. voltage_fraction = 1 the F_motor_max 
-%                        will get scaled down w/ the voltage fraction
 %     v_motor_max      - maximum velocity at which the motor can travel AT MAX
 %                        VOLTAGE, i.e. voltage_fraction = 1 the F_motor_max 
 %                        will get scaled down w/ the voltage fraction 
@@ -32,21 +29,25 @@
 
 classdef DeactivatingMotor < Motor
     
+    properties
+        r_deactivation
+    end
+    
     methods (Static)
         % first row contains parameter names
         % second row contains default values for the loading motor
         % third row contains default values for the unlatching motor
         function parameters = parameters()
-            parameters = ["Fmax" "Vmax" "range of motion" "deactivation rate" "voltage fraction";
-                "10" "10" "0.005" "1E7" "1" ;
-                "0.25" "1" "0.005" "1E7" "1";
-                "0" "0" "0" "0" "0";
-                "Inf" "Inf" "Inf" "Inf" "Inf"];
+            parameters = ["Vmax" "range of motion" "deactivation rate" "voltage fraction";
+                "10" "0.005" "1E7" "1" ;
+                "1" "0.005" "1E7" "1";
+                "0" "0" "0" "0";
+                "Inf" "Inf" "Inf" "Inf"];
         end
     end
     
     methods
-        function obj = DeactivatingMotor(F_motor_max, v_motor_max, range_of_motion,r_deactivation, varargin)
+        function obj = DeactivatingMotor(v_motor_max, range_of_motion,r_deactivation, varargin)
             % optional parameters
             varargin_param_names = {'voltage_fraction','no_braking'};
             varargin_default_values = {1, true};
@@ -71,14 +72,17 @@ classdef DeactivatingMotor < Motor
             end
             
             % model
-            max_force = -voltage_fraction*F_motor_max;
+            max_force = 0;
             range = range_of_motion;
             velocity = voltage_fraction*v_motor_max;
-            Force = @(t,x) max_force * exp(-r_deactivation*t);
-            rest_length = 100;
+            Force = @(t,x) 0; % this is assigned in solve_model
+            rest_length = 0;
+            
             
             % call parent constructor
             obj = obj@Motor(max_force, range, velocity, Force, rest_length);
+            
+            obj.r_deactivation = r_deactivation;
         end 
     end
 end
