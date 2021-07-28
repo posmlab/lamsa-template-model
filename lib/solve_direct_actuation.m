@@ -28,7 +28,7 @@ while (t(end) == tspan(end))
     [t,y]=ode45(ode,tspan,y0,launch_opts);
 end
 
-T=[t];
+ T=[t];
 Y=[y];
 
 for i = 1:size(T)

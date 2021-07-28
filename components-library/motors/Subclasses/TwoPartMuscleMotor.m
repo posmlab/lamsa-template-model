@@ -7,15 +7,17 @@
 %
 % arguments in required order:
 
-%     L_0 - rest length of the contractile element
+
 %     v_motor_max - maximum velocity at which the motor can travel
 %     F_max - F_max in [N] for Extensor
-%     l_CEopt - optimal length of CE in [m] for Extensor
+%     l_CEopt - optimal length of CE in [m] for Extensor (rest length of
+%     contractile element)
 %     L_PEE0 - rest length of PEE normalized to optimal lenght of CE (Guenther et al., 2007)
 
 %optional
-%     L_initial - initial stretch on the contractile element  
-%       min # arguments = 5
+%     L_initial - inital length of contractile element  (including stretch)
+%     r_act - rate of activation
+%       min # arguments = 6
 
 classdef TwoPartMuscleMotor < Motor
     
@@ -24,21 +26,21 @@ classdef TwoPartMuscleMotor < Motor
         % second row contains default values for the loading motor
         % third row contains default values for the unlatching motor
         function parameters = parameters()
-            parameters = [ "L_0" "v_motor_max" "F_max" "l_CEopt"  "L_PEE0"...
-                "L_initial";
-                 "0.0828" "1" "5" "0.092" "0.9" "0";
-                 "0.0828" "1" "5" "0.092" "0.9" "0";
-                 "0" "0" "0" "0" "0" "0";
-                 "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
+            parameters = [ "v_motor_max" "F_max" "l_CEopt"  "L_PEE0"...
+                "L_initial" "r_act";
+                 "1" "5" "0.092" "0.9" "0.1" "200";
+                 "1" "5" "0.092" "0.9" "0.1""200";
+                 "0" "0" "0" "0" "0""0";
+                 "Inf" "Inf" "Inf" "Inf" "Inf""Inf"];
         end
     end
     
     methods
-        function obj = TwoPartMuscleMotor( L_0, v_motor_max, F_max, l_CEopt, L_PEE0, varargin)
+        function obj = TwoPartMuscleMotor( v_motor_max, F_max, l_CEopt, L_PEE0, varargin)
             
             % optional parameters
-            varargin_param_names = {'L_initial'};
-            varargin_default_values = {0};
+            varargin_param_names = {'L_initial', 'r_act'};
+            varargin_default_values = {0, 200};
            % 
              
 %             % check and assign optional parameters
@@ -82,11 +84,11 @@ classdef TwoPartMuscleMotor < Motor
             v_CElimb_asc = 3.0;
             
             %changing variables
-            l_CE=@(t,x) L_0-x(1);
+            l_CE=@(t,x) l_CEopt-x(1);
             dot_l_CE=@(t,x) x(2);
                 %muscles activity, 0<=q<=1
-            r_activation=200;
-            q=@(t,x)min(r_activation*t,1);
+            
+            q=@(t,x)min(r_act*t,1);
             %force calculations
             %chill initial stuff
             l_PEE0 = L_PEE0*l_CEopt;       % rest length of PEE (Guenther et al., 2007)
@@ -115,16 +117,16 @@ classdef TwoPartMuscleMotor < Motor
             % I think this might just be to initialize F_CE = F_max*q*F_isom;
             F_CE = @(t,x) F_max*(( (q(t,x)*F_isom(t,x)+A_rel(t,x)) / (1 - dot_l_CE(t,x)/(l_CEopt*B_rel(t,x)) ) )-A_rel(t,x));
             %needed for constructor
-            Force=@(t,x)F_CE(t,x)+F_PE(t,x);
+            Force=@(t,x)F_CE(t,x)*(F_CE(t,x)>eps)-F_PE(t,x)*(F_PE(t,x)>eps);
             max_force = F_max;
             
-            range=0.3*L_0-L_initial;
+            range=L_initial-l_CEopt+(.3*l_CEopt);
             %it needs to mean stretch minus 0.7 rest length. What's initial stretch?
         %     motor.range=muscle_length;
-            velocity=@(t,x) dot_l_CE;
+            velocity=v_motor_max;
             
             % call parent constructor
-            obj = obj@Motor(max_force, range, velocity, Force);
+            obj = obj@Motor(max_force, range, velocity, Force,l_CEopt);
         end  
     end
 end
