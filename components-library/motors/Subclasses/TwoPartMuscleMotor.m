@@ -17,7 +17,7 @@
 %optional
 %     L_initial - inital length of contractile element  (including stretch)
 %     r_act - rate of activation
-%       min # arguments = 6
+%       min # arguments = 4
 
 classdef TwoPartMuscleMotor < Motor
     
@@ -29,9 +29,9 @@ classdef TwoPartMuscleMotor < Motor
             parameters = [ "v_motor_max" "F_max" "l_CEopt"  "L_PEE0"...
                 "L_initial" "r_act";
                  "1" "5" "0.092" "0.9" "0.1" "200";
-                 "1" "5" "0.092" "0.9" "0.1""200";
-                 "0" "0" "0" "0" "0""0";
-                 "Inf" "Inf" "Inf" "Inf" "Inf""Inf"];
+                 "1" "5" "0.092" "0.9" "0.1" "200";
+                 "0" "0" "0" "0" "0" "0";
+                 "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
         end
     end
     
@@ -40,12 +40,12 @@ classdef TwoPartMuscleMotor < Motor
             
             % optional parameters
             varargin_param_names = {'L_initial', 'r_act'};
-            varargin_default_values = {0, 200};
+            varargin_default_values = {0,200};
            % 
              
 %             % check and assign optional parameters
             if (nargin < 4)
-                error('Two Part muscle motor requires at le%ast 4 arguments.');
+                error('Two Part muscle motor requires at least 4 arguments.');
             end
             
             if (length(varargin)>length(varargin_param_names))
@@ -87,8 +87,8 @@ classdef TwoPartMuscleMotor < Motor
             l_CE=@(t,x) l_CEopt-x(1);
             dot_l_CE=@(t,x) x(2);
                 %muscles activity, 0<=q<=1
-            
-            q=@(t,x)min(r_act*t,1);
+            %q=@(t,x)0.01;
+            q=@(t,x)(min(r_act*t,1)>0)*min(r_act*t,1)+(min(r_act*t,1)<=0)*(0.001);
             %force calculations
             %chill initial stuff
             l_PEE0 = L_PEE0*l_CEopt;       % rest length of PEE (Guenther et al., 2007)
@@ -105,12 +105,12 @@ classdef TwoPartMuscleMotor < Motor
        
             
             % Hill Parameters concentric contraction
-            A_rel=@(t,x)1*(l_CE(t,x)<l_CEopt)+ (l_CE(t,x)>=1)*(F_isom(t,x));
+            A_rel=@(t,x) (l_CE(t,x)<l_CEopt)+ (l_CE(t,x)>=1)*(F_isom(t,x));
             
             A_rel = @(t,x) (A_rel(t,x) * A_rel0*1/4*(1+3*q(t,x)))*(dot_l_CE(t,x)<=0)+(dot_l_CE(t,x) > 0)*(-F_eccentric*q(t,x)*F_isom(t,x));
             
             B_rel = @(t,x)B_rel0*1*1/7*(3+4*q(t,x));
-
+            %below there is an occasional dividion by 0
             B_rel=@(t,x) B_rel(t,x)*(dot_l_CE(t,x)<=0)+(dot_l_CE(t,x) > 0)*((q(t,x)*F_isom(t,x)*(1-F_eccentric)/(q(t,x)*F_isom(t,x)+A_rel(t,x))*B_rel(t,x)/S_eccentric));
             
             % Contractile element force (isometric)
@@ -124,9 +124,9 @@ classdef TwoPartMuscleMotor < Motor
             %it needs to mean stretch minus 0.7 rest length. What's initial stretch?
         %     motor.range=muscle_length;
             velocity=v_motor_max;
-            
+            rest_length=l_CEopt;
             % call parent constructor
-            obj = obj@Motor(max_force, range, velocity, Force,l_CEopt);
+            obj = obj@Motor(max_force, range, velocity, Force,rest_length);
         end  
     end
 end
