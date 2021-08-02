@@ -10,7 +10,7 @@ function [sol, transition_times] = solve_direct_actuation(motor,load)
 
 
 %% Ballistic phase:F motor only 
-launch_opts=odeset('Events',@(t,y) direct_actuation_end(t,y,motor),'RelTol',1E-7,'AbsTol',1E-10);
+launch_opts=odeset('Events',@(t,y) direct_actuation_end(t,y,motor),'RelTol',1E-7,'AbsTol',1E-10,'OutputFcn', @odeprint);
 ode=@(t,y) direct_actuation_ode(t,y,load,motor);
 
 t_guess_v=(motor.velocity*load.mass([1,1]))/motor.max_force;

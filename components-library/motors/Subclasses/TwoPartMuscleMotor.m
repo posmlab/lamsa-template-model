@@ -105,7 +105,7 @@ classdef TwoPartMuscleMotor < Motor
        
             
             % Hill Parameters concentric contraction
-            A_rel=@(t,x) (l_CE(t,x)<l_CEopt)+ (l_CE(t,x)>=1)*(F_isom(t,x));
+            A_rel=@(t,x) (l_CE(t,x)<l_CEopt)+ (l_CE(t,x)>=l_CEopt)*(F_isom(t,x));
             
             A_rel = @(t,x) (A_rel(t,x) * A_rel0*1/4*(1+3*q(t,x)))*(dot_l_CE(t,x)<=0)+(dot_l_CE(t,x) > 0)*(-F_eccentric*q(t,x)*F_isom(t,x));
             
