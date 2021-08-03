@@ -8,8 +8,9 @@
 % arguments in required order:
 
 
-%     v_motor_max - maximum velocity at which the motor can travel
-%     F_max - F_max in [N] for Extensor
+%     v_motor_max - maximum velocity at which contractile element of the motor can travel
+%     F_max - F_max in [N] for Extensor/contractile element, more comes
+%     from paralellel elastic element
 %     l_CEopt - optimal length of CE in [m] for Extensor (rest length of
 %     contractile element)
 %     L_PEE0 - rest length of PEE normalized to optimal lenght of CE (Guenther et al., 2007)
@@ -40,7 +41,7 @@ classdef TwoPartMuscleMotor < Motor
             
             % optional parameters
             varargin_param_names = {'L_initial', 'r_act'};
-            varargin_default_values = {0,200};
+            varargin_default_values = {0.1,200};
            % 
              
 %             % check and assign optional parameters
@@ -85,7 +86,7 @@ classdef TwoPartMuscleMotor < Motor
             
             %changing variables
             l_CE=@(t,x) l_CEopt-x(1);
-            dot_l_CE=@(t,x) x(2);
+            dot_l_CE=@(t,x) -x(2);
                 %muscles activity, 0<=q<=1
             %q=@(t,x)0.01;
             q=@(t,x)(min(r_act*t,1)>0)*min(r_act*t,1)+(min(r_act*t,1)<=0)*(0.001);
@@ -117,7 +118,7 @@ classdef TwoPartMuscleMotor < Motor
             % I think this might just be to initialize F_CE = F_max*q*F_isom;
             F_CE = @(t,x) F_max*(( (q(t,x)*F_isom(t,x)+A_rel(t,x)) / (1 - dot_l_CE(t,x)/(l_CEopt*B_rel(t,x)) ) )-A_rel(t,x));
             %needed for constructor
-            Force=@(t,x)F_CE(t,x)*(F_CE(t,x)>eps)-F_PE(t,x)*(F_PE(t,x)>eps);
+            Force=@(t,x)F_CE(t,x)*(F_CE(t,x)>eps)+F_PE(t,x)*(F_PE(t,x)>eps);
             max_force = F_max;
             
             range=L_initial-l_CEopt+(.3*l_CEopt);
