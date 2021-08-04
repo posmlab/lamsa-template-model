@@ -18,6 +18,11 @@
 %optional
 %     L_initial - inital length of contractile element  (including stretch)
 %     r_act - rate of activation
+%     DeltaW_limb_des - width of normalized bell curve in descending branch of force-length relationship
+%                       0.35 for mammalian slowtwitch, 0.15 to match Rosario;
+%     DeltaW_limb_asc - width of normalized bell curve in ascending branch
+%                       of force length relationship (contraction)
+%                       0.35 for mammalian slowtwitch, 0.15 to match Rosario;
 %       min # arguments = 4
 
 classdef TwoPartMuscleMotor < Motor
@@ -27,21 +32,21 @@ classdef TwoPartMuscleMotor < Motor
         % second row contains default values for the loading motor
         % third row contains default values for the unlatching motor
         function parameters = parameters()
-            parameters = [ "v_motor_max" "F_max" "l_CEopt"  "L_PEE0"...
-                "L_initial" "r_act";
-                 "1" "5" "0.092" "0.9" "0.1" "200";
-                 "1" "5" "0.092" "0.9" "0.1" "200";
-                 "0" "0" "0" "0" "0" "0";
-                 "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
+            parameters = [ "v_motor_max" "F_max" "l_CEopt" "L_PEE0"...
+                "L_initial" "r_act" "DeltaW_limb_des" "DeltaW_limb_asc";
+                 "1" "5" "0.092" "0.9" "0.1" "200" "0.15" "0.15";
+                 "1" "5" "0.092" "0.9" "0.1" "200" "0.15" "0.15";
+                 "0" "0" "0" "0" "0" "0" "0" "0";
+                 "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
         end
     end
     
     methods
-        function obj = TwoPartMuscleMotor( v_motor_max, F_max, l_CEopt, L_PEE0, varargin)
+        function obj = TwoPartMuscleMotor(v_motor_max,F_max,l_CEopt,L_PEE0,varargin)
             
             % optional parameters
-            varargin_param_names = {'L_initial', 'r_act'};
-            varargin_default_values = {0.1,200};
+            varargin_param_names = {'L_initial','r_act','DeltaW_limb_des','DeltaW_limb_asc'};
+            varargin_default_values = {0.1,200,0.15,0.15};
            % 
              
 %             % check and assign optional parameters
@@ -64,13 +69,10 @@ classdef TwoPartMuscleMotor < Motor
                 warning("v_max argument must be nonzero, setting to Inf")
             end
             % model
-            % constants
+            % constants(which could be parameters, but there are so many)
             v_PEE=2.5;%    v_PEE -  exponent of F_PEE (Moerl et al., 2012)
             F_PEE=2.0;%    F_PEE - force of PEE if l_CE is stretched to deltaWlimb_des (Moerl et al., 2012)
-            %DeltaW_limb_des - width of normalized bell curve in descending branch of force-length relationship
-            DeltaW_limb_des=0.35;
-            % DeltaW_limb_asc - width of normalized bell curve in ascending branch of force length relationship
-            DeltaW_limb_asc=0.35;
+            
             %A_rel0 - parameter for contraction dynamics: maximum value of A_rel
             A_rel0=0.25;
             %    B_rel0 -  parameter for contraction dynmacis: maximum value of B_rel
