@@ -96,7 +96,7 @@ classdef TwoPartMuscleMotor < Motor
             %chill initial stuff
             l_PEE0 = L_PEE0*l_CEopt;       % rest length of PEE (Guenther et al., 2007)
            
-            K_PEE= F_PEE*( F_max/ ( l_CEopt*(DeltaW_limb_des+1-L_PEE0) )^v_PEE );%I think I have a units issue here??? This is the same equation so...
+            K_PEE= F_PEE*( F_max/ ( l_CEopt*(DeltaW_limb_des+1-L_PEE0) )^v_PEE );
             % Isometric force (Force length relation)
             %Guenther et al. 2007
           %descending branch or ascending branch
@@ -113,19 +113,17 @@ classdef TwoPartMuscleMotor < Motor
             A_rel = @(t,x) (A_rel(t,x) * A_rel0*1/4*(1+3*q(t,x)))*(dot_l_CE(t,x)<=0)+(dot_l_CE(t,x) > 0)*(-F_eccentric*q(t,x)*F_isom(t,x));
             
             B_rel = @(t,x)B_rel0*1*1/7*(3+4*q(t,x));
-            %below there is an occasional dividion by 0
+            
             B_rel=@(t,x) B_rel(t,x)*(dot_l_CE(t,x)<=0)+(dot_l_CE(t,x) > 0)*((q(t,x)*F_isom(t,x)*(1-F_eccentric)/(q(t,x)*F_isom(t,x)+A_rel(t,x))*B_rel(t,x)/S_eccentric));
             
             % Contractile element force (isometric)
-            % I think this might just be to initialize F_CE = F_max*q*F_isom;
+            
             F_CE = @(t,x) F_max*(( (q(t,x)*F_isom(t,x)+A_rel(t,x)) / (1 - dot_l_CE(t,x)/(l_CEopt*B_rel(t,x)) ) )-A_rel(t,x));
             %needed for constructor
             Force=@(t,x)F_CE(t,x)*(F_CE(t,x)>eps)+F_PE(t,x)*(F_PE(t,x)>eps);
             max_force = F_max;
             
             range=L_initial-l_CEopt+(.3*l_CEopt);
-            %it needs to mean stretch minus 0.7 rest length. What's initial stretch?
-        %     motor.range=muscle_length;
             velocity=v_motor_max;
             rest_length=l_CEopt;
             % call parent constructor
