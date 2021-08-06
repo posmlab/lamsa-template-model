@@ -37,12 +37,11 @@ classdef OneDMass < Mass
             
             % model
             % takes y as [y0 y]
-            mass = @(y) m_end/(EMA^2) + m_rod*( (1+1/EMA)^2 + 3*(1/EMA-1)^2 ) /12;
-            real_mass = m_end/(EMA^2) + m_rod*( (1+1/EMA)^2 + 3*(1/EMA-1)^2 ) /12;
+            mass = m_end/(EMA^2) + m_rod*( (1+1/EMA)^2 + 3*(1/EMA-1)^2 ) /12;
             EMA = @(y) EMA;
             
             % call parent constructor
-            obj = obj@Mass(mass, real_mass, EMA);
+            obj = obj@Mass(mass, EMA);
         end 
     end
 end
