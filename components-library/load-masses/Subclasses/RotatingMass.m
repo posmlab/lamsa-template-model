@@ -12,6 +12,10 @@
 
 classdef RotatingMass < Mass
     
+    properties
+        L1, theta_0
+    end
+    
     methods (Static)
         function parameters = parameters()
             parameters = ["mass" "mass of lever arm" "L1" "L2" "theta initial";
@@ -43,20 +47,13 @@ classdef RotatingMass < Mass
             
             % model
             EMA = L1/L2;
-            % takes y as [y0 y]
-%             mass = @(y) real((m_end/(EMA^2) + m_rod*( (1+1/EMA)^2 + 3*(1/EMA-1)^2 ) /12)/...
-%                 sin(acos(((x_rest-y(2))^2-(x_rest-y(1))^2+2*(x_rest-y(1))*L1*sin(theta_0))/(2*(x_rest-y(2))*L1))))...
-%                 +1000000000000*(sqrt((L1*cos(theta_0))^2+(x_rest-y(1)-L1*sin(theta_0))^2)>(x_rest-y(2)+L1));
-%             real_mass = (m_end/(EMA^2) + m_rod*( (1+1/EMA)^2 + 3*(1/EMA-1)^2 ) /12);
-            % @(y1, y2)
-            mass = @(y) real((m_end/(EMA^2) + m_rod*( (1+1/EMA)^2 + 3*(1/EMA-1)^2 ) /12)/...
-                sin(acos((y(2)^2-y(1)^2+2*y(1)*L1*sin(theta_0))/(2*y(2)*L1))))...
-                +1000000000000*(sqrt((L1*cos(theta_0))^2+(y(1)-L1*sin(theta_0))^2)>(y(2)+L1));
-            real_mass = (m_end/(EMA^2) + m_rod*( (1+1/EMA)^2 + 3*(1/EMA-1)^2 ) /12);
+            mass = (m_end/(EMA^2) + m_rod*( (1+1/EMA)^2 + 3*(1/EMA-1)^2 ) /12);
             EMA = @(y) EMA;
             
             % call parent constructor
-            obj = obj@Mass(mass, real_mass, EMA);
+            obj = obj@Mass(mass, EMA);
+            obj.L1 = L1;
+            obj.theta_0 = theta_0;
         end 
     end
 end
