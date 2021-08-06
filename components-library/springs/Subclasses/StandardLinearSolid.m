@@ -11,7 +11,7 @@
 classdef StandardLinearSolid < Spring
     
     properties
-        F_history, k_0, k_inf, eta
+        F_history, k1, k2, eta
     end
     
     methods(Static)
