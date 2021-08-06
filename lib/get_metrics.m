@@ -2,7 +2,7 @@ function metrics = get_metrics(sol,transition_times,load,met_names)
 %Takes solution matrix (columns time, position, velocity)and the effective 
 %    mass and returns the metrics specified in met_names
     % should m be load.mass+spring.mass?
-    m = load.real_mass;
+    m = load.mass;
     EMA = load.EMA([0 0]);
 
     sol(:,2:3)=sol(:,2:3)./EMA;
@@ -31,7 +31,8 @@ function metrics = get_metrics(sol,transition_times,load,met_names)
         if size(sol,1) < 2
             metrics('Pmax') = 0;
         else
-            metrics('Pmax')=max(gradient(kinetic_energy)./gradient(sol(:,1)));
+            Power = gradient(kinetic_energy)./gradient(sol(:,1));
+            metrics('Pmax')=max(Power);
         end
     end
     if isKey(metrics,'ymax')
@@ -44,7 +45,6 @@ function metrics = get_metrics(sol,transition_times,load,met_names)
         index=find(sol(:,1)<=transition_times(1),1,"last");
         metrics('yunlatch')= sol(index, 2);
     end
-    %amax 
     if isKey(metrics,'amax')
         metrics("amax")=max(acceleration);
     end
