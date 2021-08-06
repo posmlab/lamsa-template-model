@@ -31,8 +31,8 @@ classdef StandardLinearSolid < Spring
             varargin_param_names = {'mass','rest_length'};
             varargin_default_values = {0,0.01};
             % check and assign optional parameters
-            if (nargin < 2)
-                error('StandardLinearSolid2 requires at least 3 arguments.');
+            if (nargin < 3)
+                error('StandardLinearSolid requires at least 3 arguments.');
             end
             if (length(varargin)>length(varargin_param_names))
                 error('Too many input parameters');
@@ -58,7 +58,7 @@ classdef StandardLinearSolid < Spring
             Force = @(t,y) ( -k1*k2*(y(1)) - k1*eta*y(2)) / ( k1+k2 );
             
             % call parent constructor
-            obj = obj@Spring(mass, range, rest_length, Force);
+            obj = obj@Spring(Force, mass, range, rest_length);
             
             obj.k1 = k1;
             obj.k2 = k2;
