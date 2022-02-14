@@ -75,7 +75,7 @@ classdef DeactivatingMotor < Motor
             max_force = 0;
             range = range_of_motion;
             velocity = voltage_fraction*v_motor_max;
-            Force = @(t,x) 0; % this is assigned in solve_model
+            Force = @(t,x) 0; % this is assigned in solve_lamsa
             rest_length = 0;
             
             

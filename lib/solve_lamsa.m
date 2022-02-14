@@ -1,5 +1,5 @@
 
-function [sol,transition_times] = solve_model(loading_motor,unlatching_motor,load,latch,spring, outputDirectory)
+function [sol,transition_times] = solve_lamsa(loading_motor,unlatching_motor,load,latch,spring, outputDirectory)
 
 % Solve set of differential equations for loading, unlatching, and launching
 % phases of LAMSA motion

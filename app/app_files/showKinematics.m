@@ -50,7 +50,7 @@ changeEditField(app, yAxisVariable, yefIndex, yUsed);
 [spring, loading_motor, unlatching_motor, load, latch] = initialize_components(app);
 
 % calling solve model
-[sol,transition_times] = solve_model(loading_motor,unlatching_motor,load,latch,spring);
+[sol,transition_times] = solve_lamsa(loading_motor,unlatching_motor,load,latch,spring);
 
 plotNames = {'Time vs. y coordinate of load', 'Time vs. y velocity of load', 'Time vs. y-forces on load',...
              'Time vs. x coordinate of latch','Time vs. x velocity of latch','Time vs. x-forces on latch'};
