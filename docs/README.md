@@ -375,7 +375,7 @@ classdef ParabolicLatch < Latch
 end
 ```
 
-After completing this code, run the NewApp code, resolve any errors, and check that output values make sense.
+After completing this code, run the lamsa_template_model app, resolve any errors, and check that output values make sense.
 
 ## The Repository
 
