@@ -31,7 +31,7 @@ classdef LinearMotor < Motor
         % third row contains default values for the unlatching motor
         function parameters = parameters()
             parameters = ["Fmax" "Vmax" "range of motion" "voltage fraction" "muscle length";
-                "10" "10" "0.005"  "1" "0.01";
+                "0.25" "1" "0.005"  "1" "0.01";
                 "0.25" "1" "0.005"  "1" "0.01";
                 "0" "0" "0" "0" "0";
                 "Inf" "Inf" "Inf" "Inf" "Inf"];
