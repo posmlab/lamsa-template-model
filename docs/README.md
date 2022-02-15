@@ -18,7 +18,9 @@ Table of Contents
 
 ## Installing the Model
 
-To install the model, click [here](https://github.com/posmlab/matlab-lamsa-model/archive/master.zip), or select the "Download ZIP" option from the "Code" dropdown at [the top of our github repository](https://github.com/posmlab/matlab-lamsa-model).
+The software is available as either
+- a [standalone Windows executable installer](https://github.com/posmlab/lamsa-template-model/releases/download/v1.1.0/LaMSAModelInstaller_Windows.exe) (Windows only)
+- as a [ZIP archive of the MATLAB source code](https://github.com/posmlab/matlab-lamsa-model/archive/master.zip) (requires MATLAB)
 
 
 ## Using the Graphical User Interface
