@@ -21,7 +21,7 @@ classdef RoundedLatch < Latch
     methods (Static)
         function parameters = parameters()
             parameters = ["radius" "mass" "μ" "v_0" "min latching dist" "max latching dist" "runway length";
-                "0.005" "0.003" "0" "0" "0" "Inf" "0";
+                "0.0002" "0.003" "0" "0" "0" "Inf" "0";
                 "0" "0" "0" "0" "0" "0" "-Inf";
                 "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
         end
