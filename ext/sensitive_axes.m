@@ -1,20 +1,30 @@
-function [axes,pac] = sensitive_axes(fun,x0,grad_pct,mesh_pct,pca_pct,pca_N)
+function [axes,pac] = sensitive_axes(fun,x0,grad_pct,mesh_pct,pca_pct,pca_N,first_order_flag)
 %Determines the most sensitive axis by the gradient, then performs a PCA on
 %the projection of the function onto the tangent plane
-    if nargin == 4 %Set default value for pca_N
+    if nargin < 6 %Set default value for pca_N
         pca_N = 5;
+    end
+    
+    if nargin < 7
+        first_order_flag = false;
     end
     
     %% Find gradient and find tangent plane
     %Evaluate the gradient
     f0 = feval(fun,x0);
     grad = relative_gradient(fun,x0,grad_pct);
-    %If the gradient is small, call it zero
-    if 2*grad_pct*grad/f0<1e-4 %If the total variation is less than some small percentage
-        grad = zeros(length(x0),1);
+    if (first_order_flag)
+        axes = grad/norm(grad);
+        pac= zeros(size(axes));
+        return;
     end
+    %If the gradient is small along a particular direction, call it zero
+    grad(abs(grad)/(grad_pct*f0)<1e-5) = 0;
+    
+    
+        
     %Determine the matrix U that maps to the tangent plane
-    nullBasis = null(grad');
+    nullBasis = null(grad')
     
     %% Create mesh in input space
     dim = size(nullBasis,2);
@@ -112,7 +122,11 @@ function [axes,pac] = sensitive_axes(fun,x0,grad_pct,mesh_pct,pca_pct,pca_N)
     end
     [pca_u_basis,~,~,~,explained] = pca(crds_to_pca');
     pca_x_basis = nullBasis*pca_u_basis;
-    axes = [grad/norm(grad) flip(pca_x_basis,2)];
+    if (grad==0)
+        axes = flip(pca_x_basis,2);
+    else
+        axes = [grad/norm(grad) flip(pca_x_basis,2)];
+    end
     coeff=pca_u_basis.^2;
     explained=explained*.01;
     puck=coeff.*explained';
