@@ -11,16 +11,23 @@ function dydt = se_ode(t, y, loading_motor, unlatching_motor, load, latch, sprin
 %   y = [theta dot, theta, s dot, s, y1]
 dydt = zeros(4,1);
 
-dydt(1) = 
+moI = load.mass;
+n = normal_force;
+L1 = load.L1;
+L2 = L1/load.EMA;
+phi = atan(latch.y_L);
+mu = latch.coeff_fric;
+
+dydt(1) = 1/moI * (f_perp*L1 - n*L2*cos(phi) - mu*L2*sin(phi));
 dydt(2) = y(1);
-dydt(3) = 
+dydt(3) = (-mu*n*cos(phi) + n*sin(phi) + unlatching_motor.Force)/latch.mass;
 dydt(4) = y(3);
 dydt(5) = 
 end
 
 function f = f_perp()
 %F_PERP is the part of the spring force perpendicular to the lever
-a = alpha();
+a = alpha;
     if theta + a >= 90
         f = 0;
     else
