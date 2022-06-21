@@ -13,7 +13,7 @@
 classdef RotatingMassSE < Mass
     
     properties
-        L1, L2, theta_0
+        lengths, theta_0
     end
      
     methods (Static)
@@ -49,14 +49,13 @@ classdef RotatingMassSE < Mass
             end
             
             % model
-            EMA = L1/L3;
+            EMA = 1/2;
             mass = (m_end/(EMA^2) + m_rod*( (1+1/EMA)^2 + 3*(1/EMA-1)^2 ) /12);
             EMA = @(y) EMA;
             
             % call parent constructor
             obj = obj@Mass(mass, EMA);
-            obj.L1 = L1;
-            obj.L2 = L2;
+            [L1, L2, L3] = obj.lengths;
             obj.theta_0 = theta_0;
         end 
     end
