@@ -20,8 +20,8 @@ L3 = load.lengths(3);
 moI = load.mass*(L3^3 + L2^3)/(3*(L3 + L2));% moment of inertia assuming uniform mass
 mu = latch.coeff_fric;
 
-fPerp = f_perp(t, y(1), y(2), loading_motor, load, spring, l0);
-n =  normal_force(t, y(1), y(2), y(3), y(4), unlatching_motor, load, latch, spring, l0);
+fPerp = f_perp(t, y(1), y(2), y(5), loading_motor, load, spring, l0);
+n =  normal_force(t, y(1), y(2), y(3), y(4), y(5), loading_motor, unlatching_motor, load, latch, spring, l0);
 phi = atan(latch.y_L{2}(y(4))); %angle of latch surface
 
 dydt(1) = 1/moI * (fPerp*L1 - n*L2*cos(phi) - mu*L2*sin(phi));
@@ -29,14 +29,13 @@ dydt(2) = y(1);
 dydt(3) = (-mu*n*cos(phi) + n*sin(phi) + unlatching_motor.Force(t, [y(4),y(3)]) )/latch.mass;
 dydt(4) = y(3);
 dydt(5) = y_1dot(t, y(1), y(2), y(5), loading_motor, load, spring, l0);
-
 end
 
 function f = f_perp(t, thetadot, theta, y1, loading_motor, load, spring, l0)
 %F_PERP is the part of the spring force perpendicular to the lever
 
 [y2, y2dot] = y_2(thetadot, theta, load, l0);
-y1dot = y_1dot(t, y1, loading_motor, spring);
+y1dot = y_1dot(t, thetadot, theta, y1, loading_motor, load, spring, l0);
 a = alpha(theta, load, l0);
 
 if theta + a >= pi/2
@@ -57,11 +56,10 @@ a = asin((cos(theta0) -  cos(theta))/(l0 - y2));
 
 end
 
-function n = normal_force(t, thetadot, theta, dsdt, s, unlatching_motor, load, latch, spring, l0)
+function n = normal_force(t, thetadot, theta, dsdt, s, y1, loading_motor, unlatching_motor, load, latch, spring, l0)
 %NORMAL_FORCE is the normal force of the latch on the lever
 
-Fperp = f_perp(t, thetadot, theta, load, spring, l0);
-moI = load.moment_of_inertia;
+Fperp = f_perp(t, thetadot, theta, y1, loading_motor, load, spring, l0);
 df = latch.y_L{2}(s);
 ddf = latch.y_L{3}(s);
 Ful = unlatching_motor.Force(t, [s, dsdt]);
@@ -69,6 +67,8 @@ mL = latch.mass;
 mu = latch.coeff_fric;
 L1 = load.lengths(1);
 L2 = load.lengths(2);
+L3 = load.lengths(3);
+moI = load.mass*(L3^3 + L2^3)/(3*(L3 + L2));
 phi = atan(df);
 
 n = (moI*df*Ful + mL*moI*ddf*dsdt*dsdt - mL * Fperp * L1)/( (moI*df*mu - mL * L2)*cos(phi) - (moI*df + mL * mu * L2)*sin(phi) );
@@ -107,7 +107,7 @@ net_force = @(y1dot) spring.Force(t, spring_strain(y1dot)) - loading_motor.Force
 
 y1dot = fzero(net_force, 0);
 
-if y1dot.isNaN()
+if isnan(y1dot)
     error("Muscle is unable to overcome spring.")
 end
 
