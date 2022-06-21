@@ -20,17 +20,27 @@ end
 
 function f = f_perp()
 %F_PERP is the part of the spring force perpendicular to the lever
-
-end
+a = alpha();
+    if theta + a >= 90
+        f = 0;
+    else
+        f = @(theta) spring.Force * sin(pi/2 - theta - a);
+    end
+end 
 
 function a = alpha()
 %ALPHA is the angle the spring and muscle make with the vertical
-
+l0 = spring.rest_length + loading_motor.initial_length;
+theta0 = load.theta_0;
+    if l0 == y2
+        a = 0;
+    else
+        a = @(theta, y2) asind((cos(theta0) -  cos(theta))/(l0 - y2));
+    end 
 end
 
 function f = normal_force()
 %NORMAL_FORCE is the normal force of the latch on the lever
-
 end
 
 function y2 = y2()
