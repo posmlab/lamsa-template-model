@@ -1,15 +1,17 @@
-function [sol,transition_times] = solve_lamsa_se(loading_motor,unlatching_motor,load,latch,spring, outputDirectory)
+function sol = solve_lamsa_se(loading_motor,unlatching_motor,load,latch,spring, outputDirectory)
 %SOLVE_LAMSA_SE Solves equations of motion for series elastic system
 
-sol = se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring);
-transition_times = [0];
+initial_conditions = [0; load.theta_0; 0; 0; 0];
+odeprob = @(t,y) se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring);
+
+sol = ode15s(odeprob, [0, 1], initial_conditions);
 end
 
 function dydt = se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring)
 %SE_ODE is the equation of motion for a series elastic system
 %
 %   y = [theta dot, theta, s dot, s, y1]
-dydt = zeros(4,1);
+dydt = zeros(5,1);
 
 l0 = spring.rest_length + loading_motor.rest_length;% initial length of spring + muscle
 [L1, L2, L3] = load.lengths;
@@ -24,7 +26,8 @@ dydt(1) = 1/moI * (fPerp*L1 - n*L2*cos(phi) - mu*L2*sin(phi));
 dydt(2) = y(1);
 dydt(3) = (-mu*n*cos(phi) + n*sin(phi) + unlatching_motor.Force(t, [y(4),y(3)]) )/latch.mass;
 dydt(4) = y(3);
-dydt(5) = y_1dot(t, y,loading_motor, spring);
+dydt(5) = y_1dot(t, y(1), y(2), y(5), loading_motor, load, spring, l0);
+
 end
 
 function f = f_perp(t, thetadot, theta, y1, loading_motor, load, spring, l0)
@@ -39,6 +42,7 @@ if theta + a >= pi/2
 else
     f = spring.Force(t, [y2 - y1, y2dot-y1dot]) * sin(pi/2 - theta - a);
 end
+
 end
 
 function a = alpha(theta, load, l0)
@@ -46,7 +50,6 @@ function a = alpha(theta, load, l0)
 
 [y2, ~] = y_2(0, theta, load, l0);
 theta0 = load.theta_0;
-
 
 a = asin((cos(theta0) -  cos(theta))/(l0 - y2));
 
@@ -87,12 +90,14 @@ end
 end
 
 
-function y1dot = y_1dot(t, y1, loading_motor, spring)
+function y1dot = y_1dot(t, thetadot, theta, y1, loading_motor, load, spring, l0)
 %Y1DOT is the velocity of the point of intersection of the muscle and
 %spring along the direction of the muscle.
 % It is calculated using the force-velocity curve of the muscle
 
-spring_strain = @(y1dot) [y2() - y1, y2dot() - y1dot];
+[y2, y2dot] = y_2(thetadot, theta, load, l0);
+
+spring_strain = @(y1dot) [y2 - y1, y2dot - y1dot];
 
 net_force = @(y1dot) spring.Force(t, spring_strain(y1dot)) - loading_motor.Force(t, [y1, y1dot]);
 
