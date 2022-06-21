@@ -60,18 +60,22 @@ end
 function n = normal_force(t, thetadot, theta, dsdt, s, unlatching_motor, load, latch, spring, l0)
 %NORMAL_FORCE is the normal force of the latch on the lever
 
-Fperp = f_perp(t, thetadot, theta, load, spring, l0);
-moI = load.moment_of_inertia;
-df = latch.y_L{2}(s);
-ddf = latch.y_L{3}(s);
-Ful = unlatching_motor.Force(t, [s, dsdt]);
-mL = latch.mass;
-mu = latch.coeff_fric;
-L1 = load.lengths(1);
-L2 = load.lengths(2);
-phi = atan(df);
-
-n = (moI*df*Ful + mL*moI*ddf*dsdt*dsdt - mL * Fperp * L1)/( (moI*df*mu - mL * L2)*cos(phi) - (moI*df + mL * mu * L2)*sin(phi) );
+if s < latch.max_width
+    Fperp = f_perp(t, thetadot, theta, load, spring, l0);
+    moI = load.moment_of_inertia;
+    df = latch.y_L{2}(s);
+    ddf = latch.y_L{3}(s);
+    Ful = unlatching_motor.Force(t, [s, dsdt]);
+    mL = latch.mass;
+    mu = latch.coeff_fric;
+    L1 = load.lengths(1);
+    L2 = load.lengths(2);
+    phi = atan(df);
+    
+    n = (moI*df*Ful + mL*moI*ddf*dsdt*dsdt - mL * Fperp * L1)/( (moI*df*mu - mL * L2)*cos(phi) - (moI*df + mL * mu * L2)*sin(phi) );
+else % If latch has been removed, no more normal force
+    n = 0;
+end
 
 end
 
