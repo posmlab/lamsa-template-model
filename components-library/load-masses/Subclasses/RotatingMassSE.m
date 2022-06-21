@@ -19,7 +19,7 @@ classdef RotatingMassSE < Mass
     methods (Static)
         function parameters = parameters()
             parameters = ["mass" "mass of lever arm" "L1" "L2" "L3" "theta initial";
-                "0" "0.001" "0.001" "0.001" "0.001" "0";
+                "0" "0.001" "0.001" "0.001" "0.01" "0";
                 "0" "0" "0" "0" "0" "0";
                 "Inf" "Inf" "Inf" "Inf" "Inf" "1.57"];
         end
@@ -30,7 +30,7 @@ classdef RotatingMassSE < Mass
         % constructor
         function obj = RotatingMassSE(m_end,varargin)
             varargin_param_names = {'m_rod','L1','L2','L3','theta_0'};
-            varargin_default_values = {.001, .001 , .01, .001, 0};
+            varargin_default_values = {.001, .001 , .001, .01, 0};
             % check and assign optional parameters
             if (nargin < 1)
                 error('load mass requires at least 1 argument');
@@ -38,14 +38,14 @@ classdef RotatingMassSE < Mass
             if (length(varargin)>length(varargin_param_names))
                 error('Too many input parameters');
             end
-            if L1 > L2
-                error('L1 must be less than or equal to L2');
-            end
             for i=1:length(varargin)
                 eval([varargin_param_names{i} '=varargin{i};'])
             end
             for i=(length(varargin)+1):length(varargin_param_names)
                 eval([varargin_param_names{i} '=varargin_default_values{i};'])
+            end
+            if L1 > L2
+                error('L1 must be less than or equal to L2');
             end
             
             % model
@@ -55,7 +55,7 @@ classdef RotatingMassSE < Mass
             
             % call parent constructor
             obj = obj@Mass(mass, EMA);
-            [L1, L2, L3] = obj.lengths;
+            obj.lengths = [L1, L2, L3];
             obj.theta_0 = theta_0;
         end 
     end

@@ -1,10 +1,10 @@
-function sol = solve_lamsa_se(loading_motor,unlatching_motor,load,latch,spring, outputDirectory)
+function  [t,y] = solve_lamsa_se(loading_motor,unlatching_motor,load,latch,spring)
 %SOLVE_LAMSA_SE Solves equations of motion for series elastic system
 
 initial_conditions = [0; load.theta_0; 0; 0; 0];
 odeprob = @(t,y) se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring);
 
-sol = ode15s(odeprob, [0, 1], initial_conditions);
+[t,y] = ode15s(odeprob, [0, 1], initial_conditions);
 end
 
 function dydt = se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring)
@@ -14,7 +14,9 @@ function dydt = se_ode(t, y, loading_motor, unlatching_motor, load, latch, sprin
 dydt = zeros(5,1);
 
 l0 = spring.rest_length + loading_motor.rest_length;% initial length of spring + muscle
-[L1, L2, L3] = load.lengths;
+L1 = load.lengths(1);
+L2 = load.lengths(2);
+L3 = load.lengths(3);
 moI = load.mass*(L3^3 + L2^3)/(3*(L3 + L2));% moment of inertia assuming uniform mass
 mu = latch.coeff_fric;
 
@@ -65,7 +67,8 @@ ddf = latch.y_L{3}(s);
 Ful = unlatching_motor.Force(t, [s, dsdt]);
 mL = latch.mass;
 mu = latch.coeff_fric;
-[L1, L2, ~] = load.lengths;
+L1 = load.lengths(1);
+L2 = load.lengths(2);
 phi = atan(df);
 
 n = (moI*df*Ful + mL*moI*ddf*dsdt*dsdt - mL * Fperp * L1)/( (moI*df*mu - mL * L2)*cos(phi) - (moI*df + mL * mu * L2)*sin(phi) );
@@ -76,7 +79,8 @@ end
 function [y2, y2dot] = y_2(thetadot, theta, load, l0)
 %Y2 is the distance the spring and muscle have contracted and its time
 %derivative
-[L1, L2, ~] = load.lengths;
+L1 = load.lengths(1);
+L2 = load.lengths(2);
 theta0 = load.theta_0;
 
 y2 = l0 - sqrt(L1^2*(cos(theta) - cos(theta0))^2 + (l0 - L1*(sin(theta) - sin(theta0)) )^2 );
