@@ -60,8 +60,7 @@ function n = normal_force(t, thetadot, theta, dsdt, s, y1, loading_motor, unlatc
 %NORMAL_FORCE is the normal force of the latch on the lever
 
 if s < latch.max_width
-    Fperp = f_perp(t, thetadot, theta, load, spring, l0);
-    moI = load.moment_of_inertia;
+    Fperp = f_perp(t, thetadot, theta, y1, loading_motor, load, spring, l0);
     df = latch.y_L{2}(s);
     ddf = latch.y_L{3}(s);
     Ful = unlatching_motor.Force(t, [s, dsdt]);
@@ -69,6 +68,8 @@ if s < latch.max_width
     mu = latch.coeff_fric;
     L1 = load.lengths(1);
     L2 = load.lengths(2);
+    L3 = load.lengths(3);
+    moI = load.mass*(L3^3 + L2^3)/(3*(L3 + L2));% moment of inertia assuming uniform mass
     phi = atan(df);
     
     n = (moI*df*Ful + mL*moI*ddf*dsdt*dsdt - mL * Fperp * L1)/( (moI*df*mu - mL * L2)*cos(phi) - (moI*df + mL * mu * L2)*sin(phi) );
@@ -105,11 +106,11 @@ function y1dot = y_1dot(t, thetadot, theta, y1, loading_motor, load, spring, l0)
 
 [y2, y2dot] = y_2(thetadot, theta, load, l0);
 
-spring_strain = @(y1dot) [y2 - y1, y2dot - y1dot];
+spring_strain = @(y1dot) [y1 - y2, y1dot - y2dot];
 
 net_force = @(y1dot) spring.Force(t, spring_strain(y1dot)) - loading_motor.Force(t, [y1, y1dot]);
 
-y1dot = fzero(net_force, 0);
+y1dot = fzero(net_force, 10);
 
 if isnan(y1dot)
     error("Muscle is unable to overcome spring.")
