@@ -27,7 +27,7 @@ classdef LinearSpring < Spring
             varargin_default_values = {0,Inf,0.01};
             % check and assign optional parameters
             if (nargin < 2)
-                error('Exponential spring requires at least 1 argument.');
+                error('Linear spring requires at least 1 argument.');
             end
             if (length(varargin)>length(varargin_param_names))
                 error('Too many input parameters');
