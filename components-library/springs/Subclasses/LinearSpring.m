@@ -26,7 +26,7 @@ classdef LinearSpring < Spring
             varargin_param_names = {'m_s','F_spring_max','rest_length'};
             varargin_default_values = {0,Inf,0.01};
             % check and assign optional parameters
-            if (nargin < 2)
+            if (nargin < 1)
                 error('Linear spring requires at least 1 argument.');
             end
             if (length(varargin)>length(varargin_param_names))
