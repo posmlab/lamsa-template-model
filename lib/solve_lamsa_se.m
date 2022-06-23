@@ -12,7 +12,7 @@ end
 function dydt = se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring)
 %SE_ODE is the equation of motion for a series elastic system
 %
-%   y = [theta dot, theta, s dot, s, y1]
+%   y = [theta dot, theta, s dot, s, y1dot, ...]
 % y = real(y);
 nsp = size(y,1) - 3;
 dydt = zeros(nsp+3,1);
@@ -34,13 +34,13 @@ dydt(1) = 1/moI * (fPerp*L1 - n*L2*cos(phi) - mu*L2*sin(phi));
 dydt(2) = y(1);
 dydt(3) = (-mu*n*cos(phi) + n*sin(phi) + unlatching_motor.Force(t, [y(4),y(3)]) )/latch.mass;
 dydt(4) = y(3);
-dydt(5) = -(spring.Force(t, [y(6) - y(8), y(5) - y(7)]) - spring.Force(t, [y2-y(6), y2dot - y(5)]))/small_mass;
+dydt(5) = (spring.Force(t, [y(6) - y(8), y(5) - y(7)]) - spring.Force(t, [y2-y(6), y2dot - y(5)]))/small_mass;
 dydt(6) = y(5);
 for i = 7:2:nsp
-   dydt(i) = -(spring.Force(t, [y(i+1) - y(i+3), y(i) - y(i+2)]) - spring.Force(t, [y(i-1) - y(i+1), y(i-2) - y(i)]))/small_mass;
+   dydt(i) = (spring.Force(t, [y(i+1) - y(i+3), y(i) - y(i+2)]) - spring.Force(t, [y(i-1) - y(i+1), y(i-2) - y(i)]))/small_mass;
    dydt(i+1) = y(i);
 end
-dydt(nsp+2) = -(loading_motor.Force(t, [y(nsp+3), y(nsp+2)]) - spring.Force(t, [y(nsp+1) - y(nsp+3), y(nsp) - y(nsp+2)]))/small_mass;
+dydt(nsp+2) = (loading_motor.Force(t, [y(nsp+3), y(nsp+2)]) - spring.Force(t, [y(nsp+1) - y(nsp+3), y(nsp) - y(nsp+2)]))/small_mass;
 dydt(nsp+3) = y(nsp+2);
 end
 
