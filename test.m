@@ -1,9 +1,9 @@
 metrics = {'tto', 'vto', 'Pmax', 'ymax', 'tL', 'KEmax', 'yunlatch', 'amax'};
-loading_motor =LinearMotor(20, 20, 0.2);
-load = RotatingMassSE(0, 0.01, 0.1, 0.2, 1, -pi/4);
+loading_motor =LinearMotor(20, 20, 2e-2);
+load = RotatingMassSE(0, 3e-2 ,1e-3, 1e-3, 5e-2, -pi/4);
 unlatching_motor = LinearMotor(1, 1, .05);
-latch = ParabolicLatch(150, .05, .03, 0,1000);
-spring = LinearSpring(200, 0.1, Inf, 0.4);
+latch = ParabolicLatch(150, 1e-4, 3e-3, 0);
+spring = LinearSpring(200, 0.1, Inf, 5e-3);
 
 tspan = [0, 1];
 
@@ -17,4 +17,4 @@ perpvals = zeros(numsteps,1);
 for i = 1:numsteps
     perpvals(i) = fun(i);
 end
-plot(t, perpvals)
+% plot(t, perpvals)
