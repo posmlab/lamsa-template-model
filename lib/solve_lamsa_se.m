@@ -1,4 +1,4 @@
-function  [t,y] = solve_lamsa_se(tspan, loading_motor,unlatching_motor,load,latch,spring)
+function  [t,y, funcs] = solve_lamsa_se(tspan, loading_motor,unlatching_motor,load,latch,spring)
 %SOLVE_LAMSA_SE Solves equations of motion for series elastic system
 
 initial_conditions = zeros(25,1);
@@ -7,13 +7,19 @@ options = odeset('Events', @(t,y) launching_end(t,y));
 odeprob = @(t,y) se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring);
 
 [t,y,te,ye,ie] = ode15s(odeprob, tspan, initial_conditions, options);
+
+l0 = spring.rest_length + loading_motor.rest_length;% initial length of spring + muscle
+funcs = @(i) f_perp(t(i), y(i,1), y(i,2), y(i,5), y(i,6), load, spring, l0);
 end
 
 function dydt = se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring)
 %SE_ODE is the equation of motion for a series elastic system
 %
 %   y = [theta dot, theta, s dot, s, y1dot, ...]
-% y = real(y);
+if imag(y(1))~= 0
+   warning("Complex Numbers") 
+   y = real(y);
+end
 nsp = size(y,1) - 3;
 dydt = zeros(nsp+3,1);
 
@@ -51,11 +57,11 @@ function f = f_perp(t, thetadot, theta, y1dot, y1, load, spring, l0)
 % y1dot = y_1dot(t, thetadot, theta, y1, loading_motor, load, spring, l0);
 a = alpha(theta, load, l0);
 
-if theta + a >= pi/2
-    f = 0;
-else
-    f = spring.Force(t, [y2 - y1, y2dot - y1dot]) * sin(pi/2 - theta - a);
-end
+%if theta + a >= pi/2 %Why?
+%    f = 0;
+%else
+f = spring.Force(t, [y2 - y1, y2dot - y1dot]) * sin(pi/2 - theta - a);
+%end
 
 end
 
@@ -64,8 +70,9 @@ function a = alpha(theta, load, l0)
 
 [y2, ~] = y_2(0, theta, load, l0);
 theta0 = load.theta_0;
+L1 = load.lengths(1);
 
-a = asin((cos(theta0) -  cos(theta))/(l0 - y2));
+a = asin(L1*(cos(theta0) -  cos(theta))/(l0 - y2));
 
 end
 
@@ -108,7 +115,9 @@ y2dot = -thetadot*(  L1^2*sin(theta-theta0) - l0*L1*cos(theta) )   /   sqrt(2*L1
 if y2 >= l0
     error("Spring and Muscle have zero length")
 elseif (imag(y2) ~= 0) || (imag(y2dot) ~= 0)
-    error("Complex valued y2")
+    warning("Complex valued y2")
+    y2 = real(y2);
+    y2dot = real(y2dot);
 end
 
 end
