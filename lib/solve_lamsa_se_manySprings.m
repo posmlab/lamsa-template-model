@@ -125,25 +125,18 @@ end
 
 end
 
+function ddy2 = y2_ddot(theta, thetadot, thetaddot, load, l0)
 
-function y1dot = y_1dot(t, thetadot, theta, y1, loading_motor, load, spring, l0)
-%Y1DOT is the velocity of the point of intersection of the muscle and
-%spring along the direction of the muscle.
-% It is calculated using the force-velocity curve of the muscle
+L1 = load.lengths(1);
+theta0 = load.theta_0;
 
-[y2, y2dot] = y_2(thetadot, theta, load, l0);
+beta = sqrt(2*L1^2*(1-cos(theta-theta0)) + l0^2 + 2*l0*L1(sin(theta)- sin(theta0)));
+gamma = (L1^2*sin(theta-theta0) - l0*L1*cos(theta))/beta;
 
-spring_strain = @(y1dot) [y1 - y2, y1dot - y2dot];
-
-net_force = @(y1dot) spring.Force(t, spring_strain(y1dot)) - loading_motor.Force(t, [y1, y1dot]);
-
-y1dot = fzero(net_force, 10);
-
-if isnan(y1dot)
-    error("Muscle is unable to overcome spring.")
-end
+ddy2 = gamma*thetaddot - thetadot^2*(L1^2 * cos(theta-theta0) + l0*L1*sin(theta) + gamma^2)/beta;
 
 end
+
 
 function [position,isterminal,direction] = launching_end(t,y)
 position = y(1);
