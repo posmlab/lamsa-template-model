@@ -1,4 +1,4 @@
-function  [t,y, funcs] = solve_lamsa_se(tspan, loading_motor,unlatching_motor,load,latch,spring)
+function  [t,y, funcs] = solve_lamsa_se_manySprings(tspan, loading_motor,unlatching_motor,load,latch,spring)
 %SOLVE_LAMSA_SE_MANYSPRINGS Solves equations of motion for series elastic
 %system, approximating the spring as a series of masses connected by
 %springs with appropriately higher spring constants
@@ -6,10 +6,10 @@ function  [t,y, funcs] = solve_lamsa_se(tspan, loading_motor,unlatching_motor,lo
 NUM_STUFF = 25; % # of elements in y vector; increase by 2 to increase no. of springs by 1
 initial_conditions = zeros(NUM_STUFF,1);
 initial_conditions(2) = load.theta_0;
-options = odeset('Events', @(t,y) launching_end(t,y));
+options = odeset('Events', @(t,y) launching_end(t,y)); %Stops solving when angular velocity is zero
 odeprob = @(t,y) se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring);
 
-[t,y,te,ye,ie] = ode15s(odeprob, tspan, initial_conditions, options);
+[t,y,~,~,~] = ode15s(odeprob, tspan, initial_conditions, options);
 
 l0 = spring.rest_length + loading_motor.rest_length;% initial length of spring + muscle
 funcs = @(i) f_perp(t(i), y(i,1), y(i,2), y(i,5), y(i,6), load, spring, l0);
@@ -43,15 +43,16 @@ dydt(1) = 1/moI * (fPerp*L1 - n*L2*cos(phi) - mu*L2*sin(phi));
 dydt(2) = y(1);
 dydt(3) = (-mu*n*cos(phi) + n*sin(phi) + unlatching_motor.Force(t, [y(4),y(3)]) )/latch.mass;
 dydt(4) = y(3);
-dydt(5) = (spring.Force(t, [y(6) - y(8), y(5) - y(7)]) - spring.Force(t, [y2-y(6), y2dot - y(5)]))/small_mass;
+dydt(5) = (spring.Force(t, [y(6) - y(8), y(5) - y(7)]) - spring.Force(t, [y2-y(6), y2dot - y(5)]))/latch.mass;
 dydt(6) = y(5);
 for i = 7:2:nsp
-   dydt(i) = (spring.Force(t, [y(i+1) - y(i+3), y(i) - y(i+2)]) - spring.Force(t, [y(i-1) - y(i+1), y(i-2) - y(i)]))/small_mass;
+   dydt(i) = (spring.Force(t, [y(i+1) - y(i+3), y(i) - y(i+2)]) - spring.Force(t, [y(i-1) - y(i+1), y(i-2) - y(i)]))/latch.mass;
    dydt(i+1) = y(i);
 end
-dydt(nsp+2) = (loading_motor.Force(t, [y(nsp+3), y(nsp+2)]) - spring.Force(t, [y(nsp+1) - y(nsp+3), y(nsp) - y(nsp+2)]))/small_mass;
+dydt(nsp+2) = (loading_motor.Force(t, [y(nsp+3), y(nsp+2)]) - ((nsp-6)/2)*spring.Force(t, [y(nsp+1) - y(nsp+3), y(nsp) - y(nsp+2)]))/small_mass;
 dydt(nsp+3) = y(nsp+2);
 end
+
 
 function f = f_perp(t, thetadot, theta, y1dot, y1, load, spring, l0)
 %F_PERP is the part of the spring force perpendicular to the lever
@@ -122,27 +123,6 @@ elseif (imag(y2) ~= 0) || (imag(y2dot) ~= 0)
     y2 = real(y2);
     y2dot = real(y2dot);
 end
-
-end
-
-function ddy2 = y2_ddot(theta, thetadot, thetaddot, load, l0)
-
-L1 = load.lengths(1);
-theta0 = load.theta_0;
-
-beta = sqrt(2*L1^2*(1-cos(theta-theta0)) + l0^2 + 2*l0*L1(sin(theta)- sin(theta0)));
-gamma = (L1^2*sin(theta-theta0) - l0*L1*cos(theta))/beta;
-
-ddy2 = gamma*thetaddot - thetadot^2*(L1^2 * cos(theta-theta0) + l0*L1*sin(theta) + gamma^2)/beta;
-
-end
-
-function ddy1 = y_1ddot(t, y1, y1dot, y2, y2dot, y2ddot)
-Flm = loading_motor.Force(t, [y1, y1dot]);
-Fsp = spring.Force(t, [(y2 - y1), (y2dot - y1dot)]);
-m = load.mass;
-
-ddy1 = 3/m * Flm + 3/m * Fsp - y2ddot/2;
 
 end
 

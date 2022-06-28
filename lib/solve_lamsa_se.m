@@ -1,7 +1,7 @@
 function  [t,y, funcs] = solve_lamsa_se(tspan, loading_motor,unlatching_motor,load,latch,spring)
 %SOLVE_LAMSA_SE Solves equations of motion for series elastic system
 
-initial_conditions = zeros(25,1);
+initial_conditions = zeros(6,1);
 initial_conditions(2) = load.theta_0;
 options = odeset('Events', @(t,y) launching_end(t,y));
 odeprob = @(t,y) se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring);
@@ -20,10 +20,8 @@ if imag(y(1))~= 0
    warning("Complex Numbers") 
    y = real(y);
 end
-nsp = size(y,1) - 3;
-dydt = zeros(nsp+3,1);
+dydt = zeros(6,1);
 
-small_mass = 2*latch.mass/(nsp-6);
 l0 = spring.rest_length + loading_motor.rest_length;% initial length of spring + muscle
 L1 = load.lengths(1);
 L2 = load.lengths(2);
@@ -40,14 +38,9 @@ dydt(1) = 1/moI * (fPerp*L1 - n*L2*cos(phi) - mu*L2*sin(phi));
 dydt(2) = y(1);
 dydt(3) = (-mu*n*cos(phi) + n*sin(phi) + unlatching_motor.Force(t, [y(4),y(3)]) )/latch.mass;
 dydt(4) = y(3);
-dydt(5) = (spring.Force(t, [y(6) - y(8), y(5) - y(7)]) - spring.Force(t, [y2-y(6), y2dot - y(5)]))/small_mass;
+dydt(5) = y_1ddot(t, y(5), y(6), y2dot, y2, y_2ddot(y(1), y(2), dydt(1), load, l0), loading_motor, spring, load);
 dydt(6) = y(5);
-for i = 7:2:nsp
-   dydt(i) = (spring.Force(t, [y(i+1) - y(i+3), y(i) - y(i+2)]) - spring.Force(t, [y(i-1) - y(i+1), y(i-2) - y(i)]))/small_mass;
-   dydt(i+1) = y(i);
-end
-dydt(nsp+2) = (loading_motor.Force(t, [y(nsp+3), y(nsp+2)]) - spring.Force(t, [y(nsp+1) - y(nsp+3), y(nsp) - y(nsp+2)]))/small_mass;
-dydt(nsp+3) = y(nsp+2);
+
 end
 
 function f = f_perp(t, thetadot, theta, y1dot, y1, load, spring, l0)
@@ -75,6 +68,7 @@ L1 = load.lengths(1);
 a = asin(L1*(cos(theta0) -  cos(theta))/(l0 - y2));
 
 end
+
 
 function n = normal_force(t, thetadot, theta, dsdt, s, y1dot, y1, unlatching_motor, load, latch, spring, l0)
 %NORMAL_FORCE is the normal force of the latch on the lever
@@ -122,23 +116,24 @@ end
 
 end
 
+function ddy1 = y_1ddot(t, y1dot, y1, y2dot, y2, y2ddot, loading_motor, spring, load)
+Flm = loading_motor.Force(t, [y1, y1dot]);
+Fsp = spring.Force(t, [(y2 - y1), (y2dot - y1dot)]);
+m = load.mass;
 
-function y1dot = y_1dot(t, thetadot, theta, y1, loading_motor, load, spring, l0)
-%Y1DOT is the velocity of the point of intersection of the muscle and
-%spring along the direction of the muscle.
-% It is calculated using the force-velocity curve of the muscle
+ddy1 = 3/m * Flm + 3/m * Fsp - y2ddot/2;
 
-[y2, y2dot] = y_2(thetadot, theta, load, l0);
-
-spring_strain = @(y1dot) [y1 - y2, y1dot - y2dot];
-
-net_force = @(y1dot) spring.Force(t, spring_strain(y1dot)) - loading_motor.Force(t, [y1, y1dot]);
-
-y1dot = fzero(net_force, 10);
-
-if isnan(y1dot)
-    error("Muscle is unable to overcome spring.")
 end
+
+function ddy2 = y_2ddot(thetadot, theta, thetaddot, load, l0)
+
+L1 = load.lengths(1);
+theta0 = load.theta_0;
+
+beta = sqrt(2*L1^2*(1-cos(theta-theta0)) + l0^2 + 2*l0*L1*(sin(theta)- sin(theta0)));
+gamma = (L1^2*sin(theta-theta0) - l0*L1*cos(theta))/beta;
+
+ddy2 = gamma*thetaddot - thetadot^2*(L1^2 * cos(theta-theta0) + l0*L1*sin(theta) + gamma^2)/beta;
 
 end
 

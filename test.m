@@ -11,10 +11,26 @@ tspan = [0, 1];
 
 plot(t,real(y(:,2)))
 
-numsteps = size(t,1);
-
-perpvals = zeros(numsteps,1);
-for i = 1:numsteps
-    perpvals(i) = fun(i);
-end
+% numsteps = size(t,1);
+% perpvals = zeros(numsteps,1);
+% for i = 1:numsteps
+%     perpvals(i) = fun(i);
+% end
 % plot(t, perpvals)
+
+hold on;
+
+[t,y, fun] = solve_lamsa_se_manySprings(tspan, loading_motor,unlatching_motor,load,latch,spring);
+
+plot(t,real(y(:,2)))
+ 
+% numsteps = size(t,1);
+% perpvals = zeros(numsteps,1);
+% for i = 1:numsteps
+%     perpvals(i) = fun(i);
+% end
+% plot(t, perpvals)
+
+
+hold off;
+
