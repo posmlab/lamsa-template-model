@@ -137,6 +137,15 @@ ddy2 = gamma*thetaddot - thetadot^2*(L1^2 * cos(theta-theta0) + l0*L1*sin(theta)
 
 end
 
+function ddy1 = y_1ddot(t, y1, y1dot, y2, y2dot, y2ddot)
+Flm = loading_motor.Force(t, [y1, y1dot]);
+Fsp = spring.Force(t, [(y2 - y1), (y2dot - y1dot)]);
+m = load.mass;
+
+ddy1 = 3/m * Flm + 3/m * Fsp - y2ddot/2;
+
+end
+
 
 function [position,isterminal,direction] = launching_end(t,y)
 position = y(1);
