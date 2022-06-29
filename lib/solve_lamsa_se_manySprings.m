@@ -1,4 +1,4 @@
-function  [t,y, funcs] = solve_lamsa_se_manySprings(tspan, loading_motor,unlatching_motor,load,latch,spring)
+function  [sol, transition_times] = solve_lamsa_se_manySprings(tspan, loading_motor,unlatching_motor,load,latch,spring)
 %SOLVE_LAMSA_SE_MANYSPRINGS Solves equations of motion for series elastic
 %system, approximating the spring as a series of masses connected by
 %springs with appropriately higher spring constants
@@ -12,7 +12,32 @@ odeprob = @(t,y) se_ode(t, y, loading_motor, unlatching_motor, load, latch, spri
 [t,y,~,~,~] = ode15s(odeprob, tspan, initial_conditions, options);
 
 l0 = spring.rest_length + loading_motor.rest_length;% initial length of spring + muscle
-funcs = @(i) f_perp(t(i), y(i,1), y(i,2), y(i,5), y(i,6), load, spring, l0);
+L2 = load.lengths(2);
+L3 = load.lengths(3);
+
+fSpring = zeros(size(t));
+fUnlatchingMotor = zeros(size(t));
+F_comp = zeros(size(t,1),4);
+
+for i = 1:size(t,1)
+    fSpring(i) = f_perp(t(i), y(i,1), y(i,2), y(i,5), y(i,6), load, spring, l0);
+    fUnlatchingMotor(i) = unlatching_motor.Force(t(i), [y(i,4),y(i,3)]);
+    
+    mu = latch.coeff_fric;
+    n =  normal_force(t(i), y(i,1), y(i,2), y(i,3), y(i,4), y(i,5), y(i,6), unlatching_motor, load, latch, spring, l0);
+    phi = atan(latch.y_L{2}(y(4))); %angle of latch surface
+    
+    F_comp(i,1) = n*sin(phi);    %normal force on latch
+    F_comp(i,2) = n*L2*cos(phi); %normal torque on load
+    F_comp(i,3) = mu*n*cos(phi); %frictional force on latch
+    F_comp(i,4) = mu*L2*sin(phi); %frictional toque on load
+end
+
+sol=[t y(:,2).*L3 y(:,1).*L3 y(:,4) y(:,3) F_comp fSpring fUnlatchingMotor];
+
+[~, argmaxv] = max(y(:,1));
+
+transition_times = [t(find(flip(F_comp(:,1)), 1)), t(argmaxv)];  
 end
 
 function dydt = se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring)
@@ -43,13 +68,13 @@ dydt(1) = 1/moI * (fPerp*L1 - n*L2*cos(phi) - mu*L2*sin(phi));
 dydt(2) = y(1);
 dydt(3) = (-mu*n*cos(phi) + n*sin(phi) + unlatching_motor.Force(t, [y(4),y(3)]) )/latch.mass;
 dydt(4) = y(3);
-dydt(5) = (spring.Force(t, [y(6) - y(8), y(5) - y(7)]) - spring.Force(t, [y2-y(6), y2dot - y(5)]))/latch.mass;
+dydt(5) = (spring.Force(t, [y(6) - y(8), y(5) - y(7)]) - spring.Force(t, [y2-y(6), y2dot - y(5)]))/small_mass;
 dydt(6) = y(5);
 for i = 7:2:nsp
-   dydt(i) = (spring.Force(t, [y(i+1) - y(i+3), y(i) - y(i+2)]) - spring.Force(t, [y(i-1) - y(i+1), y(i-2) - y(i)]))/latch.mass;
+   dydt(i) = (spring.Force(t, [y(i+1) - y(i+3), y(i) - y(i+2)]) - spring.Force(t, [y(i-1) - y(i+1), y(i-2) - y(i)]))/small_mass;
    dydt(i+1) = y(i);
 end
-dydt(nsp+2) = (loading_motor.Force(t, [y(nsp+3), y(nsp+2)]) - ((nsp-6)/2)*spring.Force(t, [y(nsp+1) - y(nsp+3), y(nsp) - y(nsp+2)]))/small_mass;
+dydt(nsp+2) = (loading_motor.Force(t, [y(nsp+3), y(nsp+2)]) - spring.Force(t, [y(nsp+1) - y(nsp+3), y(nsp) - y(nsp+2)]))/small_mass;
 dydt(nsp+3) = y(nsp+2);
 end
 
@@ -128,7 +153,7 @@ end
 
 
 function [position,isterminal,direction] = launching_end(t,y)
-position = y(1);
+position = y(1)+1e-1;
 isterminal = 1;
 direction = 0;
 
