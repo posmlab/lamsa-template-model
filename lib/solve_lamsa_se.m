@@ -84,6 +84,10 @@ dydt(4) = y(3);
 dydt(5) = y_1ddot(t, y(5), y(6), y2dot, y2, y_2ddot(y(1), y(2), dydt(1), load, l0), loading_motor, spring);
 dydt(6) = y(5);
 
+if dydt(3) == 0 && dydt(4) == 0
+   warning("Latch is Stuck")
+end
+
 end
 
 function f = f_perp(t, thetadot, theta, y1dot, y1, load, spring, l0)
@@ -121,6 +125,8 @@ L3 = load.lengths(3);
 df = latch.y_L{2}(s);
 ddf = latch.y_L{3}(s);
 
+% checks if latch is out of the way or if it is moving faster than the
+% lever
 if s < latch.max_width && df*dsdt <= L2*(thetadot+1e-3)
     Fperp = f_perp(t, thetadot, theta, y1dot, y1, load, spring, l0);
     Ful = unlatching_motor.Force(t, [s, dsdt]);

@@ -5,6 +5,16 @@ function [sol,transition_times] = solve_lamsa(loading_motor,unlatching_motor,loa
 % phases of LAMSA motion
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Series elastic systems are solved in a different way
+if isa(load, 'RotatingMassSE')
+    if nargin >= 6
+        [sol, transition_times] = solve_lamsa_se([0,1], loading_motor, unlatching_motor, load, latch, spring, outputDirectory);
+    else
+        [sol, transition_times] = solve_lamsa_se([0,1], loading_motor, unlatching_motor, load, latch, spring);
+    end
+    return
+end
 %% Loading phase
 
 N_points = 10000;
