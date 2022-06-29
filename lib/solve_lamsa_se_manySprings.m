@@ -6,10 +6,10 @@ function  [sol, transition_times] = solve_lamsa_se_manySprings(tspan, loading_mo
 NUM_STUFF = 25; % # of elements in y vector; increase by 2 to increase no. of springs by 1
 initial_conditions = zeros(NUM_STUFF,1);
 initial_conditions(2) = load.theta_0;
-options = odeset('Events', @(t,y) launching_end(t,y)); %Stops solving when angular velocity is zero
+options = odeset(AbsTol = 1e-8, RelTol = 1e-8); %Stops solving when angular velocity is zero
 odeprob = @(t,y) se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring);
 
-[t,y,~,~,~] = ode15s(odeprob, tspan, initial_conditions, options);
+[t,y] = ode15s(odeprob, tspan, initial_conditions, options);
 
 l0 = spring.rest_length + loading_motor.rest_length;% initial length of spring + muscle
 L2 = load.lengths(2);
@@ -33,7 +33,7 @@ for i = 1:size(t,1)
     F_comp(i,4) = mu*L2*sin(phi); %frictional toque on load
 end
 
-sol=[t y(:,2).*L3 y(:,1).*L3 y(:,4) y(:,3) F_comp fSpring fUnlatchingMotor];
+sol=[t y(:,2).*L3 y(:,1).*L3 y(:,4) y(:,3) F_comp fSpring fUnlatchingMotor y(:,NUM_STUFF) y(:,NUM_STUFF-1)];
 
 [~, argmaxv] = max(y(:,1));
 
@@ -153,7 +153,7 @@ end
 
 
 function [position,isterminal,direction] = launching_end(t,y)
-position = y(1)+1e-1;
+position = y(1)+100;
 isterminal = 1;
 direction = 0;
 

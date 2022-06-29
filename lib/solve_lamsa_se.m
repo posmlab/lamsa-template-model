@@ -31,7 +31,7 @@ for i = 1:size(t,1)
     F_comp(i,4) = mu*L2*sin(phi); %frictional toque on load
 end
 
-sol=[t y(:,2).*L3 y(:,1).*L3 y(:,4) y(:,3) F_comp fSpring fUnlatchingMotor];
+sol=[t y(:,2).*L3 y(:,1).*L3 y(:,4) y(:,3) F_comp fSpring fUnlatchingMotor y(:,6) y(:,5)];
 
 [~, argmaxv] = max(y(:,1));
 
@@ -64,7 +64,7 @@ dydt(1) = 1/moI * (fPerp*L1 - n*L2*cos(phi) - mu*L2*sin(phi));
 dydt(2) = y(1);
 dydt(3) = (-mu*n*cos(phi) + n*sin(phi) + unlatching_motor.Force(t, [y(4),y(3)]) )/latch.mass;
 dydt(4) = y(3);
-dydt(5) = y_1ddot(t, y(5), y(6), y2dot, y2, y_2ddot(y(1), y(2), dydt(1), load, l0), loading_motor, spring, load);
+dydt(5) = y_1ddot(t, y(5), y(6), y2dot, y2, y_2ddot(y(1), y(2), dydt(1), load, l0), loading_motor, spring);
 dydt(6) = y(5);
 
 end
@@ -142,10 +142,10 @@ end
 
 end
 
-function ddy1 = y_1ddot(t, y1dot, y1, y2dot, y2, y2ddot, loading_motor, spring, load)
+function ddy1 = y_1ddot(t, y1dot, y1, y2dot, y2, y2ddot, loading_motor, spring)
 Flm = loading_motor.Force(t, [y1, y1dot]);
 Fsp = spring.Force(t, [(y2 - y1), (y2dot - y1dot)]);
-m = load.mass;
+m = spring.mass;
 
 ddy1 = 3/m * Flm + 3/m * Fsp - y2ddot/2;
 
