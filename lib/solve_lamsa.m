@@ -13,9 +13,9 @@ rangeBound = min([latch.max_latching_dist, spring.range, loading_motor.range, 0.
 
 % this is the range of y values where we are looking for Fspring =
 % Floading_motor.
-% We want to sweep over a wide range of values initially, 
+% We want to sweep over a wide range of values initially,
 % to get a rough sense of the order-of-magnitude y-value where
-% the forces are equal 
+% the forces are equal
 y_range=-logspace(log10(eps), log10(rangeBound),N_points);
 
 fmotor = zeros(size(y_range));
@@ -41,7 +41,7 @@ elseif isempty(index)
         [~,ind]=max(fspring);
         y0=y_range(ind);
     end
-else 
+else
     y_range=linspace(y_range(index-1),y_range(index),N_points);
     fdiff = zeros(size(y_range));
     for i=1:length(y_range)
@@ -56,8 +56,8 @@ if (abs(y0) < latch.min_latching_dist)
     warning('Loading failed. Does not fall within latching distance conditions.');
     y0 = 0;
     sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
-            latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
-            unlatching_motor.Force(0,[0,0])];
+        latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
+        unlatching_motor.Force(0,[0,0])];
     transition_times = [inf,inf];
     if (nargin >= 6)
         writeInfoToFile(m_eff(load,spring,y0,y0), transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
@@ -80,8 +80,8 @@ if (condition)
     warning('Loading failed. Latch slope is too large at x=0 for the given coefficient of friction.');
     y0 = 0;
     sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
-            latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
-            unlatching_motor.Force(0,[0,0])];
+        latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
+        unlatching_motor.Force(0,[0,0])];
     transition_times = [inf,inf];
     if (nargin >= 6)
         writeInfoToFile(m_eff(load,spring,y0,y0), transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
@@ -96,9 +96,9 @@ end
 
 if (unlatching_motor.max_force==0 && latch.v_0 == 0)
     warning('Latch gets stuck!');
-     sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
-            latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
-            unlatching_motor.Force(0,[0,0])];
+    sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
+        latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
+        unlatching_motor.Force(0,[0,0])];
     transition_times = [inf,inf];
     return
 end
@@ -109,8 +109,8 @@ catch ME
         case 'Latch gets stuck!'
             warning('Latch gets stuck!')
             sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
-                    latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
-                    unlatching_motor.Force(0,[0,0])];
+                latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
+                unlatching_motor.Force(0,[0,0])];
             transition_times = [inf,inf];
             if (nargin >= 6)
                 writeInfoToFile(m_eff(load,spring,y0,y0), transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
@@ -129,7 +129,7 @@ if inst_check>0  % not instantaneous unlatching
     
     if (a_0L ~= 0)
         % calculate t_L_guess using quadratic formula
-        % and the following kinematic equation: R = (1/2)a*t^2 + v_0*t  
+        % and the following kinematic equation: R = (1/2)a*t^2 + v_0*t
         t_L_guess = (((-1*latch.v_0) + sqrt((latch.v_0)^2  + (2*a_0L*latch.max_width)))/(a_0L));
     elseif (latch.v_0 ~= 0 )
         t_L_guess = latch.max_width/latch.v_0;
@@ -146,17 +146,17 @@ if inst_check>0  % not instantaneous unlatching
     catch ME
         switch ME.message
             case "Latch gets stuck!"
-            warning('Latch gets stuck!')
-            % if the latch gets stuck, just give back
-            % the initial conditions
-            sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
-                latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
-                unlatching_motor.Force(0,[0,0])];
-            transition_times = [inf,inf];
-            if (nargin >= 6)
-                writeInfoToFile(m_eff(load,spring,y0,y0), transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
-            end
-            return
+                warning('Latch gets stuck!')
+                % if the latch gets stuck, just give back
+                % the initial conditions
+                sol = [0,y0,0,0,0,0,spring.Force(0,[y0, 0]), ...
+                    latch.coeff_fric*spring.Force(0,[y0, 0]),0,spring.Force(0,[y0,0]), ...
+                    unlatching_motor.Force(0,[0,0])];
+                transition_times = [inf,inf];
+                if (nargin >= 6)
+                    writeInfoToFile(m_eff(load,spring,y0,y0), transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
+                end
+                return
             otherwise
                 rethrow(ME)
         end
@@ -165,10 +165,10 @@ if inst_check>0  % not instantaneous unlatching
     % this while loop ensures that the system unlatches.
     % t_L_guess is a guess at the upper bound on the unlatching time.
     % Usually, integrating from t=0 to t=t_L_guess is a long enough
-    % time interval to trigger the 'unlatching_end' event option. 
+    % time interval to trigger the 'unlatching_end' event option.
     % However, when it's not, we simply try longer and longer time
-    % intervals until we get a long enough time interval that 
-    % t_unlatch(end) ~= tspan(end), which indicates that the 
+    % intervals until we get a long enough time interval that
+    % t_unlatch(end) ~= tspan(end), which indicates that the
     % integration stopped early because we've activated 'unlatching_end'
     while (t_unlatch(end) == tspan(end))
         t_L_guess = 10 * t_L_guess;
@@ -238,7 +238,7 @@ F_comp = [F_nx F_ny F_fx F_fy];
 %% Ballistic phase:Fs only
 %guess launch times by treating the spring as ideal-ish and getting the
 %   frequency
-stiffness = abs(( spring.Force(0,y_unlatch(end,:))-spring.Force(0,y_unlatch(end,:)+(100*eps)) ) / (100*eps)); 
+stiffness = abs(( spring.Force(0,y_unlatch(end,:))-spring.Force(0,y_unlatch(end,:)+(100*eps)) ) / (100*eps));
 nat_freq=sqrt(stiffness/m_eff(load,spring,y0,y_unlatch));
 t_launch_guess=pi/nat_freq;
 launch_opts=odeset('Events',@(t,y) launching_end(t,y,load,spring,y0),'OutputFcn', @(t,y,flag) update_f_launching(t,y,flag,spring));
@@ -293,7 +293,7 @@ sol=[T Y X F_comp fSpring fUnlatchingMotor];
 
 %% Establishing Parameters for .json output
 if (nargin >= 6)
-writeInfoToFile(m_eff(load,spring,y0,y0), transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
+    writeInfoToFile(m_eff(load,spring,y0,y0), transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
 end
 
 end
@@ -332,10 +332,10 @@ function [value,isterminal,direction] = unlatching_end(t,x,load,y0,latch,spring,
 
 %End condition for unlatching
 if (x(1) > latch.max_width)
-   value = 0;
-   isterminal = 1;
-   direction = 0;
-   return
+    value = 0;
+    isterminal = 1;
+    direction = 0;
+    return
 end
 
 yL=(latch.y_L{1}(x(1))-latch.y_L{1}(0))+y0;

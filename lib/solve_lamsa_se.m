@@ -1,12 +1,20 @@
-function  [sol, transition_times] = solve_lamsa_se(tspan, loading_motor,unlatching_motor,load,latch,spring)
+function  [sol, transition_times] = solve_lamsa_se(tspan, loading_motor,unlatching_motor,load,latch,spring, outputDirectory)
 %SOLVE_LAMSA_SE Solves equations of motion for series elastic system
+%   sol is an nx13 matrix and each column corresponds to t, arclength,
+%   arcvelocity, latch displacement, latch velocity, normal forces on the
+%   latch and load, frictional forces on the latch and load, spring force,
+%   unlatching motor force, and the displacement and velocity of the point
+%   of connection between the spring and loading motor.
+% 
+%   transition_times is a 1x2 vector which shows the unlatching time and
+%   the time to maximum displacement respectively.
 
 initial_conditions = zeros(6,1);
 initial_conditions(2) = load.theta_0;
 options = odeset('Events', @(t,y) launching_end(t,y));
 odeprob = @(t,y) se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring);
 
-[t,y,te,ye,ie] = ode15s(odeprob, tspan, initial_conditions, options);
+[t,y,~,~,~] = ode15s(odeprob, tspan, initial_conditions, options);
 
 
 l0 = spring.rest_length + loading_motor.rest_length;% initial length of spring + muscle
@@ -36,6 +44,11 @@ sol=[t y(:,2).*L3 y(:,1).*L3 y(:,4) y(:,3) F_comp fSpring fUnlatchingMotor y(:,6
 [~, argmaxv] = max(y(:,1));
 
 transition_times = [t(find(flip(F_comp(:,1)), 1)), t(argmaxv)];  
+
+if (nargin >= 7)
+    writeInfoToFile(load.mass, transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
+end
+
 end
 
 function dydt = se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring)

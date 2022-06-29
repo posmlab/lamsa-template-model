@@ -1,4 +1,4 @@
-function  [sol, transition_times] = solve_lamsa_se_manySprings(tspan, loading_motor,unlatching_motor,load,latch,spring)
+function  [sol, transition_times] = solve_lamsa_se_manySprings(tspan, loading_motor,unlatching_motor,load,latch,spring,outputDirectory)
 %SOLVE_LAMSA_SE_MANYSPRINGS Solves equations of motion for series elastic
 %system, approximating the spring as a series of masses connected by
 %springs with appropriately higher spring constants
@@ -38,7 +38,13 @@ sol=[t y(:,2).*L3 y(:,1).*L3 y(:,4) y(:,3) F_comp fSpring fUnlatchingMotor y(:,N
 [~, argmaxv] = max(y(:,1));
 
 transition_times = [t(find(flip(F_comp(:,1)), 1)), t(argmaxv)];  
+
+if (nargin >= 7)
+    writeInfoToFile(m_eff(load,spring,y0,y0), transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
 end
+
+end
+
 
 function dydt = se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring)
 %SE_ODE is the equation of motion for a series elastic system
