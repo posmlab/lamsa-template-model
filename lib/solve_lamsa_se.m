@@ -11,6 +11,7 @@ function  [sol, transition_times] = solve_lamsa_se(tspan, loading_motor,unlatchi
 
 initial_conditions = zeros(6,1);
 initial_conditions(2) = load.theta_0;
+initial_conditions(3) = latch.v_0;
 options = odeset('Events', @(t,y) launching_end(t,y));
 odeprob = @(t,y) se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring);
 
@@ -39,11 +40,14 @@ for i = 1:size(t,1)
     F_comp(i,4) = mu*L2*sin(phi); %frictional toque on load
 end
 
-sol=[t y(:,2).*L3 y(:,1).*L3 y(:,4) y(:,3) F_comp fSpring fUnlatchingMotor y(:,6) y(:,5)];
+% sol=[t y(:,2).*L3 y(:,1).*L3 y(:,4) y(:,3) F_comp fSpring fUnlatchingMotor y(:,6) y(:,5)];
+sol=[t y(:,2) y(:,1) y(:,4) y(:,3) F_comp fSpring fUnlatchingMotor y(:,6) y(:,5)];
 
 [~, argmaxv] = max(y(:,1));
 
-transition_times = [t(find(flip(F_comp(:,1)), 1)), t(argmaxv)];  
+
+latched = y(:,4) - latch.max_width;
+transition_times = [t(find(latched > 0, 1)), t(argmaxv)];  
 
 if (nargin >= 7)
     writeInfoToFile(load.mass, transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
@@ -65,7 +69,7 @@ l0 = spring.rest_length + loading_motor.rest_length;% initial length of spring +
 L1 = load.lengths(1);
 L2 = load.lengths(2);
 L3 = load.lengths(3);
-moI = load.mass*(L3^3 + L2^3)/(3*(L3 + L2));% moment of inertia assuming uniform mass
+moI = load.mass;% moment of inertia assuming uniform mass
 mu = latch.coeff_fric;
 
 fPerp = f_perp(t, y(1), y(2), y(5), y(6), load, spring, l0);
@@ -111,18 +115,18 @@ end
 
 function n = normal_force(t, thetadot, theta, dsdt, s, y1dot, y1, unlatching_motor, load, latch, spring, l0)
 %NORMAL_FORCE is the normal force of the latch on the lever
+L1 = load.lengths(1);
+L2 = load.lengths(2);
+L3 = load.lengths(3);
+df = latch.y_L{2}(s);
+ddf = latch.y_L{3}(s);
 
-if s < latch.max_width
+if s < latch.max_width && df*dsdt <= L2*(thetadot+1e-3)
     Fperp = f_perp(t, thetadot, theta, y1dot, y1, load, spring, l0);
-    df = latch.y_L{2}(s);
-    ddf = latch.y_L{3}(s);
     Ful = unlatching_motor.Force(t, [s, dsdt]);
     mL = latch.mass;
     mu = latch.coeff_fric;
-    L1 = load.lengths(1);
-    L2 = load.lengths(2);
-    L3 = load.lengths(3);
-    moI = load.mass*(L3^3 + L2^3)/(3*(L3 + L2));% moment of inertia assuming uniform mass
+    moI = load.mass;% moment of inertia assuming uniform mass
     phi = atan(df);
     
     n = (moI*df*Ful + mL*moI*ddf*dsdt*dsdt - mL * Fperp * L1)/( (moI*df*mu - mL * L2)*cos(phi) - (moI*df + mL * mu * L2)*sin(phi) );

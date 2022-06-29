@@ -49,8 +49,8 @@ classdef RotatingMassSE < Mass
             end
             
             % model
-            EMA = 1/2;
-            mass = (m_end/(EMA^2) + m_rod*( (1+1/EMA)^2 + 3*(1/EMA-1)^2 ) /12);
+            EMA = 1;
+            mass = m_rod*(L3^3 + L2^3)/(3*(L3 + L2)) + m_end*L3^2; %Moment of Inertia
             EMA = @(y) EMA;
             
             % call parent constructor

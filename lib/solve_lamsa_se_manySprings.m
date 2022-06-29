@@ -6,7 +6,7 @@ function  [sol, transition_times] = solve_lamsa_se_manySprings(tspan, loading_mo
 NUM_STUFF = 25; % # of elements in y vector; increase by 2 to increase no. of springs by 1
 initial_conditions = zeros(NUM_STUFF,1);
 initial_conditions(2) = load.theta_0;
-options = odeset(AbsTol = 1e-8, RelTol = 1e-8); %Stops solving when angular velocity is zero
+options = odeset(AbsTol = 1e-2, RelTol = 1e-2); %Stops solving when angular velocity is zero
 odeprob = @(t,y) se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring);
 
 [t,y] = ode15s(odeprob, tspan, initial_conditions, options);
