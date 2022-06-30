@@ -72,7 +72,7 @@ msp = spring.mass;
 beta = sqrt(2*L1^2*(1-cos(y(2)-theta0)) + l0^2 + 2*l0*L1*(sin(y(2))- sin(theta0)));
 gamma = (L1^2*sin(y(2)-theta0) - l0*L1*cos(y(2)))/beta;
 y2 = l0 - beta;
-y2dot = gamma*y(1);
+y2dot = -gamma*y(1);
 alpha = asin(L1*(cos(theta0) -  cos(y(2)))/(l0 - y2)); %Angle the spring makes with the vertical
 Fsp =  spring.Force(t, [y2 - y(6), y2dot - y(5)]);
 Fperp = Fsp * sin(pi/2 - y(2) - alpha); %spring force perpendicular to lever
@@ -86,7 +86,7 @@ dydt(2) = y(1);
 dydt(3) = (-mu*n*cos(phi) + n*sin(phi) + unlatching_motor.Force(t, [y(4),y(3)]) )/latch.mass;
 dydt(4) = y(3);
 
-y2ddot = gamma*dydt(1) - y(1)^2*(L1^2 * cos(y(2)-theta0) + l0*L1*sin(y(2)) + gamma^2)/beta;
+y2ddot = -gamma*dydt(1) - y(1)^2*(L1^2 * cos(y(2)-theta0) + l0*L1*sin(y(2)) + gamma^2)/beta;
 
 dydt(5) = 3/msp * Flm + 3/msp * Fsp - y2ddot/2;
 dydt(6) = y(5);
