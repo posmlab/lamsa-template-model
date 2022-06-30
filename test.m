@@ -10,7 +10,7 @@ unlatching_motor = LinearMotor(5, 5, .5, 1, .05);
 % "coeff_parabola" "parabola_width" "mass" "μ" "v_0" "min_latching_dist" "max_latching_dist" "runway_length"
 latch = ParabolicLatch(150, 1e-3, 1e-3, 0, 0.5, 0, Inf, 0);
 % "k" "m_s" "F_spring_max" "rest length"
-spring = LinearSpring(2000, 0.005, Inf, 0.02);
+spring = LinearSpring(0.5, 0.005, Inf, 0.02);
 
 tspan = [0, 1];
 

@@ -138,8 +138,10 @@ theta0 = load.theta_0;
 
 beta = sqrt(2*L1^2*(1-cos(theta-theta0)) + l0^2 + 2*l0*L1*(sin(theta)- sin(theta0)));
 gamma = (L1^2*sin(theta-theta0) - l0*L1*cos(theta))/beta;
-y2 = l0 - beta;
-y2dot = gamma*thetadot;
+%y2 = l0 - beta;
+%y2dot = gamma*thetadot;
+y2 = L1*sin(theta);
+y2dot = L1*cos(theta)*thetadot;
 
 alpha = asin(L1*(cos(theta0) -  cos(theta))/(l0 - y2)); %Angle the spring makes with the vertical
 
