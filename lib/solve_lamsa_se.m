@@ -9,6 +9,14 @@ function  [sol, transition_times] = solve_lamsa_se(tspan, loading_motor,unlatchi
 %   transition_times is a 1x2 vector which shows the unlatching time and
 %   the time to maximum displacement respectively.
 
+if spring.mass == 0
+    warning("Spring is massless. Solving using direct actuation...")
+    [sol,transition_times] = solve_direct_actuation(loading_motor, load);
+    cols = size(sol,1);
+    sol = [sol zeros(cols,8)];
+    return
+end
+
 initial_conditions = zeros(6,1);
 initial_conditions(2) = load.theta_0;
 initial_conditions(3) = latch.v_0;
