@@ -96,8 +96,12 @@ dydt(4) = y(3);
 
 y2ddot = -gamma*dydt(1) - y(1)^2*(L1^2 * cos(y(2)-theta0) + l0*L1*sin(y(2)) + gamma^2)/beta;
 
-dydt(5) = 3/msp * Flm + 3/msp * Fsp - y2ddot/2;
+dydt(5) = (3/msp) * (Flm + Fsp) - y2ddot/2;
 dydt(6) = y(5);
+
+if y2 > l0 || y(6) > loading_motor.rest_length
+    warning("Negative muscle length")
+end
 
 if dydt(3) == 0 && dydt(4) == 0
    warning("Latch is Stuck")
