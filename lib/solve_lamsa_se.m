@@ -17,10 +17,8 @@ odeprob = @(t,y) se_ode(t, y, loading_motor, unlatching_motor, load, latch, spri
 
 [t,y,~,~,~] = ode15s(odeprob, tspan, initial_conditions, options);
 
-
 l0 = spring.rest_length + loading_motor.rest_length;% initial length of spring + muscle
 L2 = load.lengths(2);
-L3 = load.lengths(3);
 
 fSpring = zeros(size(t));
 fUnlatchingMotor = zeros(size(t));
@@ -31,7 +29,7 @@ for i = 1:size(t,1)
     fUnlatchingMotor(i) = unlatching_motor.Force(t(i), [y(i,4),y(i,3)]);
     
     mu = latch.coeff_fric;
-    n =  normal_force(t(i), y(i,1), y(i,2), y(i,3), y(i,4), y(i,5), y(i,6), unlatching_motor, load, latch, spring, l0);
+    n =  normal_force(y(i,1), y(i,3), y(i,4), fSpring(i), load, latch, fUnlatchingMotor(i));
     phi = atan(latch.y_L{2}(y(4))); %angle of latch surface
     
     F_comp(i,1) = n*sin(phi);    %normal force on latch
@@ -40,7 +38,6 @@ for i = 1:size(t,1)
     F_comp(i,4) = mu*L2*sin(phi); %frictional toque on load
 end
 
-% sol=[t y(:,2).*L3 y(:,1).*L3 y(:,4) y(:,3) F_comp fSpring fUnlatchingMotor y(:,6) y(:,5)];
 sol=[t y(:,2) y(:,1) y(:,4) y(:,3) F_comp fSpring fUnlatchingMotor y(:,6) y(:,5)];
 
 [~, argmaxv] = max(y(:,1));
@@ -52,7 +49,6 @@ transition_times = [t(find(latched > 0, 1)), t(argmaxv)];
 if (nargin >= 7)
     writeInfoToFile(load.mass, transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
 end
-
 end
 
 function dydt = se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring)
@@ -68,20 +64,31 @@ dydt = zeros(6,1);
 l0 = spring.rest_length + loading_motor.rest_length;% initial length of spring + muscle
 L1 = load.lengths(1);
 L2 = load.lengths(2);
-L3 = load.lengths(3);
-moI = load.mass;% moment of inertia assuming uniform mass
+theta0 = load.theta_0;
+moI = load.mass;
 mu = latch.coeff_fric;
+msp = spring.mass;
 
-fPerp = f_perp(t, y(1), y(2), y(5), y(6), load, spring, l0);
-n =  normal_force(t, y(1), y(2), y(3), y(4), y(5), y(6), unlatching_motor, load, latch, spring, l0);
+beta = sqrt(2*L1^2*(1-cos(y(2)-theta0)) + l0^2 + 2*l0*L1*(sin(y(2))- sin(theta0)));
+gamma = (L1^2*sin(y(2)-theta0) - l0*L1*cos(y(2)))/beta;
+y2 = l0 - beta;
+y2dot = gamma*y(1);
+alpha = asin(L1*(cos(theta0) -  cos(y(2)))/(l0 - y2)); %Angle the spring makes with the vertical
+Fsp =  spring.Force(t, [y2 - y(6), y2dot - y(5)]);
+Fperp = Fsp * sin(pi/2 - y(2) - alpha); %spring force perpendicular to lever
+Flm = loading_motor.Force(t, [y(6), y(5)]); %Loading Motor force
 phi = atan(latch.y_L{2}(y(4))); %angle of latch surface
-[y2, y2dot] = y_2(y(1), y(2), load, l0);
+Funlatch = unlatching_motor.Force(t, [y(4),y(3)]);
+n =  normal_force(y(1), y(3), y(4), Fperp, load, latch, Funlatch);
 
-dydt(1) = 1/moI * (fPerp*L1 - n*L2*cos(phi) - mu*L2*sin(phi));
+dydt(1) = 1/moI * (Fperp*L1 - n*L2*cos(phi) - mu*L2*sin(phi));
 dydt(2) = y(1);
 dydt(3) = (-mu*n*cos(phi) + n*sin(phi) + unlatching_motor.Force(t, [y(4),y(3)]) )/latch.mass;
 dydt(4) = y(3);
-dydt(5) = y_1ddot(t, y(5), y(6), y2dot, y2, y_2ddot(y(1), y(2), dydt(1), load, l0), loading_motor, spring);
+
+y2ddot = gamma*dydt(1) - y(1)^2*(L1^2 * cos(y(2)-theta0) + l0*L1*sin(y(2)) + gamma^2)/beta;
+
+dydt(5) = 3/msp * Flm + 3/msp * Fsp - y2ddot/2;
 dydt(6) = y(5);
 
 if dydt(3) == 0 && dydt(4) == 0
@@ -90,52 +97,23 @@ end
 
 end
 
-function f = f_perp(t, thetadot, theta, y1dot, y1, load, spring, l0)
-%F_PERP is the part of the spring force perpendicular to the lever
-
-[y2, y2dot] = y_2(thetadot, theta, load, l0);
-% y1dot = y_1dot(t, thetadot, theta, y1, loading_motor, load, spring, l0);
-a = alpha(theta, load, l0);
-
-%if theta + a >= pi/2 %Why?
-%    f = 0;
-%else
-f = spring.Force(t, [y2 - y1, y2dot - y1dot]) * sin(pi/2 - theta - a);
-%end
-
-end
-
-function a = alpha(theta, load, l0)
-%ALPHA is the angle the spring and muscle make with the vertical
-
-[y2, ~] = y_2(0, theta, load, l0);
-theta0 = load.theta_0;
-L1 = load.lengths(1);
-
-a = asin(L1*(cos(theta0) -  cos(theta))/(l0 - y2));
-
-end
-
-
-function n = normal_force(t, thetadot, theta, dsdt, s, y1dot, y1, unlatching_motor, load, latch, spring, l0)
+function n = normal_force(thetadot, sdot, s, Fperp, load, latch, Ful)
 %NORMAL_FORCE is the normal force of the latch on the lever
 L1 = load.lengths(1);
 L2 = load.lengths(2);
-L3 = load.lengths(3);
 df = latch.y_L{2}(s);
 ddf = latch.y_L{3}(s);
 
 % checks if latch is out of the way or if it is moving faster than the
 % lever
-if s < latch.max_width && df*dsdt <= L2*(thetadot+1e-3)
-    Fperp = f_perp(t, thetadot, theta, y1dot, y1, load, spring, l0);
-    Ful = unlatching_motor.Force(t, [s, dsdt]);
-    mL = latch.mass;
+if s < latch.max_width && df*sdot <= L2*(thetadot+1e-3)
+    moI = load.mass;
     mu = latch.coeff_fric;
-    moI = load.mass;% moment of inertia assuming uniform mass
+    mL = latch.mass;
     phi = atan(df);
     
-    n = (moI*df*Ful + mL*moI*ddf*dsdt*dsdt - mL * Fperp * L1)/( (moI*df*mu - mL * L2)*cos(phi) - (moI*df + mL * mu * L2)*sin(phi) );
+    
+    n = (moI*df*Ful + mL*moI*ddf*sdot*sdot - mL * Fperp * L1)/( (moI*df*mu - mL * L2)*cos(phi) - (moI*df + mL * mu * L2)*sin(phi) );
 else % If latch has been removed, no more normal force
     n = 0;
 end
@@ -143,48 +121,21 @@ end
 
 end
 
-
-function [y2, y2dot] = y_2(thetadot, theta, load, l0)
-%Y2 is the distance the spring and muscle have contracted and its time
-%derivative
-L1 = load.lengths(1);
-theta0 = load.theta_0;
-
-%y2 = l0 - sqrt(L1^2*(cos(theta) - cos(theta0))^2 + (l0 - L1*(sin(theta) - sin(theta0)) )^2 );
-y2 = l0 - sqrt(2*L1^2 * (1-cos(theta-theta0)) + l0^2 - 2*l0*L1*(sin(theta) - sin(theta0)));
-
-y2dot = -thetadot*(  L1^2*sin(theta-theta0) - l0*L1*cos(theta) )   /   sqrt(2*L1^2 * (1-cos(theta-theta0)) + l0^2 - 2*l0*L1*(sin(theta) - sin(theta0)));
-
-if y2 >= l0
-    error("Spring and Muscle have zero length")
-elseif (imag(y2) ~= 0) || (imag(y2dot) ~= 0)
-    warning("Complex valued y2")
-    y2 = real(y2);
-    y2dot = real(y2dot);
-end
-
-end
-
-function ddy1 = y_1ddot(t, y1dot, y1, y2dot, y2, y2ddot, loading_motor, spring)
-Flm = loading_motor.Force(t, [y1, y1dot]);
-Fsp = spring.Force(t, [(y2 - y1), (y2dot - y1dot)]);
-m = spring.mass;
-
-ddy1 = 3/m * Flm + 3/m * Fsp - y2ddot/2;
-
-end
-
-function ddy2 = y_2ddot(thetadot, theta, thetaddot, load, l0)
-
+function f = f_perp(t, thetadot, theta, y1dot, y1, load, spring, l0)
 L1 = load.lengths(1);
 theta0 = load.theta_0;
 
 beta = sqrt(2*L1^2*(1-cos(theta-theta0)) + l0^2 + 2*l0*L1*(sin(theta)- sin(theta0)));
 gamma = (L1^2*sin(theta-theta0) - l0*L1*cos(theta))/beta;
+y2 = l0 - beta;
+y2dot = gamma*thetadot;
 
-ddy2 = gamma*thetaddot - thetadot^2*(L1^2 * cos(theta-theta0) + l0*L1*sin(theta) + gamma^2)/beta;
+alpha = asin(L1*(cos(theta0) -  cos(theta))/(l0 - y2)); %Angle the spring makes with the vertical
+
+f =  spring.Force(t, [y2 - y1, y2dot - y1dot]) * sin(pi/2 - theta - alpha); %spring force perpendicular to lever
 
 end
+
 
 function [position,isterminal,direction] = launching_end(t,y)
 position = y(1);

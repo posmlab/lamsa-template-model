@@ -20,7 +20,7 @@ classdef RotatingMassSE < Mass
         function parameters = parameters()
             parameters = ["mass" "mass of lever arm" "L1" "L2" "L3" "theta initial";
                 "0" "0.001" "0.001" "0.001" "0.01" "0";
-                "0" "0" "0" "0" "0" "0";
+                "0" "0" "0" "0" "0" "-1.57";
                 "Inf" "Inf" "Inf" "Inf" "Inf" "1.57"];
         end
     end

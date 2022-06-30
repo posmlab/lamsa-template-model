@@ -7,7 +7,7 @@
 %     m_rod - mass of lever arm
 %     L1    - segment of the lever arm closest to the spring
 %     L2    - segment of the lever arm furthest from the spring
-%     x_rest- rest length of the spring
+%     theta initial - initial angle of the lever arm
 % min # arguments = 1
 
 classdef RotatingMass < Mass
