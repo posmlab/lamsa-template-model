@@ -1,4 +1,4 @@
-function  [sol, transition_times] = solve_lamsa_se(tspan, loading_motor,unlatching_motor,load,latch,spring, outputDirectory)
+function  [sol, transition_times] = solve_lamsa_se_approx(tspan, loading_motor,unlatching_motor,load,latch,spring, outputDirectory)
 %SOLVE_LAMSA_SE Solves equations of motion for series elastic system
 %   sol is an nx13 matrix and each column corresponds to t, arclength,
 %   arcvelocity, latch displacement, latch velocity, normal forces on the
@@ -20,7 +20,7 @@ end
 initial_conditions = zeros(6,1);
 initial_conditions(2) = load.theta_0;
 initial_conditions(3) = latch.v_0;
-options = odeset('Events', @(t,y) launching_end(t,y), AbsTol = 1e-6, RelTol = 1e-6);
+options = odeset('Events', @(t,y) launching_end(t,y));
 odeprob = @(t,y) se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring);
 
 [t,y,~,~,~] = ode15s(odeprob, tspan, initial_conditions, options);
@@ -77,10 +77,12 @@ moI = load.mass;
 mu = latch.coeff_fric;
 msp = spring.mass;
 
-beta = sqrt(2*L1^2*(1-cos(y(2)-theta0)) + l0^2 - 2*l0*L1*(sin(y(2))- sin(theta0)));
+beta = sqrt(2*L1^2*(1-cos(y(2)-theta0)) + l0^2 + 2*l0*L1*(sin(y(2))- sin(theta0)));
 gamma = (L1^2*sin(y(2)-theta0) - l0*L1*cos(y(2)))/beta;
-y2 = l0 - beta;
-y2dot = -gamma*y(1);
+%y2 = l0 - beta;
+%y2dot = -gamma*y(1);
+y2 = L1*sin(y(2));
+y2dot = L1*cos(y(2))*y(1);
 alpha = asin(L1*(cos(theta0) -  cos(y(2)))/(l0 - y2)); %Angle the spring makes with the vertical
 Fsp =  spring.Force(t, [y2 - y(6), y2dot - y(5)]);
 Fperp = Fsp * sin(pi/2 - y(2) - alpha); %spring force perpendicular to lever
@@ -89,19 +91,16 @@ phi = atan(latch.y_L{2}(y(4))); %angle of latch surface
 Funlatch = unlatching_motor.Force(t, [y(4),y(3)]);
 n =  normal_force(y(1), y(3), y(4), Fperp, load, latch, Funlatch);
 
-dydt(1) = 1/moI * (Fperp*L1 - n*L2*cos(phi) - mu*n*L2*sin(phi));
+dydt(1) = 1/moI * (Fperp*L1 - n*L2*cos(phi) - mu*L2*sin(phi));
 dydt(2) = y(1);
 dydt(3) = (-mu*n*cos(phi) + n*sin(phi) + unlatching_motor.Force(t, [y(4),y(3)]) )/latch.mass;
 dydt(4) = y(3);
 
-y2ddot = -gamma*dydt(1) - y(1)^2*(L1^2 * cos(y(2)-theta0) + l0*L1*sin(y(2)) + gamma^2)/beta;
+%y2ddot = -gamma*dydt(1) - y(1)^2*(L1^2 * cos(y(2)-theta0) + l0*L1*sin(y(2)) + gamma^2)/beta;
+y2ddot = L1*(cos(y(2))-sin(y(2))*y(1)^2);
 
-dydt(5) = (3/msp) * (Flm - Fsp) - y2ddot/2;
+dydt(5) = 3/msp * Flm + 3/msp * Fsp - y2ddot/2;
 dydt(6) = y(5);
-
-if y2 > l0 || y(6) > loading_motor.rest_length
-    warning("Negative muscle length")
-end
 
 if dydt(3) == 0 && dydt(4) == 0
    warning("Latch is Stuck")
@@ -118,8 +117,8 @@ ddf = latch.y_L{3}(s);
 
 % checks if latch is out of the way or if it is moving faster than the
 % lever
-if s < latch.max_width && df*sdot <= L2*thetadot
-    moI = load.mass/L2; %temporary fix
+if s < latch.max_width && df*sdot <= L2*(thetadot+1e-3)
+    moI = load.mass;
     mu = latch.coeff_fric;
     mL = latch.mass;
     phi = atan(df);
@@ -139,8 +138,10 @@ theta0 = load.theta_0;
 
 beta = sqrt(2*L1^2*(1-cos(theta-theta0)) + l0^2 + 2*l0*L1*(sin(theta)- sin(theta0)));
 gamma = (L1^2*sin(theta-theta0) - l0*L1*cos(theta))/beta;
-y2 = l0 - beta;
-y2dot = gamma*thetadot;
+%y2 = l0 - beta;
+%y2dot = gamma*thetadot;
+y2 = L1*sin(theta);
+y2dot = L1*cos(theta)*thetadot;
 
 alpha = asin(L1*(cos(theta0) -  cos(theta))/(l0 - y2)); %Angle the spring makes with the vertical
 
