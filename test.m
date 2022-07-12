@@ -23,18 +23,12 @@ tspan = [0, 100];
 %%
 t = sol(:,1);
 y1 = sol(:,12);
-y1dot = sol(:,13);
 l0 = spring.rest_length + loading_motor.rest_length;
 L1 = load.lengths(1);
 theta0 = load.theta_0;
 theta = sol(:,2);
-thetadot = sol(:,3);
-
 beta = sqrt(2*L1^2*(1-cos(theta-theta0)) + l0^2 + 2*l0*L1*(sin(theta)- sin(theta0)));
-gamma = (L1^2*sin(theta-theta0) - l0*L1*cos(theta))/beta;
-
 y2 = l0-beta;
-y2dot = -gamma*thetadot;
 Force = @(t, Y) spring.Force;
 
 U = zeros(size(t));
