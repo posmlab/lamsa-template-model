@@ -99,7 +99,7 @@ dydt(4) = y(3);
 %y2ddot = -gamma*dydt(1) - y(1)^2*(L1^2 * cos(y(2)-theta0) + l0*L1*sin(y(2)) + gamma^2)/beta;
 y2ddot = L1*(cos(y(2))-sin(y(2))*y(1)^2);
 
-dydt(5) = 3/msp * Flm + 3/msp * Fsp - y2ddot/2;
+dydt(5) = 3/msp * Flm - 3/msp * Fsp - y2ddot/2;
 dydt(6) = y(5);
 
 if dydt(3) == 0 && dydt(4) == 0
