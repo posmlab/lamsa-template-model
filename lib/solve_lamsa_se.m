@@ -20,7 +20,7 @@ end
 initial_conditions = zeros(6,1);
 initial_conditions(2) = load.theta_0;
 initial_conditions(3) = latch.v_0;
-options = odeset('Events', @(t,y) launching_end(t,y), AbsTol = 1e-6, RelTol = 1e-6);
+options = odeset('Events', @(t,y) launching_end(t,y), AbsTol = 1e-8, RelTol = 1e-8);
 odeprob = @(t,y) se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring);
 
 [t,y,~,~,~] = ode15s(odeprob, tspan, initial_conditions, options);
