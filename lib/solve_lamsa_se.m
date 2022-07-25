@@ -1,4 +1,4 @@
-function  [sol, transition_times] = solve_lamsa_se_approx(tspan, loading_motor,unlatching_motor,load,latch,spring, outputDirectory)
+function  [sol, transition_times] = solve_lamsa_se(tspan, loading_motor,unlatching_motor,load,latch,spring, outputDirectory)
 %SOLVE_LAMSA_SE Solves equations of motion for series elastic system
 %   sol is an nx13 matrix and each column corresponds to t, arclength,
 %   arcvelocity, latch displacement, latch velocity, normal forces on the
@@ -20,7 +20,8 @@ end
 initial_conditions = zeros(6,1);
 initial_conditions(2) = load.theta_0;
 initial_conditions(3) = latch.v_0;
-options = odeset('Events', @(t,y) launching_end(t,y), "RelTol", 1e-6);
+initial_conditions(5) = 1e-10;
+options = odeset('Events', @(t,y) launching_end(t,y), "RelTol", 1e-8);
 odeprob = @(t,y) se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring);
 
 [t,y,~,~,~] = ode15s(odeprob, tspan, initial_conditions, options);
@@ -33,7 +34,7 @@ fUnlatchingMotor = zeros(size(t));
 F_comp = zeros(size(t,1),4);
 
 for i = 1:size(t,1)
-    fSpring(i) = f_perp(t(i), y(i,1), y(i,2), y(i,5), y(i,6), load, spring, l0);
+    fSpring(i) = f_perp(t(i), y(i,1), y(i,2), y(i,5), y(i,6), load, loading_motor, l0, spring);
     fUnlatchingMotor(i) = unlatching_motor.Force(t(i), [y(i,4),y(i,3)]);
     
     mu = latch.coeff_fric;
@@ -62,7 +63,7 @@ end
 function dydt = se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring)
 %SE_ODE is the equation of motion for a series elastic system
 %
-%   y = [theta dot, theta, s dot, s, y1dot, ...]
+%   y = [theta dot, theta, s dot, s, y1dot, y1]
 if imag(y(1))~= 0
    warning("Complex Numbers") 
    y = real(y);
@@ -83,10 +84,13 @@ y2 = l0 - beta;
 y2dot = -gamma*y(1);
 % y2 = L1*sin(y(2));
 % y2dot = L1*cos(y(2))*y(1);
+y2ddot = -gamma*dydt(1) - y(1)^2*(L1^2 * cos(y(2)-theta0) + l0*L1*sin(y(2)) + gamma^2)/beta;
+%y2ddot = L1*(cos(y(2))-sin(y(2))*y(1)^2);
 alpha = asin(L1*(cos(theta0) -  cos(y(2)))/(l0 - y2)); %Angle the spring makes with the vertical
 Fsp =  spring.Force(t, [y2 - y(6), y2dot - y(5)]);
-Fperp = Fsp * sin(pi/2 - y(2) - alpha); %spring force perpendicular to lever
 Flm = loading_motor.Force(t, [y(6), y(5)]); %Loading Motor force
+Fperp = f_perp(t, y(1), y(2), y(5), y(6), load, loading_motor, l0, spring);
+%Fperp = (Flm - msp/2 * ((3/msp * Flm - 3/msp * Fsp - y2ddot/2) + y2ddot)) * sin(pi/2 - y(2) - alpha); %spring force perpendicular to lever
 phi = atan(latch.y_L{2}(y(4))); %angle of latch surface
 Funlatch = unlatching_motor.Force(t, [y(4),y(3)]);
 n =  normal_force(y(1), y(3), y(4), Fperp, load, latch, Funlatch);
@@ -95,13 +99,10 @@ dydt(1) = 1/moI * (Fperp*L1 - n*L2*cos(phi) - mu*L2*sin(phi));
 dydt(2) = y(1);
 dydt(3) = (-mu*n*cos(phi) + n*sin(phi) + unlatching_motor.Force(t, [y(4),y(3)]) )/latch.mass;
 dydt(4) = y(3);
-
-y2ddot = -gamma*dydt(1) - y(1)^2*(L1^2 * cos(y(2)-theta0) + l0*L1*sin(y(2)) + gamma^2)/beta;
-%y2ddot = L1*(cos(y(2))-sin(y(2))*y(1)^2);
-
 dydt(5) = 3/msp * Flm - 3/msp * Fsp - y2ddot/2;
 dydt(6) = y(5);
 %disp(dydt(5))
+
 
 if Fperp >= 5
     disp("uh oh")
@@ -137,7 +138,7 @@ end
 
 end
 
-function f = f_perp(t, thetadot, theta, y1dot, y1, load, spring, l0)
+function f = f_perp(t, thetadot, theta, y1dot, y1, load, loading_motor, l0, spring)
 L1 = load.lengths(1);
 theta0 = load.theta_0;
 
@@ -145,13 +146,16 @@ beta = sqrt(2*L1^2*(1-cos(theta-theta0)) + l0^2 - 2*l0*L1*(sin(theta)- sin(theta
 gamma = (L1^2*sin(theta-theta0) - l0*L1*cos(theta))/beta;
 y2 = l0 - beta;
 y2dot = gamma*thetadot;
+y2ddot = -gamma*thetadot - thetadot^2*(L1^2 * cos(theta-theta0) + l0*L1*sin(theta) + gamma^2)/beta;
+msp = spring.mass;
+Flm = loading_motor.Force(t, [y2 - y1, y2dot - y1dot]);
+Fsp = spring.Force(t, [y2 - y1, y2dot - y1dot]);
 %y2 = L1*sin(theta);
 %y2dot = L1*cos(theta)*thetadot;
 
 alpha = asin(L1*(cos(theta0) -  cos(theta))/(l0 - y2)); %Angle the spring makes with the vertical
 
-f =  spring.Force(t, [y2 - y1, y2dot - y1dot]) * sin(pi/2 - theta - alpha); %spring force perpendicular to lever
-
+f = 1/5 * (-Flm + 6*Fsp - msp*y2ddot) * sin(pi/2 - theta - alpha); %spring force perpendicular to lever
 end
 
 

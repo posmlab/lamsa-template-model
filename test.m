@@ -5,7 +5,7 @@ metrics = {'tto', 'vto', 'Pmax', 'ymax', 'tL', 'KEmax', 'yunlatch', 'amax'};
 % "muscle length" "Fmax" "Vmax" "rate of activation" "initial length" "a_L" "b_L" "s"
 loading_motor = HillMuscleMotor(0.006, 5, 5, 200, 0.007, 2.08, -2.89, -0.75);
 % "mass" "mass of lever arm" "L1" "L2" "L3" "theta initial"
-load = RotatingMassSE(1e-2, 3e-2 ,3e-3, 3e-3, 1e-2, 0);
+load = RotatingMassSE(1e-2, 3e-2 ,5e-3, 5e-3, 1e-2, 0);
 %"mass" "mass of lever arm" "L1" "L2" "theta initial"
 load2 = RotatingMass(1e-2, 3e-2, 1e-3, 5e-2, -pi/4);
 % "Fmax" "Vmax" "range of motion" "voltage fraction" "no braking" "muscle length"
@@ -14,7 +14,7 @@ unlatching_motor = LinearMotor(5, 5, .5, 1, .05);
 % "coeff_parabola" "parabola_width" "mass" "μ" "v_0" "min_latching_dist" "max_latching_dist" "runway_length"
 latch = ParabolicLatch(150, 1e-3, 1e-3, 0, 0, 0, Inf, 0);
 % "k" "m_s" "F_spring_max" "rest length"
-spring = LinearSpring(1e3, 1, 50, 0.0075);
+spring = LinearSpring(1e3, 0.001, 50, 0.0075);
 %spring = ExponentialSpring(2000, 0.01, 0.00002, 20, 0.01);
 
 tspan = [0, 1];
@@ -22,6 +22,7 @@ tspan = [0, 1];
 [sol, t_times] = solve_lamsa_se(tspan, loading_motor,unlatching_motor,load,latch,spring);
 %[sol2, t_times2] = solve_direct_actuation(loading_motor, load2);
 [sol2,t_times2]=solve_lamsa_se_approx(tspan,loading_motor,unlatching_motor,load,latch,spring);
+
 
 %%
 t = sol(:,1);
@@ -33,6 +34,12 @@ theta = sol(:,2);
 beta = sqrt(2*L1^2*(1-cos(theta-theta0)) + l0^2 - 2*l0*L1*(sin(theta)- sin(theta0)));
 y2 = l0-beta;
 Force = @(t, Y) spring.Force;
+
+for i = 1:(length(t))
+    if y1(i) == y2(i)
+        disp(y1(i))
+    end
+end
 
 U = zeros(size(t));
 for i = 1:(length(t))
