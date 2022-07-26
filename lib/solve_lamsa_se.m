@@ -45,7 +45,7 @@ for i = 1:size(t,1)
     F_comp(i,4) = mu*n(i)*L2*sin(phi); %frictional toque on load
 end
 
-fSpring = f_perp(t, y(:,1), y(:,2), y(:,3), y(:,4), y(:,5), y(:,6), n, load, latch, spring, loading_motor);
+fSpring = f_perp(t, y(:,1), y(:,2), y(:,3), y(:,4), y(:,5), y(:,6), n, load, latch, spring, loading_motor, unlatching_motor);
 
 sol=[t y(:,2) y(:,1) y(:,4) y(:,3) F_comp fSpring fUnlatchingMotor y(:,6) y(:,5)];
 
@@ -77,6 +77,8 @@ theta0 = load.theta_0;
 moI = load.mass;
 mu = latch.coeff_fric;
 msp = spring.mass;
+df = latch.y_L{2}(y(4));
+ddf = latch.y_L{3}(y(4));
 
 phi = atan(latch.y_L{2}(y(4))); %angle of latch surface
 beta = sqrt(2*L1^2*(1-cos(y(2)-theta0)) + l0^2 - 2*l0*L1*(sin(y(2))- sin(theta0)));
@@ -89,15 +91,23 @@ y2dot = -gamma*y(1);
 alpha = asin(L1*(cos(theta0) -  cos(y(2)))/(l0 - y2)); %Angle the spring makes with the vertical
 la = L1*sin(pi/2 - alpha - y(2));
 
+
 Fsp =  spring.Force(t, [y2 - y(6), y2dot - y(5)]);
 Flm = loading_motor.Force(t, [y(6), y(5)]); %Loading Motor force
 Funlatch = unlatching_motor.Force(t, [y(4),y(3)]);
 n =  normal_force(t, y(1), y(2), y(3), y(4), y(5), y(6), load, latch, spring, loading_motor, Funlatch);
 
-dydt(1) = (4*epsilon*L2*n + la*(-2*Flm + 6*Fsp + msp*delta*y(1)^2))/(4*moI - msp*gamma*la);
+
 dydt(2) = y(1);
 dydt(3) = (-mu*n*cos(phi) + n*sin(phi) + unlatching_motor.Force(t, [y(4),y(3)]) )/latch.mass;
 dydt(4) = y(3);
+
+% Different ddot theta depending on if in latched or unlatched state
+if y(4) < latch.max_width
+    dydt(1) = (ddf*y(3)^2 + df*dydt(3));
+else
+    dydt(1) = (la*(-2*Flm + 6*Fsp + msp*delta*y(1)^2))/(4*moI - msp*gamma*la);
+end
 
 y2ddot = -gamma*dydt(1) - delta*y(1)^2;
 
@@ -106,6 +116,10 @@ dydt(6) = y(5);
 
 if dydt(3) == 0 && dydt(4) == 0
    warning("Latch is Stuck")
+end
+
+if f_perp(t, y(1), y(2), y(3), y(4), y(5), y(6), n, load, latch, spring, loading_motor, unlatching_motor) > 100
+    warning(":(")
 end
 
 end
@@ -118,8 +132,8 @@ df = latch.y_L{2}(s);
 ddf = latch.y_L{3}(s);
 
 % checks if latch is out of the way or if it is moving faster than the
-% lever
-if s < latch.max_width && df*sdot <= L2*(thetadot+1e-3)
+% lever. Probably somethign wrong here.
+if s < latch.max_width && df*sdot <= L2*thetadot
     
     l0 = spring.rest_length + loading_motor.rest_length;% initial length of spring + muscle
     theta0 = load.theta_0;
@@ -153,7 +167,7 @@ end
 
 end
 
-function f = f_perp(t, thetadot, theta, sdot, s, y1dot, y1, n, load, latch, spring, loading_motor)
+function f = f_perp(t, thetadot, theta, sdot, s, y1dot, y1, n, load, latch, spring, loading_motor, unlatching_motor)
 % F_PERP takes in vectors of the solution and calculates the force 
 %   perpendciular to the load applied by the spring.
 l0 = spring.rest_length + loading_motor.rest_length;% initial length of spring + muscle
@@ -165,6 +179,7 @@ msp = spring.mass;
 mu = latch.coeff_fric;
 moI = load.mass;
 
+
 beta = sqrt(2*L1^2*(1-cos(theta-theta0)) + l0^2 - 2*l0*L1*(sin(theta)- sin(theta0)));
 gamma = (L1^2*sin(theta-theta0) - l0*L1*cos(theta))./beta;
 delta = (L1^2*cos(theta-theta0) - l0*L1*cos(theta) + gamma.^2)./beta;
@@ -175,17 +190,28 @@ alpha = asin(L1*(cos(theta0) -  cos(theta))./(l0 - y2)); %Angle the spring makes
     
 Fsp = zeros(num_iter,1);
 Flm = zeros(num_iter,1);
+Ful = zeros(num_iter, 1);
 phi = zeros(num_iter, 1);
+df = zeros(num_iter, 1);
+ddf = zeros(num_iter, 1);
 for i = 1:num_iter
     Fsp(i) = spring.Force(t(i), [y2(i) - y1(i), y2dot(i) - y1dot(i)]);
     Flm(i) = loading_motor.Force(t(i), [y1(i), y1dot(i)]);
     phi(i) = atan(latch.y_L{2}(s(i))); %angle of latch surface
+    df(i) = latch.y_L{2}(s(i));
+    ddf(i) = latch.y_L{3}(s(i));
+    Ful(i) = unlatching_motor.Force(t(i), [s(i), sdot(i)]);
 end
 
 la = L1*sin(pi/2 - alpha - theta);
 epsilon = mu*sin(phi) - cos(phi);
+ddots = (-mu*n.*cos(phi) + n.*sin(phi) + Ful)/latch.mass;
 
-thetaddot = (epsilon*L2.*n + la.*(-2*Flm + 6*Fsp + msp*delta.*thetadot.^2))./(4*moI - msp*gamma.*la);
+if s < latch.max_width
+    thetaddot = (ddf.*sdot.^2 + df.*ddots);
+else
+    thetaddot = (la.*(-2*Flm + 6*Fsp + msp*delta.*thetadot.^2))./(4*moI - msp*gamma.*la);
+end
 
 f =  (1/4)*(-2* Flm + 6*Fsp + msp * gamma .* thetaddot + msp * delta .* thetadot.^2 ) .* sin(pi/2 - theta - alpha); %spring force perpendicular to lever
 
