@@ -12,7 +12,7 @@ loading_motor = HillMuscleMotor(0.05, 5, 5, 200, 0, 2.08, -2.89, -0.75);
 % "mass" "mass of lever arm" "L1" "L2" "L3" "theta initial"
 load = RotatingMassSE(1e-2, 3e-2 ,1e-2, 1e-2, 1e-2, 0);
 %"mass" "mass of lever arm" "L1" "L2" "theta initial"
-load2 = RotatingMass(1e-2, 3e-2, 1e-3, 5e-2, -pi/4);
+load2 = RotatingMass(1e-2, 3e-2, 1e-3, 5e-2, 0);
 % "Fmax" "Vmax" "range of motion" "voltage fraction" "no braking" "muscle length"
 unlatching_motor = LinearMotor(5, 5, .5, 1, .05);
 %unlatching_motor = LinearMotor(0, 0, .5, 1, .05);
