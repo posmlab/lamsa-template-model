@@ -183,9 +183,9 @@ for i = 1:num_iter
 end
 
 la = L1*sin(pi/2 - alpha - theta);
-epsilon = mu*sin(phi) - cos(phi);
+epsilon = -mu*sin(phi) - cos(phi);
 
-thetaddot = (epsilon*L2.*n + la.*(-2*Flm + 6*Fsp + msp*delta.*thetadot.^2))./(4*moI - msp*gamma.*la);
+thetaddot = (4*epsilon*L2.*n + la.*(-2*Flm + 6*Fsp + msp*delta.*thetadot.^2))./(4*moI - msp*gamma.*la);
 
 f =  (1/4)*(-2* Flm + 6*Fsp + msp * gamma .* thetaddot + msp * delta .* thetadot.^2 ) .* sin(pi/2 - theta - alpha); %spring force perpendicular to lever
 

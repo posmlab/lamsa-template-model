@@ -11,6 +11,7 @@
 % Set-up stuff
 L3 = load.lengths(3);
 L2 = load.lengths(2);
+L4 = spring.rest_length + loading_motor.rest_length;
 l0 = spring.rest_length + loading_motor.rest_length;
 theta0 = load.theta_0;
 
@@ -65,8 +66,9 @@ for k = 1:length(angle)
     text(0.8*max(L2, L3), max(L2, L3), txt);
 
 %     axis.style = 'square';
-
-    set(gca, 'XLim', [-1.5*max(L2,L3), 1.5*max(L2,L3)], 'YLim', [-1.5*max(L2,L3), 1.5*max(L2,L3)]);
+    s = [L2,L3,L4];
+    %set(gca, 'XLim', [-3*max(L2,L3), 3*max(L2,L3)], 'YLim', [-1.5*max(s), 1.5*max(s)]);
+    set(gca, 'XLim', [-0.7*max(s), 0.7*max(s)], 'YLim', [-1.5*max(s), 1.5*max(s)]);
 
     frames(k) = getframe;
     hold off;
