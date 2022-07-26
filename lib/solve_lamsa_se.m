@@ -77,6 +77,7 @@ theta0 = load.theta_0;
 moI = load.mass;
 mu = latch.coeff_fric;
 msp = spring.mass;
+mL = latch.mass;
 df = latch.y_L{2}(y(4));
 ddf = latch.y_L{3}(y(4));
 
@@ -85,6 +86,7 @@ beta = sqrt(2*L1^2*(1-cos(y(2)-theta0)) + l0^2 - 2*l0*L1*(sin(y(2))- sin(theta0)
 gamma = (L1^2*sin(y(2)-theta0) - l0*L1*cos(y(2)))/beta;
 delta = (L1^2*cos(y(2)-theta0) - l0*L1*cos(y(2)) + gamma^2)/beta;
 epsilon = mu*sin(phi) - cos(phi);
+epsilonbar = -mu*cos(phi) + sin(phi);
 
 y2 = l0 - beta;
 y2dot = -gamma*y(1);
@@ -94,12 +96,13 @@ la = L1*sin(pi/2 - alpha - y(2));
 
 Fsp =  spring.Force(t, [y2 - y(6), y2dot - y(5)]);
 Flm = loading_motor.Force(t, [y(6), y(5)]); %Loading Motor force
-Funlatch = unlatching_motor.Force(t, [y(4),y(3)]);
-n =  normal_force(t, y(1), y(2), y(3), y(4), y(5), y(6), load, latch, spring, loading_motor, Funlatch);
+Ful = unlatching_motor.Force(t, [y(4),y(3)]);
+n =  normal_force(t, y(1), y(2), y(3), y(4), y(5), y(6), load, latch, spring, loading_motor, Ful);
 
 
 dydt(2) = y(1);
-dydt(3) = (-mu*n*cos(phi) + n*sin(phi) + unlatching_motor.Force(t, [y(4),y(3)]) )/latch.mass;
+% dydt(3) = (-mu*n*cos(phi) + n*sin(phi) + unlatching_motor.Force(t, [y(4),y(3)]) )/latch.mass;
+dydt(3) = (L2*la*epsilonbar*(-2*Flm + 6*Fsp + msp*delta*y(1)^2) - (4*moI - msp*gamma*la)*epsilonbar*ddf*y(3)^2 - 4*epsilon*L2^2*Ful )/((4*moI - msp*gamma*la)*df*epsilonbar - 4*epsilon*L2^2*mL);
 dydt(4) = y(3);
 
 % Different ddot theta depending on if in latched or unlatched state
