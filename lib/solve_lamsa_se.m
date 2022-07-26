@@ -103,7 +103,6 @@ dydt(5) = 3/msp * Flm - 3/msp * Fsp - y2ddot/2;
 dydt(6) = y(5);
 %disp(dydt(5))
 
-
 if Fperp >= 5
     disp("uh oh")
 end 
@@ -149,13 +148,14 @@ y2dot = gamma*thetadot;
 y2ddot = -gamma*thetadot - thetadot^2*(L1^2 * cos(theta-theta0) + l0*L1*sin(theta) + gamma^2)/beta;
 msp = spring.mass;
 Flm = loading_motor.Force(t, [y2 - y1, y2dot - y1dot]);
-Fsp = spring.Force(t, [y2 - y1, y2dot - y1dot]);
+Fsp = spring.Force(t, [y2 - y1, y2dot-y1dot]);
 %y2 = L1*sin(theta);
 %y2dot = L1*cos(theta)*thetadot;
 
 alpha = asin(L1*(cos(theta0) -  cos(theta))/(l0 - y2)); %Angle the spring makes with the vertical
 
-f = 1/5 * (-Flm + 6*Fsp - msp*y2ddot) * sin(pi/2 - theta - alpha); %spring force perpendicular to lever
+f = (1/2 * (3*Fsp - Flm) + msp*y2ddot/4) * sin(pi/2 - theta - alpha);
+%f = 1/5 * (-Flm + 6*Fsp - msp*y2ddot) * sin(pi/2 - theta - alpha); %spring force perpendicular to lever
 end
 
 
