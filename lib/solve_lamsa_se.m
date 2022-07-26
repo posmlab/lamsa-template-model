@@ -25,10 +25,8 @@ odeprob = @(t,y) se_ode(t, y, loading_motor, unlatching_motor, load, latch, spri
 
 [t,y,~,~,~] = ode15s(odeprob, tspan, initial_conditions, options);
 
-l0 = spring.rest_length + loading_motor.rest_length;% initial length of spring + muscle
 L2 = load.lengths(2);
 
-fSpring = zeros(size(t));
 n = zeros(size(t));
 fUnlatchingMotor = zeros(size(t));
 F_comp = zeros(size(t,1),4);
@@ -96,7 +94,7 @@ Flm = loading_motor.Force(t, [y(6), y(5)]); %Loading Motor force
 Funlatch = unlatching_motor.Force(t, [y(4),y(3)]);
 n =  normal_force(t, y(1), y(2), y(3), y(4), y(5), y(6), load, latch, spring, loading_motor, Funlatch);
 
-dydt(1) = (epsilon*L2*n+la*(-2*Flm + 6*Fsp + msp*delta*y(1)^2))/(4*moI - msp*gamma*la);
+dydt(1) = (4*epsilon*L2*n + la*(-2*Flm + 6*Fsp + msp*delta*y(1)^2))/(4*moI - msp*gamma*la);
 dydt(2) = y(1);
 dydt(3) = (-mu*n*cos(phi) + n*sin(phi) + unlatching_motor.Force(t, [y(4),y(3)]) )/latch.mass;
 dydt(4) = y(3);
@@ -173,7 +171,7 @@ delta = (L1^2*cos(theta-theta0) - l0*L1*cos(theta) + gamma.^2)./beta;
 
 y2 = l0 - beta;
 y2dot = gamma.*thetadot;
-alpha = asin(L1*(cos(theta0) -  cos(theta))/(l0 - y2)); %Angle the spring makes with the vertical
+alpha = asin(L1*(cos(theta0) -  cos(theta))./(l0 - y2)); %Angle the spring makes with the vertical
     
 Fsp = zeros(num_iter,1);
 Flm = zeros(num_iter,1);
