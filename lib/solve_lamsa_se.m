@@ -83,6 +83,8 @@ beta = sqrt(2*L1^2*(1-cos(y(2)-theta0)) + l0^2 - 2*l0*L1*(sin(y(2))- sin(theta0)
 gamma = (L1^2*sin(y(2)-theta0) - l0*L1*cos(y(2)))/beta;
 delta = (L1^2*cos(y(2)-theta0) - l0*L1*sin(y(2)) + gamma^2)/beta;
 epsilon = mu*sin(phi) - cos(phi);
+df = latch.y_L{2}(y(4));
+ddf = latch.y_L{3}(y(4));
 
 y2 = l0 - beta;
 y2dot = -gamma*y(1);
