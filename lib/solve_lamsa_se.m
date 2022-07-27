@@ -84,7 +84,7 @@ ddf = latch.y_L{3}(y(4));
 phi = atan(latch.y_L{2}(y(4))); %angle of latch surface
 beta = sqrt(2*L1^2*(1-cos(y(2)-theta0)) + l0^2 - 2*l0*L1*(sin(y(2))- sin(theta0)));
 gamma = (L1^2*sin(y(2)-theta0) - l0*L1*cos(y(2)))/beta;
-delta = (L1^2*cos(y(2)-theta0) - l0*L1*cos(y(2)) + gamma^2)/beta;
+delta = (L1^2*cos(y(2)-theta0) - l0*L1*sin(y(2)) + gamma^2)/beta;
 epsilon = mu*sin(phi) - cos(phi);
 epsilonbar = -mu*cos(phi) + sin(phi);
 
@@ -143,7 +143,7 @@ if s < latch.max_width
     phi = atan(latch.y_L{2}(s)); %angle of latch surface
     beta = sqrt(2*L1^2*(1-cos(theta-theta0)) + l0^2 - 2*l0*L1*(sin(theta)- sin(theta0)));
     gamma = (L1^2*sin(theta-theta0) - l0*L1*cos(theta))/beta;
-    delta = (L1^2*cos(theta-theta0) - l0*L1*cos(theta) + gamma^2)/beta;
+    delta = (L1^2*cos(theta-theta0) - l0*L1*sin(theta) + gamma^2)/beta;
     epsilon = mu*sin(phi) - cos(phi);
     epsilonbar = -mu*cos(phi) + sin(phi);
     
@@ -180,7 +180,7 @@ moI = load.mass;
 
 beta = sqrt(2*L1^2*(1-cos(theta-theta0)) + l0^2 - 2*l0*L1*(sin(theta)- sin(theta0)));
 gamma = (L1^2*sin(theta-theta0) - l0*L1*cos(theta))./beta;
-delta = (L1^2*cos(theta-theta0) - l0*L1*cos(theta) + gamma.^2)./beta;
+delta = (L1^2*cos(theta-theta0) - l0*L1*sin(theta) + gamma.^2)./beta;
 
 y2 = l0 - beta;
 y2dot = gamma.*thetadot;
@@ -217,7 +217,7 @@ end
 
 
 function [position,isterminal,direction] = launching_end(t,y)
-position = y(1) + 1e-3;
+position = y(1) + 1e-1;
 isterminal = 1;
 direction = 0;
 

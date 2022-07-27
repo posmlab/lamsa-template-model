@@ -64,7 +64,7 @@ for k = 1:length(angle)
     end
     text(0.8*max(L2, L3), max(L2, L3), txt);
 
-%     axis.style = 'square';
+    axis.style = 'square';
 
     set(gca, 'XLim', [-1.5*max(L2,L3), 1.5*max(L2,L3)], 'YLim', [-1.5*max(L2,L3), 1.5*max(L2,L3)]);
 
