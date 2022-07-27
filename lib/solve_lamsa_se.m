@@ -105,7 +105,7 @@ dydt(3) = (L2*la*epsilonbar*(-2*Flm + 6*Fsp + msp*delta*y(1)^2) - (4*moI - msp*g
 dydt(4) = y(3);
 
 % Different ddot theta depending on if in latched or unlatched state
-if y(4) < latch.max_width
+if y(4) < latch.max_width && n > 0
     dydt(1) = (ddf*y(3)^2 + df*dydt(3));
 else
     dydt(1) = (la*(-2*Flm + 6*Fsp + msp*delta*y(1)^2))/(4*moI - msp*gamma*la);
@@ -118,10 +118,6 @@ dydt(6) = y(5);
 
 if dydt(3) == 0 && dydt(4) == 0
    warning("Latch is Stuck")
-end
-
-if f_perp(t, y(1), y(2), y(3), y(4), y(5), y(6), n, load, latch, spring, loading_motor, unlatching_motor) > 100
-    warning(":(")
 end
 
 end
@@ -221,7 +217,7 @@ end
 
 
 function [position,isterminal,direction] = launching_end(t,y)
-position = y(1);
+position = y(1) + 1e-3;
 isterminal = 1;
 direction = 0;
 
