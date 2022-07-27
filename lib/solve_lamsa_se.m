@@ -30,7 +30,8 @@ end
 initial_conditions = zeros(6,1);
 initial_conditions(2) = load.theta_0;
 initial_conditions(3) = latch.v_0;
-options = odeset('Events', @(t,y) launching_end(t,y), AbsTol = 1e-8, RelTol = 1e-8);
+options = odeset('Events', @(t,y) launching_end(t,y), 'AbsTol', 1e-8, 'RelTol', 1e-8, ...
+    'OutputFcn', @(t,y,flag) update_f(t,y,flag,load,spring,loading_motor));
 odeprob = @(t,y) se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring);
 
 [t,y,~,~,~] = ode15s(odeprob, tspan, initial_conditions, options);
@@ -238,6 +239,31 @@ else
 end
 
 f =  (1/4)*(-2* Flm + 6*Fsp + msp * gamma .* thetaddot + msp * delta .* thetadot.^2 ) .* sin(pi/2 - theta - alpha); %spring force perpendicular to lever
+
+end
+
+
+% update force history for standard linear solids
+function status = update_f(t, y, ~, load, spring, loading_motor)
+
+if (isa(spring, 'StandardLinearSolid2') || isa(spring, 'StandardLinearSolid')) && (size(t,2)>0)
+    t = t(end);
+    y = y(:,end);
+
+    l0 = spring.rest_length + loading_motor.rest_length;% initial length of spring + muscle
+    L1 = load.lengths(1);
+    theta0 = load.theta_0;
+    
+    beta = sqrt(2*L1^2*(1-cos(y(2)-theta0)) + l0^2 - 2*l0*L1*(sin(y(2))- sin(theta0)));
+    gamma = (L1^2*sin(y(2)-theta0) - l0*L1*cos(y(2)))./beta;
+    y2 = l0 - beta;
+    y2dot = gamma*y(1);
+    
+    F = spring.Force(t, [y2 - y(6), y2dot - y(5)]);
+    spring.F_history = [spring.F_history; [t F]];
+end
+
+status = 0;
 
 end
 
