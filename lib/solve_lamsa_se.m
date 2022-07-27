@@ -94,16 +94,10 @@ Flm = loading_motor.Force(t, [y(6), y(5)]); %Loading Motor force
 Funlatch = unlatching_motor.Force(t, [y(4),y(3)]);
 n =  normal_force(t, y(1), y(2), y(3), y(4), y(5), y(6), load, latch, spring, loading_motor, Funlatch);
 
+dydt(1) = (4*epsilon*L2*n + la*(-2*Flm + 6*Fsp + msp*delta*y(1)^2))/(4*moI - msp*gamma*la);
 dydt(2) = y(1);
 dydt(3) = (-mu*n*cos(phi) + n*sin(phi) + unlatching_motor.Force(t, [y(4),y(3)]) )/latch.mass;
 dydt(4) = y(3);
-
-% Different ddot theta depending on if in latched or unlatched state
-if y(4) < latch.max_width && n > 0
-    dydt(1) = (ddf*y(3)^2 + df*dydt(3));
-else
-    dydt(1) = (la*(-2*Flm + 6*Fsp + msp*delta*y(1)^2))/(4*moI - msp*gamma*la);
-end
 
 y2ddot = -gamma*dydt(1) - delta*y(1)^2;
 
