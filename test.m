@@ -4,22 +4,22 @@ warning("off", "all")
 metrics = {'tto', 'vto', 'Pmax', 'ymax', 'tL', 'KEmax', 'yunlatch', 'amax'};
 
 % "muscle length" "Fmax" "Vmax" "rate of activation" "initial stretch" "a_L" "b_L" "s"
-loading_motor = HillMuscleMotor(0.05, 5, 5, 200, 0, 2.08, -2.89, -0.75);
+%loading_motor = HillMuscleMotor(0.006, 5, 5, 200, 0, 2.08, -2.89, -0.75);
 
 % "Fmax" "Vmax" "range of motion" "voltage fraction" "muscle length"
-%loading_motor = LinearMotor(0.25, 1, 0.005, 1, 0.1);
+loading_motor = LinearMotor(0.25, 1, 0.005, 1, 0.1);
 
 % "mass" "mass of lever arm" "L1" "L2" "L3" "theta initial"
-load = RotatingMassSE(1e-2, 3e-2 ,1e-2, 1e-2, 1e-2, 0);
+load = RotatingMassSE(1e-2, 3e-2 ,5e-3, 5e-3, 1e-2, 0);
 %"mass" "mass of lever arm" "L1" "L2" "theta initial"
 load2 = RotatingMass(1e-2, 3e-2, 1e-3, 5e-2, 0);
 % "Fmax" "Vmax" "range of motion" "voltage fraction" "no braking" "muscle length"
-unlatching_motor = LinearMotor(5, 5, .5, 1, .05);
+unlatching_motor = LinearMotor(0, 0, .5, 1, .05);
 %unlatching_motor = LinearMotor(0, 0, .5, 1, .05);
 % "coeff_parabola" "parabola_width" "mass" "μ" "v_0" "min_latching_dist" "max_latching_dist" "runway_length"
 latch = ParabolicLatch(150, 1e-3, 1e-3, 0, 0, 0, Inf, 0);
 % "k" "m_s" "F_spring_max" "rest length"
-spring = LinearSpring(1e3, 0.001, 50, 0.05);
+spring = LinearSpring(1e3, 0.001, 50, 0.006);
 %spring = ExponentialSpring(2000, 0.01, 0.00002, 20, 0.01);
 
 tspan = [0, 1];
