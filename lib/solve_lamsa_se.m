@@ -101,7 +101,6 @@ n =  normal_force(t, y(1), y(2), y(3), y(4), y(5), y(6), load, latch, spring, lo
 
 
 dydt(2) = y(1);
-% dydt(3) = (-mu*n*cos(phi) + n*sin(phi) + unlatching_motor.Force(t, [y(4),y(3)]) )/latch.mass;
 dydt(3) = (L2*la*epsilonbar*(-2*Flm + 6*Fsp + msp*delta*y(1)^2) - (4*moI - msp*gamma*la)*epsilonbar*ddf*y(3)^2 - 4*epsilon*L2^2*Ful )/((4*moI - msp*gamma*la)*df*epsilonbar - 4*epsilon*L2^2*mL);
 dydt(4) = y(3);
 
@@ -136,7 +135,7 @@ ddf = latch.y_L{3}(s);
 
 % checks if latch is out of the way or if it is moving faster than the
 % lever. Probably somethign wrong here.
-if s < latch.max_width && df*sdot <= L2*thetadot
+if s < latch.max_width
     
     l0 = spring.rest_length + loading_motor.rest_length;% initial length of spring + muscle
     theta0 = load.theta_0;
@@ -162,7 +161,7 @@ if s < latch.max_width && df*sdot <= L2*thetadot
     Flm = loading_motor.Force(t, [y1, y1dot]); %Loading Motor force
     
     
-    n = ((Ful * df + mL*ddf * sdot^2)*(4*moI - msp*gamma*la) - L2*la*mL*(-2*Flm + 6*Fsp + msp*delta* thetadot^2))/(epsilon*mL*L2^2 - epsilonbar*(4*moI - msp*gamma*la)*df);
+    n = ((Ful * df + mL*ddf * sdot^2)*(4*moI - msp*gamma*la) - L2*la*mL*(-2*Flm + 6*Fsp + msp*delta* thetadot^2))/(4*epsilon*mL*L2^2 - epsilonbar*(4*moI - msp*gamma*la)*df);
 else % If latch has been removed, no more normal force
     n = 0;
 end
