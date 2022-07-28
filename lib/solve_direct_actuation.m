@@ -70,6 +70,12 @@ if isa(load, 'RotatingMass')
     mass = mass/cos(theta) + 1E2*(abs(theta) > pi/2);
 end
 
+if isa(load, 'RotatingMassSE')
+    L1 = load.lengths(1);
+    moI = load.mass;
+    mass = moI/L1;
+end
+
 end
 
 function Force = F_eff(load, motor, t, y)
@@ -88,6 +94,20 @@ if isa(load, 'RotatingMass')
     alpha = acos((y2^2-y1^2+2*y1*L1*sin(theta_0))/(2*y2*L1));
     
     Force = real( Force*sin(alpha) - abs(m*sin(theta)*y(2)^2/(cos(theta)^3))) * (abs(theta) < pi/2);
+end
+
+
+if isa(load, 'RotatingMassSE')
+    l0 = motor.rest_length;
+    L1 = load.lengths(1);
+    theta0 = load.theta_0;
+    beta = sqrt(2*L1^2*(1-cos(y(1)-theta0)) + l0^2 - 2*l0*L1*(sin(y(1))- sin(theta0)));
+    gamma = (L1^2*sin(y(1)-theta0) - l0*L1*cos(y(1)))/beta;
+    y2 = l0 - beta;
+    y2dot = -gamma*y(2);
+    alpha = asin(L1*(cos(theta0) -  cos(y(2)))/(l0 - y2)); %Angle the spring makes with the vertical
+
+    Force = motor.Force(t, [y2 y2dot])*sin(pi/2 - alpha - y(1));
 end
 
 end

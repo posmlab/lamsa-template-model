@@ -137,7 +137,7 @@ end
 
 y2ddot = -gamma*dydt(1) - delta*y(1)^2;
 
-dydt(5) = 3/msp * Flm - 3/msp * Fsp - y2ddot/2;
+dydt(5) = (3/msp) * (Flm - Fsp) - y2ddot/2;
 
 
 if dydt(3) == 0 && dydt(4) == 0 && t > ul_offset
