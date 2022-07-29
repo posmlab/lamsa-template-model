@@ -7,7 +7,8 @@
 % "frames"; it can be replayed by calling movie(frames) or, for better
 % control, by using the MovieViewer app. 
 
-
+v = VideoWriter('temp.mp4');
+open(v);
 % Set-up stuff
 L3 = load.lengths(3);
 L2 = load.lengths(2);
@@ -69,6 +70,8 @@ for k = 1:length(angle)
     set(gca, 'XLim', [-1.5*max(L2,L3), 1.5*max(L2,L3)], 'YLim', [-1.5*max(L2,L3), 1.5*max(L2,L3)]);
 
     frames(k) = getframe;
+    writeVideo(v,frames(k));
     hold off;
     drawnow
 end
+close(v);
