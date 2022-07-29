@@ -261,13 +261,11 @@ mu = latch.coeff_fric;
 moI = load.mass;
 mL = latch.mass;
 
-searchlim = min(loading_motor.velocity*dt, l0);
-
 theta = y(1,2);
 sdot = y(1,3);
 thetadot = 0;
 s = 0;
-y1 = 0;
+y1_old = 0;
 
 beta = sqrt(2*L1^2*(1-cos(theta-theta0)) + l0^2 - 2*l0*L1*(sin(theta)- sin(theta0)));
 gamma = (L1^2*sin(theta-theta0) - l0*L1*cos(theta))/beta;
@@ -279,24 +277,37 @@ for i = 1:NUM_ITER
     t = i*dt;
 
     % Net force on spring-muscle contact as function of y1
-    y1_forces = @(x) loading_motor.Force(t, [x, (x-y1)/dt]) - spring.Force(t, [y2 - x, y2dot - (x-y1)/dt]);
-    
-    % New value of y1
-    y1_old = y1;
+    y1_forces = @(x) loading_motor.Force(t, [x, (x-y1_old)/dt]) - spring.Force(t, [y2 - x, y2dot - (x-y1_old)/dt]);
 
-    y1 = fzero(y1_forces, y1);
+    y1 = fzero(y1_forces, y1_old);
+   
     
     %Forces 
     Flm = loading_motor.Force(t, [y1, (y1 - y1_old)/dt]);
     
-    dydt = @(y) y - [thetadot, theta, sdot, s] - dt*se_ode_massless(t, y, theta0, l0, L1, L2, mu, moI, mL, Flm, unlatching_motor, latch, ul_offset);
+    % New value of y1
+    y1dot = (y1 - y1_old)/dt;
+    y1_old = y1;
+ 
+    
+    % Solving everything else
+    % Backwards Euler Method
+    dydt = @(x) x - [thetadot, theta, sdot, s] - dt*se_ode_massless(t, x, theta0, l0, L1, L2, mu, moI, mL, Flm, unlatching_motor, latch, ul_offset);
 
     options = optimset('Display','off');
-    y_new = fsolve(dydt, [thetadot, theta, sdot, s], options);
+    [y_new, ~, exitflag] = fsolve(dydt, [thetadot, theta, sdot, s], options);
     
-%     y_new = [thetadot, theta, sdot, s] + dt*se_ode_massless(t, [thetadot,  theta, sdot, s], theta0, l0, L1, L2, mu, moI, mL, Flm, unlatching_motor, latch, ul_offset);
+    % If fsolve fails, use forwards euler method
+    if exitflag < 0
+       y_new = [thetadot, theta, sdot, s] + dt*se_ode_massless(t, [thetadot,  theta, sdot, s], theta0, l0, L1, L2, mu, moI, mL, Flm, unlatching_motor, latch, ul_offset); 
+    end
     
-    y(i+1, :) = [y_new (y1 - y1_old)/dt y1];
+    
+    % Append new values
+    y(i+1, :) = [y_new y1dot y1];
+    
+    % Update spring Force History
+    update_f(t, [y_new y1dot y1], true, load, spring, loading_motor)
     
     thetadot = y_new(1);
     theta = y_new(2);
@@ -331,12 +342,15 @@ for i = 1:NUM_ITER
     F_comp(i+1,3) = mu*F_n*cos(phi); %frictional force on latch
     F_comp(i+1,4) = mu*F_n*L2*sin(phi); %frictional toque on load
     
+    %This code is slow. Vectorize and move it outside.
     F_perp(i+1) = Flm*sin(pi/2 - alpha - theta);
     F_unlatching_motor(i+1) = Ful;
     
     if thetadot + 1 < 0
        break; 
     end
+    
+
 end
 
 t = (tspan(1):dt:t)';
@@ -372,11 +386,11 @@ else
     Ful = 0;
 end
 
-F_n = (mL*la*L2*Flm - moI*df*Ful - mL*moI*ddf*y(3)^2)/(epsilonbar*moI*df + epsilon*L2^2*mL);
+F_n = (mL*la*L2*Flm - moI*df*Ful - mL*moI*ddf*y(3)^2)/(epsilonbar*moI*df - epsilon*L2^2*mL);
 
 
 if y(4) < latch.max_width && F_n >= 0 %Latched
-    dydt(3) = (epsilonbar*la*L2*Flm - epsilonbar*moI*ddf*y(3)^2 + epsilon*L2^2*Ful)/(epsilon*L2^2*mL + epsilonbar*moI*df);
+    dydt(3) = (-epsilonbar*la*L2*Flm + epsilonbar*moI*ddf*y(3)^2 + epsilon*L2^2*Ful)/(epsilon*L2^2*mL - epsilonbar*moI*df);
     dydt(1) = (ddf*y(3)^2 + df*dydt(3))/L2;
 else % Unlatched
     dydt(1) = (la*Flm)/moI;
@@ -394,8 +408,6 @@ end
 function status = update_f(t, y, ~, load, spring, loading_motor)
 
 if (isa(spring, 'StandardLinearSolid2') || isa(spring, 'StandardLinearSolid')) && (size(t,2)>0)
-    t = t(end);
-    y = y(:,end);
 
     l0 = spring.rest_length + loading_motor.rest_length;% initial length of spring + muscle
     L1 = load.lengths(1);
