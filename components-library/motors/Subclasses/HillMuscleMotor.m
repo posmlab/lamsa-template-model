@@ -54,7 +54,7 @@ classdef HillMuscleMotor < Motor
             % F_velocity=@(t,x)(1-(x(2)/v_motor_max))/(1+(x(2)/(v_motor_max/4))); 
             % F_activation=@(t,x)min(r_activation*t,1);
             % ^ obtained from Rosario et al.
-            Force = @(t,x) (x(1)<=(L_initial-(0.7*muscle_length))) * (x(1)>=(L_initial-(1.3*muscle_length))) * F_motor_max * exp(-((abs(((((L_initial-x(1))/muscle_length)^b_L)-1)/s))^a_L)) * ((1-(abs(x(2))/v_motor_max))/(1+(abs(x(2))/(v_motor_max/4)))) .* (min(r_activation*t,1));
+            Force = @(t,x) (x(1)<=(L_initial-(0.7*muscle_length))) * (x(1)>=(L_initial-(1.3*muscle_length))) * F_motor_max * exp(-((abs(((((L_initial-x(1))/muscle_length)^b_L)-1)/s))^a_L)) * (((1-(abs(x(2))/v_motor_max))/(1+(abs(x(2))/(v_motor_max/4))))*(x(2) >= 0) + (x(2) < 0)) .* (min(r_activation*t,1));
             max_force = F_motor_max;
             range=L_initial-muscle_length+(.3*muscle_length);
         %     motor.range=muscle_length;
