@@ -134,9 +134,13 @@ else % Unlatched
 end
 
 y2ddot = -gamma*dydt(1) - delta*y(1)^2;
+Fd = 1*dydt(6);
 
-dydt(5) = (3/msp) * (Flm - Fsp) - y2ddot/2;
+%no damping
+%dydt(5) = (3/msp) * (Flm - Fsp) - y2ddot/2;
 
+%with damping
+dydt(5) = (3/msp) * (Flm - Fd - Fsp) - y2ddot/2;
 
 if dydt(3) == 0 && dydt(4) == 0 && t > ul_offset
    error("Latch is Stuck")
@@ -179,10 +183,15 @@ if s < latch.max_width
     
     Fsp =  spring.Force(t, [y2 - y1, y2dot - y1dot]);
     Flm = loading_motor.Force(t, [y1, y1dot]); %Loading Motor force
+    Fd = 1*y1dot;
     
+    %no damping
+    %n = ((Ful * df + mL*ddf * sdot^2)*(4*moI - msp*gamma*la) - L2*la*mL*(-2*Flm + 6*Fsp + msp*delta* thetadot^2))/(4*epsilon*mL*L2^2 - epsilonbar*(4*moI - msp*gamma*la)*df);
     
-    n = ((Ful * df + mL*ddf * sdot^2)*(4*moI - msp*gamma*la) - L2*la*mL*(-2*Flm + 6*Fsp + msp*delta* thetadot^2))/(4*epsilon*mL*L2^2 - epsilonbar*(4*moI - msp*gamma*la)*df);
-    
+    %damping
+    n = ((Ful * df + mL*ddf * sdot^2)*(4*moI - msp*gamma*la) - L2*la*mL*(-2*Flm + 2*Fd + 6*Fsp + msp*delta* thetadot^2))/(4*epsilon*mL*L2^2 - epsilonbar*(4*moI - msp*gamma*la)*df);
+
+
     n = max(n, 0); %Negative normal force is treated as no contact
 else % If latch has been removed, no more normal force
     n = 0;
@@ -236,7 +245,12 @@ else
     thetaddot = (la.*(-2*Flm + 6*Fsp + msp*delta.*thetadot.^2))./(4*moI - msp*gamma.*la);
 end
 
-f =  (1/4)*(-2* Flm + 6*Fsp + msp * gamma .* thetaddot + msp * delta .* thetadot.^2 ) .* sin(pi/2 - theta - alpha); %spring force perpendicular to lever
+Fd = 1*y1dot;
+%no damping
+%f =  (1/4)*(-2* Flm + 6*Fsp + msp * gamma .* thetaddot + msp * delta .* thetadot.^2 ) .* sin(pi/2 - theta - alpha); %spring force perpendicular to lever
+
+%damping
+f =  (1/4)*(-2* Flm + 2*Fd + 6*Fsp + msp * gamma .* thetaddot + msp * delta .* thetadot.^2 ) .* sin(pi/2 - theta - alpha); %spring force perpendicular to lever
 
 end
 
@@ -429,7 +443,7 @@ end
 
 function [position,isterminal,direction] = launching_end(t,y)
 position = y(1) + 1;
-isterminal = 1;
+isterminal = 0;
 direction = 0;
 
 end
