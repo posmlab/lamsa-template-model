@@ -23,13 +23,20 @@ initial_conditions = zeros(6,1);
 initial_conditions(2) = load.theta_0;
 initial_conditions(3) = latch.v_0;
 
+damping = 0;
+
+l0 = spring.rest_length + loading_motor.rest_length;
+L1 = load.lengths(1);
+theta0 = load.theta_0;
+theta_final = atan((l0-L1)/(L1*cos(theta0)));
+
 % If the spring is massless, we need to do something else/
 if spring.mass == 0
-    [sol, transition_times] = solve_massless(tspan, loading_motor, unlatching_motor, load, latch, spring);
+    [sol, transition_times] = solve_massless(tspan, loading_motor, unlatching_motor, load, latch, spring, theta_final);
 else  
-    options = odeset('Events', @(t,y) launching_end(t,y), 'AbsTol', 1e-8, 'RelTol', 1e-8, ...
+    options = odeset('Events', @(t,y) launching_end(t,y, theta_final), 'AbsTol', 1e-8, 'RelTol', 1e-8, ...
         'OutputFcn', @(t,y,flag) update_f(t,y,flag,load,spring,loading_motor));
-    odeprob = @(t,y) se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring);
+    odeprob = @(t,y) se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring, damping);
     
     [t,y,~,~,~] = ode15s(odeprob, tspan, initial_conditions, options);
     
@@ -75,7 +82,7 @@ end
 
 
 
-function dydt = se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring)
+function dydt = se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring, damping)
 %SE_ODE is the equation of motion for a series elastic system
 %
 %   y = [theta dot, theta, s dot, s, y1dot, y1]
@@ -135,7 +142,7 @@ end
 
 y2ddot = -gamma*dydt(1) - delta*y(1)^2;
 
-dydt(5) = (3/msp) * (Flm - Fsp) - y2ddot/2;
+dydt(5) = (3/msp) * (Flm - Fsp) - y2ddot/2 - damping*y(5);
 
 
 if dydt(3) == 0 && dydt(4) == 0 && t > ul_offset
@@ -241,9 +248,9 @@ f =  (1/4)*(-2* Flm + 6*Fsp + msp * gamma .* thetaddot + msp * delta .* thetadot
 end
 
 
-function [sol, transition_times] = solve_massless(tspan, loading_motor, unlatching_motor, load, latch, spring)
+function [sol, transition_times] = solve_massless(tspan, loading_motor, unlatching_motor, load, latch, spring, theta_final)
 
-dt = 1e-4;
+dt = 1e-5;
 y(1,:) = zeros(1,6);
 y(1,2) = load.theta_0;
 y(1,3) = latch.v_0;
@@ -307,7 +314,7 @@ for i = 1:NUM_ITER
     y(i+1, :) = [y_new y1dot y1];
     
     % Update spring Force History
-    update_f(t, [y_new y1dot y1], true, load, spring, loading_motor)
+    update_f(t, [y_new y1dot y1], true, load, spring, loading_motor);
     
     thetadot = y_new(1);
     theta = y_new(2);
@@ -346,8 +353,12 @@ for i = 1:NUM_ITER
     F_perp(i+1) = Flm*sin(pi/2 - alpha - theta);
     F_unlatching_motor(i+1) = Ful;
     
-    if thetadot + 1 < 0
+    if theta >= theta_final
        break; 
+    end
+    
+    if F_perp(i+1) < 0
+        warning("Warning: Perpendicular Force is negative")
     end
     
 
@@ -427,8 +438,8 @@ status = 0;
 end
 
 
-function [position,isterminal,direction] = launching_end(t,y)
-position = y(1) + 1;
+function [position,isterminal,direction] = launching_end(t,y, theta_final)
+position = theta_final-y(2);
 isterminal = 1;
 direction = 0;
 
