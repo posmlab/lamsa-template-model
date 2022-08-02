@@ -85,7 +85,7 @@ function dydt = se_ode(t, y, loading_motor, unlatching_motor, load, latch, sprin
 %
 %   y = [theta dot, theta, s dot, s, y1dot, y1]
 
-ul_offset = 0.05;
+ul_offset = 0.1;
 
 dydt = zeros(6,1);
 
@@ -129,7 +129,7 @@ dydt(4) = y(3);
 dydt(6) = y(5);
 
 % Different ddot theta depending on if in latched or unlatched state
-if y(4) < latch.max_width && F_n >= 0 %Latched
+if y(4) < latch.max_width && (F_n >= 0 || y(3) == 0) %Latched
     dydt(3) = (L2*la*epsilonbar*(-2*Flm + 6*Fsp + msp*delta*y(1)^2) - (4*moI - msp*gamma*la)*epsilonbar*ddf*y(3)^2 - 4*epsilon*L2^2*Ful )...
         /((4*moI - msp*gamma*la)*df*epsilonbar - 4*epsilon*L2^2*mL);
     dydt(1) = (ddf*y(3)^2 + df*dydt(3))/L2; 
@@ -139,12 +139,16 @@ else % Unlatched
 end
 
 y2ddot = -gamma*dydt(1) - delta*y(1)^2;
-Fd = 0.5*dydt(6);
+Fd = 2*dydt(6);
 % if Fd > Flm
 %     Fd = Flm;
 % end 
 
 dydt(5) = (3/msp) * (Flm - Fd - Fsp) - y2ddot/2;
+
+if y(6) < 0
+    disp(dydt(5))
+end
 
 % Checking if latch gets stuck
 stuck_threshold = 1E-9;
@@ -274,7 +278,7 @@ end
 
 function [sol, transition_times] = solve_massless(tspan, loading_motor, unlatching_motor, load, latch, spring, theta_final)
 
-dt = 1e-5;
+dt = 1e-6;
 y(1,:) = zeros(1,6);
 y(1,2) = load.theta_0;
 y(1,3) = latch.v_0;
