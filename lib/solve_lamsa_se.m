@@ -144,9 +144,16 @@ y2ddot = -gamma*dydt(1) - delta*y(1)^2;
 
 dydt(5) = (3/msp) * (Flm - Fsp) - y2ddot/2 - damping*y(5);
 
-
-if dydt(3) == 0 && dydt(4) == 0 && t > ul_offset
-   error("Latch is Stuck")
+% Checking if latch gets stuck
+stuck_threshold = 1E-9;
+if ((y(3) < stuck_threshold) && (dydt(3) < stuck_threshold) && (t > ul_offset))
+    if (~isa(unlatching_motor, 'DeactivatingMotor') && t==0 && spring.Force(0,[y2, 0])*latch.coeff_fric > unlatching_motor.max_force)
+        error('Latch gets stuck!');
+    elseif (unlatching_motor.Force(t, [y(4) y(3)]) >= unlatching_motor.Force(t + stuck_threshold, [y(4) y(3)]))
+        error('Latch gets stuck!');
+    else
+        warning('System is moving slowly. Integration may take a long time.')
+    end
 end
 
 end
@@ -190,10 +197,10 @@ if s < latch.max_width
     
     n = ((Ful * df + mL*ddf * sdot^2)*(4*moI - msp*gamma*la) - L2*la*mL*(-2*Flm + 6*Fsp + msp*delta* thetadot^2))/(4*epsilon*mL*L2^2 - epsilonbar*(4*moI - msp*gamma*la)*df);
     
-    n = max(n, 0); %Negative normal force is treated as no contact
 else % If latch has been removed, no more normal force
     n = 0;
 end
+
 end
 
 
@@ -400,7 +407,7 @@ end
 F_n = (mL*la*L2*Flm - moI*df*Ful - mL*moI*ddf*y(3)^2)/(epsilonbar*moI*df - epsilon*L2^2*mL);
 
 
-if y(4) < latch.max_width && F_n >= 0 %Latched
+if y(4) < latch.max_width && F_n > 0 %Latched
     dydt(3) = (-epsilonbar*la*L2*Flm + epsilonbar*moI*ddf*y(3)^2 + epsilon*L2^2*Ful)/(epsilon*L2^2*mL - epsilonbar*moI*df);
     dydt(1) = (ddf*y(3)^2 + df*dydt(3))/L2;
 else % Unlatched
