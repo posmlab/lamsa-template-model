@@ -1,13 +1,17 @@
 %% RotatingMass class definition
 %
-% this type of mass allows large angle lever arm rotations for variable EMA
+% this type of mass allows large angle lever arm rotations where the spring
+%   and muscle are in series. 
 %
 % arguments:
 %     m_end - mass of the load
 %     m_rod - mass of lever arm
-%     L1    - segment of the lever arm closest to the spring
-%     L2    - segment of the lever arm furthest from the spring
-%     x_rest- rest length of the spring
+%     L1    - distance between pivot and spring contact point
+%     L2    - distance between pivot and latch contact point
+%     L3    - distance between pivot and far end of the load
+%     theta_initial - initial angle  of the load mass. Spring and muscle
+%     are vertical at this angle.
+%     
 % min # arguments = 1
 
 classdef RotatingMassSE < Mass
@@ -49,7 +53,7 @@ classdef RotatingMassSE < Mass
             end
             
             % model
-            EMA = 1;
+            EMA = 1; %Ignoring EMA because we are using rotational quantities
             mass = m_rod*(L3^3 + L2^3)/(3*(L3 + L2)) + m_end*L3^2; %Moment of Inertia
             EMA = @(y) EMA;
             

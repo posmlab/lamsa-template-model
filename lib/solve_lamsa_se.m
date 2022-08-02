@@ -287,6 +287,8 @@ y2 = l0 - beta;
 y2dot = -gamma*thetadot;
 
 for i = 1:NUM_ITER
+    
+% Solving for y1
 
     t = i*dt;
 
@@ -304,7 +306,8 @@ for i = 1:NUM_ITER
     y1_old = y1;
  
     
-    % Solving everything else
+% Solving theta and s
+
     % Backwards Euler Method
     dydt = @(x) x - [thetadot, theta, sdot, s] - dt*se_ode_massless(t, x, theta0, l0, L1, L2, mu, moI, mL, Flm, unlatching_motor, latch, ul_offset);
 
@@ -446,6 +449,9 @@ end
 
 
 function [position,isterminal,direction] = launching_end(t,y, theta_final)
+%A negative value of position ends the simulation
+%  theta final is the angle at which the load is parallel to the muscle and
+%  spring
 position = theta_final-y(2);
 isterminal = 1;
 direction = 0;
