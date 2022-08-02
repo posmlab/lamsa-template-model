@@ -23,11 +23,16 @@ initial_conditions = zeros(6,1);
 initial_conditions(2) = load.theta_0;
 initial_conditions(3) = latch.v_0;
 
+l0 = spring.rest_length + loading_motor.rest_length;
+L1 = load.lengths(1);
+theta0 = load.theta_0;
+theta_final = atan((l0-L1)/(L1*cos(theta0)));
+
 % If the spring is massless, we need to do something else/
 if spring.mass == 0
-    [sol, transition_times] = solve_massless(tspan, loading_motor, unlatching_motor, load, latch, spring);
+    [sol, transition_times] = solve_massless(tspan, loading_motor, unlatching_motor, load, latch, spring, theta_final);
 else  
-    options = odeset('Events', @(t,y) launching_end(t,y), 'AbsTol', 1e-8, 'RelTol', 1e-8, ...
+    options = odeset('Events', @(t,y) launching_end(t,y, theta_final), 'AbsTol', 1e-8, 'RelTol', 1e-8, ...
         'OutputFcn', @(t,y,flag) update_f(t,y,flag,load,spring,loading_motor));
     odeprob = @(t,y) se_ode(t, y, loading_motor, unlatching_motor, load, latch, spring);
     
@@ -134,19 +139,23 @@ else % Unlatched
 end
 
 y2ddot = -gamma*dydt(1) - delta*y(1)^2;
-Fd = 2.0*dydt(6);
+Fd = 0.5*dydt(6);
 % if Fd > Flm
 %     Fd = Flm;
 % end 
 
-%no damping
-%dydt(5) = (3/msp) * (Flm - Fsp) - y2ddot/2;
-
-%with damping
 dydt(5) = (3/msp) * (Flm - Fd - Fsp) - y2ddot/2;
 
-if dydt(3) == 0 && dydt(4) == 0 && t > ul_offset
-   error("Latch is Stuck")
+% Checking if latch gets stuck
+stuck_threshold = 1E-9;
+if ((y(3) < stuck_threshold) && (dydt(3) < stuck_threshold) && (t > ul_offset))
+    if (~isa(unlatching_motor, 'DeactivatingMotor') && t==0 && spring.Force(0,[y2, 0])*latch.coeff_fric > unlatching_motor.max_force)
+        error('Latch gets stuck!');
+    elseif (unlatching_motor.Force(t, [y(4) y(3)]) >= unlatching_motor.Force(t + stuck_threshold, [y(4) y(3)]))
+        error('Latch gets stuck!');
+    else
+        warning('System is moving slowly. Integration may take a long time.')
+    end
 end
 
 end
@@ -186,7 +195,7 @@ if s < latch.max_width
     
     Fsp =  spring.Force(t, [y2 - y1, y2dot - y1dot]);
     Flm = loading_motor.Force(t, [y1, y1dot]); %Loading Motor force
-    Fd = 2.0*y1dot;
+    Fd = 0.5*y1dot;
 %     if Fd > Flm
 %         Fd = Flm;
 %     end
@@ -197,11 +206,10 @@ if s < latch.max_width
     %damping
     n = ((Ful * df + mL*ddf * sdot^2)*(4*moI - msp*gamma*la) - L2*la*mL*(-2*Flm + 2*Fd + 6*Fsp + msp*delta* thetadot^2))/(4*epsilon*mL*L2^2 - epsilonbar*(4*moI - msp*gamma*la)*df);
 
-
-    n = max(n, 0); %Negative normal force is treated as no contact
 else % If latch has been removed, no more normal force
     n = 0;
 end
+
 end
 
 
@@ -251,7 +259,7 @@ else
     thetaddot = (la.*(-2*Flm + 6*Fsp + msp*delta.*thetadot.^2))./(4*moI - msp*gamma.*la);
 end
 
-Fd = 2.0*y1dot;
+Fd = 0.5*y1dot;
 % if Fd > Flm
 %    Fd = Flm;
 % end
@@ -264,9 +272,9 @@ f =  (1/4)*(-2* Flm + 2*Fd + 6*Fsp + msp * gamma .* thetaddot + msp * delta .* t
 end
 
 
-function [sol, transition_times] = solve_massless(tspan, loading_motor, unlatching_motor, load, latch, spring)
+function [sol, transition_times] = solve_massless(tspan, loading_motor, unlatching_motor, load, latch, spring, theta_final)
 
-dt = 1e-4;
+dt = 1e-5;
 y(1,:) = zeros(1,6);
 y(1,2) = load.theta_0;
 y(1,3) = latch.v_0;
@@ -296,6 +304,8 @@ y2 = l0 - beta;
 y2dot = -gamma*thetadot;
 
 for i = 1:NUM_ITER
+    
+% Solving for y1
 
     t = i*dt;
 
@@ -313,7 +323,8 @@ for i = 1:NUM_ITER
     y1_old = y1;
  
     
-    % Solving everything else
+% Solving theta and s
+
     % Backwards Euler Method
     dydt = @(x) x - [thetadot, theta, sdot, s] - dt*se_ode_massless(t, x, theta0, l0, L1, L2, mu, moI, mL, Flm, unlatching_motor, latch, ul_offset);
 
@@ -330,7 +341,7 @@ for i = 1:NUM_ITER
     y(i+1, :) = [y_new y1dot y1];
     
     % Update spring Force History
-    update_f(t, [y_new y1dot y1], true, load, spring, loading_motor)
+    update_f(t, [y_new y1dot y1], true, load, spring, loading_motor);
     
     thetadot = y_new(1);
     theta = y_new(2);
@@ -369,8 +380,12 @@ for i = 1:NUM_ITER
     F_perp(i+1) = Flm*sin(pi/2 - alpha - theta);
     F_unlatching_motor(i+1) = Ful;
     
-    if thetadot + 1 < 0
+    if theta >= theta_final
        break; 
+    end
+    
+    if F_perp(i+1) < 0
+        warning("Warning: Perpendicular Force is negative")
     end
     
 
@@ -412,7 +427,7 @@ end
 F_n = (mL*la*L2*Flm - moI*df*Ful - mL*moI*ddf*y(3)^2)/(epsilonbar*moI*df - epsilon*L2^2*mL);
 
 
-if y(4) < latch.max_width && F_n >= 0 %Latched
+if y(4) < latch.max_width && F_n > 0 %Latched
     dydt(3) = (-epsilonbar*la*L2*Flm + epsilonbar*moI*ddf*y(3)^2 + epsilon*L2^2*Ful)/(epsilon*L2^2*mL - epsilonbar*moI*df);
     dydt(1) = (ddf*y(3)^2 + df*dydt(3))/L2;
 else % Unlatched
@@ -450,9 +465,12 @@ status = 0;
 end
 
 
-function [position,isterminal,direction] = launching_end(t,y)
-position = y(1) + 1;
-isterminal = 0;
+function [position,isterminal,direction] = launching_end(t,y, theta_final)
+%A negative value of position ends the simulation
+%  theta final is the angle at which the load is parallel to the muscle and
+%  spring
+position = theta_final-y(2);
+isterminal = 1;
 direction = 0;
 
 end
