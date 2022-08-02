@@ -134,7 +134,10 @@ else % Unlatched
 end
 
 y2ddot = -gamma*dydt(1) - delta*y(1)^2;
-Fd = 1*dydt(6);
+Fd = 2.0*dydt(6);
+% if Fd > Flm
+%     Fd = Flm;
+% end 
 
 %no damping
 %dydt(5) = (3/msp) * (Flm - Fsp) - y2ddot/2;
@@ -183,7 +186,10 @@ if s < latch.max_width
     
     Fsp =  spring.Force(t, [y2 - y1, y2dot - y1dot]);
     Flm = loading_motor.Force(t, [y1, y1dot]); %Loading Motor force
-    Fd = 1*y1dot;
+    Fd = 2.0*y1dot;
+%     if Fd > Flm
+%         Fd = Flm;
+%     end
     
     %no damping
     %n = ((Ful * df + mL*ddf * sdot^2)*(4*moI - msp*gamma*la) - L2*la*mL*(-2*Flm + 6*Fsp + msp*delta* thetadot^2))/(4*epsilon*mL*L2^2 - epsilonbar*(4*moI - msp*gamma*la)*df);
@@ -245,7 +251,10 @@ else
     thetaddot = (la.*(-2*Flm + 6*Fsp + msp*delta.*thetadot.^2))./(4*moI - msp*gamma.*la);
 end
 
-Fd = 1*y1dot;
+Fd = 2.0*y1dot;
+% if Fd > Flm
+%    Fd = Flm;
+% end
 %no damping
 %f =  (1/4)*(-2* Flm + 6*Fsp + msp * gamma .* thetaddot + msp * delta .* thetadot.^2 ) .* sin(pi/2 - theta - alpha); %spring force perpendicular to lever
 
