@@ -5,3 +5,4 @@
 *.DS_Store
 *.exe
 lib/solve_lamsa_ALEX.m
+test.m

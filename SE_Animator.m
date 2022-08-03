@@ -7,10 +7,13 @@
 % "frames"; it can be replayed by calling movie(frames) or, for better
 % control, by using the MovieViewer app. 
 
-
+v = VideoWriter('temp.mp4');
+open(v);
 % Set-up stuff
+L4 = spring.rest_length + loading_motor.rest_length;
 L3 = load.lengths(3);
 L2 = load.lengths(2);
+LVec = [L2, L3, L4];
 l0 = spring.rest_length + loading_motor.rest_length;
 theta0 = load.theta_0;
 
@@ -66,9 +69,11 @@ for k = 1:length(angle)
 
     axis.style = 'square';
 
-    set(gca, 'XLim', [-1.5*max(L2,L3), 1.5*max(L2,L3)], 'YLim', [-1.5*max(L2,L3), 1.5*max(L2,L3)]);
+    set(gca, 'XLim', [-1.5*max(LVec), 1.5*max(LVec)], 'YLim', [-1.5*max(LVec), 1.5*max(LVec)]);
 
     frames(k) = getframe;
+    writeVideo(v,frames(k));
     hold off;
     drawnow
 end
+close(v);

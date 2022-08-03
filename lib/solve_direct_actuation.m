@@ -1,4 +1,4 @@
-function [sol, transition_times] = solve_direct_actuation(motor,load)
+function [sol, transition_times] = solve_direct_actuation(motor, spring, load)
 %Solve differential equation launching phase of direction of direct
 %actuated motion usinf F=ma
 %motor struct
@@ -11,7 +11,7 @@ function [sol, transition_times] = solve_direct_actuation(motor,load)
 
 %% Ballistic phase:F motor only 
 launch_opts=odeset('Events',@(t,y) direct_actuation_end(t,y,motor),'RelTol',1E-7,'AbsTol',1E-10);
-ode=@(t,y) direct_actuation_ode(t,y,load,motor);
+ode=@(t,y) direct_actuation_ode(t,y,load,motor,spring);
 
 t_guess_v=(motor.velocity*load.mass)/motor.max_force;
 t_guess_pos=sqrt((2*motor.range*load.mass)/motor.max_force);
@@ -40,12 +40,12 @@ transition_times = [T(1), T(end)];
 sol=[T,Y,fMotor];
 end
 
-function dy=direct_actuation_ode(t,y,load,motor)
+function dy=direct_actuation_ode(t,y,load,motor,spring)
 %ODE for direct actuation: a=F/m
 dy=zeros(2,1);
 dy(1)=y(2);
 
-Force = F_eff(load, motor, t, y);
+Force = F_eff(load, motor, spring, t, y);
 mass = m_eff(load, y);
 
 dy(2)=Force/mass;
@@ -78,7 +78,7 @@ end
 
 end
 
-function Force = F_eff(load, motor, t, y)
+function Force = F_eff(load, motor, spring, t, y)
 
 Force = motor.Force(t, y);
 
@@ -98,7 +98,7 @@ end
 
 
 if isa(load, 'RotatingMassSE')
-    l0 = motor.rest_length;
+    l0 = motor.rest_length + spring.rest_length;
     L1 = load.lengths(1);
     theta0 = load.theta_0;
     beta = sqrt(2*L1^2*(1-cos(y(1)-theta0)) + l0^2 - 2*l0*L1*(sin(y(1))- sin(theta0)));
