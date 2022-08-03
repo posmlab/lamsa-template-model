@@ -1,4 +1,4 @@
-function  [sol, transition_times] = solve_lamsa_se(tspan, loading_motor,unlatching_motor,load,latch,spring, outputDirectory)
+function  [sol, transition_times] = solve_lamsa_se(tspan, loading_motor,unlatching_motor,load,latch,spring,outputDirectory)
 %SOLVE_LAMSA_SE Solves equations of motion for series elastic system
 %   sol is an nx13 matrix and each column corresponds to t, arclength,
 %   arcvelocity, latch displacement, latch velocity, normal forces on the
@@ -71,12 +71,11 @@ else
 end
 
 
-if (nargin >= 7)
+if (nargin >= 8)
     writeInfoToFile(load.mass, transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
 end
 
 end
-
 
 
 
@@ -85,7 +84,7 @@ function dydt = se_ode(t, y, loading_motor, unlatching_motor, load, latch, sprin
 %
 %   y = [theta dot, theta, s dot, s, y1dot, y1]
 
-ul_offset = 0.1;
+ul_offset = unlatching_motor.activation_delay;
 
 dydt = zeros(6,1);
 
@@ -278,7 +277,7 @@ y(1,3) = latch.v_0;
 F_comp = zeros(1,4);
 F_perp(1) = 0;
 F_unlatching_motor(1) = 0;
-ul_offset = 0.05;
+ul_offset = unlatching_motor.activation_delay;
 NUM_ITER = tspan(2)/dt;
 
 l0 = spring.rest_length + loading_motor.rest_length;% initial length of spring + muscle
@@ -401,7 +400,7 @@ end
 
 
 
-function dydt = se_ode_massless(t, y, theta0, l0, L1, L2, mu, moI, mL, Flm, unlatching_motor, latch, ul_offset)
+function dydt = se_ode_massless(t, y, theta0, l0, L1, L2, mu, moI, mL, Flm, unlatching_motor, latch)
 
 beta = sqrt(2*L1^2*(1-cos(y(2)-theta0)) + l0^2 - 2*l0*L1*(sin(y(2))- sin(theta0)));
 gamma = (L1^2*sin(y(2)-theta0) - l0*L1*cos(y(2)))/beta;
@@ -467,7 +466,7 @@ function [position,isterminal,direction] = launching_end(t,y, theta_final)
 %  theta final is the angle at which the load is parallel to the muscle and
 %  spring
 position = theta_final-y(2);
-isterminal = 0;
+isterminal = 1;
 direction = 0;
 
 end

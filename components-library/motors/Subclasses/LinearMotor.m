@@ -30,9 +30,9 @@ classdef LinearMotor < Motor
         % second row contains default values for the loading motor
         % third row contains default values for the unlatching motor
         function parameters = parameters()
-            parameters = ["Fmax" "Vmax" "range of motion" "damping" "voltage fraction" "muscle length";
-                "0.25" "1" "0.005" "0.5" "1" "0.01" ;
-                "0.25" "1" "0.005" "0" "1" "0.01" ;
+            parameters = ["Fmax" "Vmax" "range of motion" "damping" "voltage fraction" "muscle length" "time delay";
+                "0.25" "1" "0.005" "0.5" "1" "0.01" "0";
+                "0.25" "1" "0.005" "0" "1" "0.01" "0.0";
                 "0" "0" "0" "0" "0" "0";
                 "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
         end
@@ -41,12 +41,12 @@ classdef LinearMotor < Motor
     methods
         function obj = LinearMotor(F_motor_max, v_motor_max, range_of_motion, motor_damping, varargin)
             % optional parameters
-            varargin_param_names = {'voltage_fraction','no_braking','muscle_length'};
-            varargin_default_values = {1, true, 0.01};
+            varargin_param_names = {'voltage_fraction','no_braking','muscle_length','time_delay'};
+            varargin_default_values = {1, true, 0.01, 0.05};
 
             % check and assign optional parameters
-            if (nargin < 3)
-                error('Linear motor requires at least 3 arguments.');
+            if (nargin < 4)
+                error('Linear motor requires at least 4 arguments.');
             end
             if (length(varargin)>length(varargin_param_names))
                 error('Too many input parameters. Linear motor requires at least 3 paramters.');
@@ -68,6 +68,7 @@ classdef LinearMotor < Motor
             range = range_of_motion;
             velocity = voltage_fraction*v_motor_max;
             damping = @(t,x) motor_damping*x(2);
+            activation_delay = time_delay;
             
             if (no_braking)
                 Force = @(t,x)max((max_force*(1-x(2)/velocity)) .* (abs(x(1))<=range_of_motion), 0);
@@ -76,7 +77,7 @@ classdef LinearMotor < Motor
             end
 
             % call parent constructor
-            obj = obj@Motor(max_force, range, velocity, Force, muscle_length, damping);
+            obj = obj@Motor(max_force, range, velocity, Force, muscle_length, damping, activation_delay);
         end 
     end
 end

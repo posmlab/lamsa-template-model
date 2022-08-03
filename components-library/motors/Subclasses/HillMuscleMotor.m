@@ -17,22 +17,22 @@ classdef HillMuscleMotor < Motor
         % third row contains default values for the unlatching motor
         function parameters = parameters()
             parameters = ["muscle length" "Fmax" "Vmax" "rate of activation"...
-                         "damping" "initial length" "a_L" "b_L" "s";
-                "0.01" "4" "5" "200" "0.5" "0.01" "2.08" "-2.89" "-0.75";
-                "4" "10" "10" "2" "0" "4" "2.08" "-2.89" "-0.75";
-                "0" "0" "0" "0" "0" "0" "-Inf" "-Inf" "-Inf";
-                "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
+                         "damping" "initial length" "a_L" "b_L" "s" "time delay";
+                "0.01" "4" "5" "200" "0.5" "0.01" "2.08" "-2.89" "-0.75" "0";
+                "4" "10" "10" "2" "0" "4" "2.08" "-2.89" "-0.75" "0.05";
+                "0" "0" "0" "0" "0" "0" "-Inf" "-Inf" "-Inf" "0";
+                "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
         end
     end
     
     methods
         function obj = HillMuscleMotor(muscle_length,F_motor_max,v_motor_max,r_activation,motor_damping,varargin)
             % optional parameters
-            varargin_param_names = {'L_initial','a_L','b_L','s'};
-            varargin_default_values = {muscle_length,2.08,-2.89,-0.75};
+            varargin_param_names = {'L_initial','a_L','b_L','s','time_delay'};
+            varargin_default_values = {muscle_length,2.08,-2.89,-0.75,0};
 
             % check and assign optional parameters
-            if (nargin < 4)
+            if (nargin < 5)
                 error('Hill muscle motor requires at least 4 arguments.');
             end
             if (length(varargin)>length(varargin_param_names))
@@ -60,9 +60,10 @@ classdef HillMuscleMotor < Motor
         %     motor.range=muscle_length;
             velocity=v_motor_max;
             damping= @(t,x) motor_damping*x(2);
+            activation_delay = time_delay;
             
             % call parent constructor
-            obj = obj@Motor(max_force, range, velocity, Force, muscle_length, damping);
+            obj = obj@Motor(max_force, range, velocity, Force, muscle_length, damping, activation_delay);
         end  
     end
 end
