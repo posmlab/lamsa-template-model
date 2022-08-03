@@ -51,7 +51,7 @@ else
         
         mu = latch.coeff_fric;
         F_n(i) =  normal_force(t(i), y(i,1), y(i,2), y(i,3), y(i,4), y(i,5), y(i,6), load, latch, spring, loading_motor, fUnlatchingMotor(i));
-        phi = atan(latch.y_L{2}(y(4))); %angle of latch surface
+        phi = atan(latch.y_L{2}(y(i,4))); %angle of latch surface
         
         
         F_comp(i,1) = F_n(i)*sin(phi);    %normal force on latch
