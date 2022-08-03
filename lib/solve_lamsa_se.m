@@ -51,7 +51,7 @@ else
         
         mu = latch.coeff_fric;
         F_n(i) =  normal_force(t(i), y(i,1), y(i,2), y(i,3), y(i,4), y(i,5), y(i,6), load, latch, spring, loading_motor, fUnlatchingMotor(i));
-        phi = atan(latch.y_L{2}(y(4))); %angle of latch surface
+        phi = atan(latch.y_L{2}(y(i,4))); %angle of latch surface
         
         
         F_comp(i,1) = F_n(i)*sin(phi);    %normal force on latch
@@ -116,6 +116,8 @@ la = L1*sin(pi/2 - alpha - y(2));
 % Forces
 Fsp =  spring.Force(t, [y2 - y(6), y2dot - y(5)]);
 Flm = loading_motor.Force(t, [y(6), y(5)]); %Loading Motor force
+Fd = loading_motor.damping(t, [y(6), y(5)]);
+
 if t > ul_offset
     Ful = unlatching_motor.Force(t-ul_offset, [y(4),y(3)]);
 else
@@ -134,12 +136,11 @@ if y(4) < latch.max_width && F_n >= 0 %Latched
         /((4*moI - msp*gamma*la)*df*epsilonbar - 4*epsilon*L2^2*mL);
     dydt(1) = (ddf*y(3)^2 + df*dydt(3))/L2; 
 else % Unlatched
-    dydt(1) = (la*(-2*Flm + 6*Fsp + msp*delta*y(1)^2))/(4*moI - msp*gamma*la); 
+    dydt(1) = (la*(-2*Flm + 2*Fd + 6*Fsp + msp*delta*y(1)^2))/(4*moI - msp*gamma*la); 
     dydt(3) = Ful/mL;
 end
 
 y2ddot = -gamma*dydt(1) - delta*y(1)^2;
-Fd = 0.5*dydt(6);
 % if Fd > Flm
 %     Fd = Flm;
 % end 
@@ -159,7 +160,6 @@ if ((y(3) < stuck_threshold) && (dydt(3) < stuck_threshold) && (t > ul_offset))
 end
 
 end
-
 
 
 
@@ -195,15 +195,11 @@ if s < latch.max_width
     
     Fsp =  spring.Force(t, [y2 - y1, y2dot - y1dot]);
     Flm = loading_motor.Force(t, [y1, y1dot]); %Loading Motor force
-    Fd = 0.5*y1dot;
+    Fd = loading_motor.damping(t, [y1, y1dot]);
 %     if Fd > Flm
 %         Fd = Flm;
 %     end
-    
-    %no damping
-    %n = ((Ful * df + mL*ddf * sdot^2)*(4*moI - msp*gamma*la) - L2*la*mL*(-2*Flm + 6*Fsp + msp*delta* thetadot^2))/(4*epsilon*mL*L2^2 - epsilonbar*(4*moI - msp*gamma*la)*df);
-    
-    %damping
+   
     n = ((Ful * df + mL*ddf * sdot^2)*(4*moI - msp*gamma*la) - L2*la*mL*(-2*Flm + 2*Fd + 6*Fsp + msp*delta* thetadot^2))/(4*epsilon*mL*L2^2 - epsilonbar*(4*moI - msp*gamma*la)*df);
 
 else % If latch has been removed, no more normal force
@@ -211,7 +207,6 @@ else % If latch has been removed, no more normal force
 end
 
 end
-
 
 
 function f = f_perp(t, thetadot, theta, sdot, s, y1dot, y1, n, load, latch, spring, loading_motor, unlatching_motor)
@@ -237,6 +232,7 @@ alpha = asin(L1*(cos(theta0) -  cos(theta))./(l0 - y2)); %Angle the spring makes
     
 Fsp = zeros(num_iter,1);
 Flm = zeros(num_iter,1);
+Fd = zeros(num_iter,1);
 Ful = zeros(num_iter, 1);
 phi = zeros(num_iter, 1);
 df = zeros(num_iter, 1);
@@ -244,6 +240,7 @@ ddf = zeros(num_iter, 1);
 for i = 1:num_iter
     Fsp(i) = spring.Force(t(i), [y2(i) - y1(i), y2dot(i) - y1dot(i)]);
     Flm(i) = loading_motor.Force(t(i), [y1(i), y1dot(i)]);
+    Fd(i) = loading_motor.damping(t(i), [y1(i), y1dot(i)]);
     phi(i) = atan(latch.y_L{2}(s(i))); %angle of latch surface
     df(i) = latch.y_L{2}(s(i));
     ddf(i) = latch.y_L{3}(s(i));
@@ -256,17 +253,13 @@ ddots = (-mu*n.*cos(phi) + n.*sin(phi) + Ful)/latch.mass;
 if s < latch.max_width
     thetaddot = (ddf.*sdot.^2 + df.*ddots);
 else
-    thetaddot = (la.*(-2*Flm + 6*Fsp + msp*delta.*thetadot.^2))./(4*moI - msp*gamma.*la);
+    thetaddot = (la.*(-2*Flm + 2*Fd + 6*Fsp + msp*delta.*thetadot.^2))./(4*moI - msp*gamma.*la);
 end
 
-Fd = 0.5*y1dot;
 % if Fd > Flm
 %    Fd = Flm;
 % end
-%no damping
-%f =  (1/4)*(-2* Flm + 6*Fsp + msp * gamma .* thetaddot + msp * delta .* thetadot.^2 ) .* sin(pi/2 - theta - alpha); %spring force perpendicular to lever
 
-%damping
 f =  (1/4)*(-2* Flm + 2*Fd + 6*Fsp + msp * gamma .* thetaddot + msp * delta .* thetadot.^2 ) .* sin(pi/2 - theta - alpha); %spring force perpendicular to lever
 
 end
@@ -466,11 +459,11 @@ end
 
 
 function [position,isterminal,direction] = launching_end(t,y, theta_final)
-%A negative value of position ends the simulation
+%  A negative value of position ends the simulation
 %  theta final is the angle at which the load is parallel to the muscle and
 %  spring
 position = theta_final-y(2);
-isterminal = 1;
+isterminal = 0;
 direction = 0;
 
 end

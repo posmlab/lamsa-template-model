@@ -32,17 +32,17 @@ classdef TwoPartMuscleMotor < Motor
         % second row contains default values for the loading motor
         % third row contains default values for the unlatching motor
         function parameters = parameters()
-            parameters = [ "v_motor_max" "F_max" "l_CEopt" "L_PEE0"...
+            parameters = [ "v_motor_max" "F_max" "l_CEopt" "L_PEE0" "damping"...
                 "L_initial" "r_act" "DeltaW_limb_des" "DeltaW_limb_asc";
-                 "1" "5" "0.092" "0.9" "0.1" "200" "0.15" "0.15";
-                 "1" "5" "0.092" "0.9" "0.1" "200" "0.15" "0.15";
-                 "0" "0" "0" "0" "0" "0" "0" "0";
-                 "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
+                 "1" "5" "0.092" "0.9" "0.5" "0.1" "200" "0.15" "0.15";
+                 "1" "5" "0.092" "0.9" "0" "0.1" "200" "0.15" "0.15";
+                 "0" "0" "0" "0" "0" "0" "0" "0" "0";
+                 "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
         end
     end
     
     methods
-        function obj = TwoPartMuscleMotor(v_motor_max,F_max,l_CEopt,L_PEE0,varargin)
+        function obj = TwoPartMuscleMotor(v_motor_max,F_max,l_CEopt,L_PEE0,motor_damping,varargin)
             
             % optional parameters
             varargin_param_names = {'L_initial','r_act','DeltaW_limb_des','DeltaW_limb_asc'};
@@ -126,8 +126,9 @@ classdef TwoPartMuscleMotor < Motor
             range=L_initial-l_CEopt+(.3*l_CEopt);
             velocity=v_motor_max;
             rest_length=l_CEopt;
+            damping = @(t,x) motor_damping*x(2);
             % call parent constructor
-            obj = obj@Motor(max_force, range, velocity, Force,rest_length);
+            obj = obj@Motor(max_force, range, velocity, Force,rest_length,damping);
         end  
     end
 end
