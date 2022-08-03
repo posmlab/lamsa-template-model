@@ -26,7 +26,7 @@ end
 [t,y]=ode45(ode,tspan,y0,launch_opts);
 
 % run ode45 until the projectile launches
-while (t(end) == tspan(end))
+while (t(end) == tspan(end)) && (t(end) ~= Inf)
     t_guess = 10 *t_guess;
     tspan = linspace(0, t_guess,10000);
     [t,y]=ode45(ode,tspan,y0,launch_opts);
