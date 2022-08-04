@@ -32,9 +32,9 @@ classdef LinearMotor < Motor
         function parameters = parameters()
             parameters = ["Fmax" "Vmax" "range of motion" "damping" "voltage fraction" "muscle length" "time delay";
                 "0.25" "1" "0.005" "0.5" "1" "0.01" "0";
-                "0.25" "1" "0.005" "0" "1" "0.01" "0.0";
-                "0" "0" "0" "0" "0" "0";
-                "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
+                "0.25" "1" "0.005" "0" "1" "0.01" "0.05";
+                "0" "0" "0" "0" "0" "0" "0";
+                "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
         end
     end
     
@@ -42,7 +42,7 @@ classdef LinearMotor < Motor
         function obj = LinearMotor(F_motor_max, v_motor_max, range_of_motion, motor_damping, varargin)
             % optional parameters
             varargin_param_names = {'voltage_fraction','no_braking','muscle_length','time_delay'};
-            varargin_default_values = {1, true, 0.01, 0.05};
+            varargin_default_values = {1, true, 0.01, 0};
 
             % check and assign optional parameters
             if (nargin < 4)

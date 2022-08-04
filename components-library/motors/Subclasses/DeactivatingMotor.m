@@ -38,19 +38,19 @@ classdef DeactivatingMotor < Motor
         % second row contains default values for the loading motor
         % third row contains default values for the unlatching motor
         function parameters = parameters()
-            parameters = ["Vmax" "range of motion" "deactivation rate" "damping" "voltage fraction";
-                "10" "0.005" "1E7" "0.5" "1" ;
-                "1" "0.005" "1E7" "0" "1";
-                "0" "0" "0" "0" "0";
-                "Inf" "Inf" "Inf" "Inf" "Inf"];
+            parameters = ["Vmax" "range of motion" "deactivation rate" "damping" "voltage fraction" "time delay";
+                "10" "0.005" "1E7" "0.5" "1" "0";
+                "1" "0.005" "1E7" "0" "1" "0";
+                "0" "0" "0" "0" "0" "0";
+                "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
         end
     end
     
     methods
         function obj = DeactivatingMotor(v_motor_max, range_of_motion,r_deactivation, motor_damping, varargin)
             % optional parameters
-            varargin_param_names = {'voltage_fraction','no_braking'};
-            varargin_default_values = {1, true};
+            varargin_param_names = {'voltage_fraction','time_delay','no_braking'};
+            varargin_default_values = {1, 0, true};
 
             % check and assign optional parameters
             if (nargin < 4)
@@ -78,9 +78,11 @@ classdef DeactivatingMotor < Motor
             Force = @(t,x) 0; % this is assigned in solve_lamsa
             rest_length = 0;
             damping = @(t,x) motor_damping*x(2);
+            activation_delay = time_delay;
+
             
             % call parent constructor
-            obj = obj@Motor(max_force, range, velocity, Force, rest_length,damping);
+            obj = obj@Motor(max_force, range, velocity, Force, rest_length,damping,activation_delay);
             
             obj.r_deactivation = r_deactivation;
         end 

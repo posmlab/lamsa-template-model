@@ -33,7 +33,7 @@ classdef HillMuscleMotor < Motor
 
             % check and assign optional parameters
             if (nargin < 5)
-                error('Hill muscle motor requires at least 4 arguments.');
+                error('Hill muscle motor requires at least 5 arguments.');
             end
             if (length(varargin)>length(varargin_param_names))
                 error('Too many input parameters');
