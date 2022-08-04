@@ -327,7 +327,7 @@ for i = 1:NUM_ITER
     dydt = @(x) x - x0 - (dt/2)*(f_ode(t + dt, x) + f_ode(t, x0));
 
     options = optimset('Display','off');
-    [y_new, ~, exitflag] = fsolve(dydt, [thetadot, theta, sdot, s], options);
+    [y_new, ~, exitflag] = fsolve(dydt, x0, options);
     
     % If fsolve fails, use forwards euler method
     if exitflag < 0

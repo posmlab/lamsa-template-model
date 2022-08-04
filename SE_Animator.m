@@ -7,7 +7,7 @@
 % "frames"; it can be replayed by calling movie(frames) or, for better
 % control, by using the MovieViewer app. 
 
-v = VideoWriter('temp.mp4');
+v = VideoWriter('test');
 open(v);
 % Set-up stuff
 L4 = spring.rest_length + loading_motor.rest_length;
@@ -77,3 +77,7 @@ for k = 1:length(angle)
     drawnow
 end
 close(v);
+
+% Convert to gif
+% !ffmpeg -i test.avi -vf "fps=30,palettegen=stats_mode=diff" palette.png
+% !ffmpeg -i test.avi -i palette.png -lavfi "fps=10,paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" test.gif
