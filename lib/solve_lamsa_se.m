@@ -270,7 +270,7 @@ end
 
 function [sol, transition_times] = solve_massless(tspan, loading_motor, unlatching_motor, load, latch, spring, theta_final)
 
-dt = 1e-6;
+dt = 1e-5;
 y(1,:) = zeros(1,6);
 y(1,2) = load.theta_0;
 y(1,3) = latch.v_0;
@@ -321,8 +321,10 @@ for i = 1:NUM_ITER
     
 % Solving theta and s
 
-    % Backwards Euler Method
-    dydt = @(x) x - [thetadot, theta, sdot, s] - dt*se_ode_massless(t, x, theta0, l0, L1, L2, mu, moI, mL, Flm, unlatching_motor, latch, ul_offset);
+    % Trapezoidal Rule
+    x0 = [thetadot, theta, sdot, s];
+    f_ode = @(t, x) se_ode_massless(t, x, theta0, l0, L1, L2, mu, moI, mL, Flm, unlatching_motor, latch, ul_offset);
+    dydt = @(x) x - x0 - (dt/2)*(f_ode(t + dt, x) + f_ode(t, x0));
 
     options = optimset('Display','off');
     [y_new, ~, exitflag] = fsolve(dydt, [thetadot, theta, sdot, s], options);
@@ -400,7 +402,7 @@ end
 
 
 
-function dydt = se_ode_massless(t, y, theta0, l0, L1, L2, mu, moI, mL, Flm, unlatching_motor, latch)
+function dydt = se_ode_massless(t, y, theta0, l0, L1, L2, mu, moI, mL, Flm, unlatching_motor, latch, ul_offset)
 
 beta = sqrt(2*L1^2*(1-cos(y(2)-theta0)) + l0^2 - 2*l0*L1*(sin(y(2))- sin(theta0)));
 gamma = (L1^2*sin(y(2)-theta0) - l0*L1*cos(y(2)))/beta;
@@ -465,7 +467,8 @@ function [position,isterminal,direction] = launching_end(t,y, theta_final)
 %  A negative value of position ends the simulation
 %  theta final is the angle at which the load is parallel to the muscle and
 %  spring
-position = theta_final-y(2);
+
+position = max(theta_final-y(2),0);
 isterminal = 1;
 direction = 0;
 

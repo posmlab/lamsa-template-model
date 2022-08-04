@@ -69,7 +69,7 @@ if isa(load, 'RotatingMassSE')
 
     value = motor.Force(t, [y2 y2dot]);
 else
-    value=motor.Force(Inf , [y(1), 0]);
+    value=motor.Force(t, y);
 end
 isterminal=1;
 direction=0;
