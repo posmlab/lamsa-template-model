@@ -26,7 +26,7 @@ end
 [t,y]=ode45(ode,tspan,y0,launch_opts);
 
 % run ode45 until the projectile launches
-while (t(end) == tspan(end))
+while (t(end) == tspan(end)) && (t(end) ~= Inf)
     t_guess = 10 *t_guess;
     tspan = linspace(0, t_guess,10000);
     [t,y]=ode45(ode,tspan,y0,launch_opts);
@@ -69,7 +69,7 @@ if isa(load, 'RotatingMassSE')
 
     value = motor.Force(t, [y2 y2dot]);
 else
-    value=motor.Force(Inf , [y(1), 0]);
+    value=motor.Force(t, y);
 end
 isterminal=1;
 direction=0;

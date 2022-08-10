@@ -32,21 +32,21 @@ classdef TwoPartMuscleMotor < Motor
         % second row contains default values for the loading motor
         % third row contains default values for the unlatching motor
         function parameters = parameters()
-            parameters = [ "v_motor_max" "F_max" "l_CEopt" "L_PEE0"...
-                "L_initial" "r_act" "DeltaW_limb_des" "DeltaW_limb_asc";
-                 "1" "5" "0.092" "0.9" "0.1" "200" "0.15" "0.15";
-                 "1" "5" "0.092" "0.9" "0.1" "200" "0.15" "0.15";
-                 "0" "0" "0" "0" "0" "0" "0" "0";
-                 "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
+            parameters = [ "v_motor_max" "F_max" "l_CEopt" "L_PEE0" "damping"...
+                "L_initial" "r_act" "DeltaW_limb_des" "DeltaW_limb_asc" "time delay";
+                 "1" "5" "0.092" "0.9" "0.5" "0.1" "200" "0.15" "0.15" "0";
+                 "1" "5" "0.092" "0.9" "0" "0.1" "200" "0.15" "0.15" "0";
+                 "0" "0" "0" "0" "0" "0" "0" "0" "0" "0";
+                 "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf" "Inf"];
         end
     end
     
     methods
-        function obj = TwoPartMuscleMotor(v_motor_max,F_max,l_CEopt,L_PEE0,varargin)
+        function obj = TwoPartMuscleMotor(v_motor_max,F_max,l_CEopt,L_PEE0,motor_damping,varargin)
             
             % optional parameters
-            varargin_param_names = {'L_initial','r_act','DeltaW_limb_des','DeltaW_limb_asc'};
-            varargin_default_values = {0.1,200,0.15,0.15};
+            varargin_param_names = {'L_initial','r_act','DeltaW_limb_des','DeltaW_limb_asc','time_delay'};
+            varargin_default_values = {0.1,200,0.15,0.15,0};
            % 
              
 %             % check and assign optional parameters
@@ -126,8 +126,10 @@ classdef TwoPartMuscleMotor < Motor
             range=L_initial-l_CEopt+(.3*l_CEopt);
             velocity=v_motor_max;
             rest_length=l_CEopt;
+            damping = @(t,x) motor_damping*x(2);
+            activation_delay = time_delay;
             % call parent constructor
-            obj = obj@Motor(max_force, range, velocity, Force,rest_length);
+            obj = obj@Motor(max_force, range, velocity, Force,rest_length,damping,activation_delay);
         end  
     end
 end

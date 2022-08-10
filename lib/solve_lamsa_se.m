@@ -1,4 +1,4 @@
-function  [sol, transition_times] = solve_lamsa_se(tspan, loading_motor,unlatching_motor,load,latch,spring, outputDirectory)
+function  [sol, transition_times] = solve_lamsa_se(tspan, loading_motor,unlatching_motor,load,latch,spring,outputDirectory)
 %SOLVE_LAMSA_SE Solves equations of motion for series elastic system
 %   sol is an nx13 matrix and each column corresponds to t, arclength,
 %   arcvelocity, latch displacement, latch velocity, normal forces on the
@@ -71,12 +71,11 @@ else
 end
 
 
-if (nargin >= 7)
+if (nargin >= 8)
     writeInfoToFile(load.mass, transition_times, sol, loading_motor,unlatching_motor,load,latch,spring, outputDirectory);
 end
 
 end
-
 
 
 
@@ -85,7 +84,7 @@ function dydt = se_ode(t, y, loading_motor, unlatching_motor, load, latch, sprin
 %
 %   y = [theta dot, theta, s dot, s, y1dot, y1]
 
-ul_offset = 0.1;
+ul_offset = unlatching_motor.activation_delay;
 
 dydt = zeros(6,1);
 
@@ -116,6 +115,8 @@ la = L1*sin(pi/2 - alpha - y(2));
 % Forces
 Fsp =  spring.Force(t, [y2 - y(6), y2dot - y(5)]);
 Flm = loading_motor.Force(t, [y(6), y(5)]); %Loading Motor force
+Fd = loading_motor.damping(t, [y(6), y(5)]);
+
 if t > ul_offset
     Ful = unlatching_motor.Force(t-ul_offset, [y(4),y(3)]);
 else
@@ -134,12 +135,11 @@ if y(4) < latch.max_width && (F_n >= 0 || y(3) == 0) %Latched
         /((4*moI - msp*gamma*la)*df*epsilonbar - 4*epsilon*L2^2*mL);
     dydt(1) = (ddf*y(3)^2 + df*dydt(3))/L2; 
 else % Unlatched
-    dydt(1) = (la*(-2*Flm + 6*Fsp + msp*delta*y(1)^2))/(4*moI - msp*gamma*la); 
+    dydt(1) = (la*(-2*Flm + 2*Fd + 6*Fsp + msp*delta*y(1)^2))/(4*moI - msp*gamma*la); 
     dydt(3) = Ful/mL;
 end
 
 y2ddot = -gamma*dydt(1) - delta*y(1)^2;
-Fd = 2*dydt(6);
 % if Fd > Flm
 %     Fd = Flm;
 % end 
@@ -163,7 +163,6 @@ if ((y(3) < stuck_threshold) && (dydt(3) < stuck_threshold) && (t > ul_offset))
 end
 
 end
-
 
 
 
@@ -199,15 +198,11 @@ if s < latch.max_width
     
     Fsp =  spring.Force(t, [y2 - y1, y2dot - y1dot]);
     Flm = loading_motor.Force(t, [y1, y1dot]); %Loading Motor force
-    Fd = 0.5*y1dot;
+    Fd = loading_motor.damping(t, [y1, y1dot]);
 %     if Fd > Flm
 %         Fd = Flm;
 %     end
-    
-    %no damping
-    %n = ((Ful * df + mL*ddf * sdot^2)*(4*moI - msp*gamma*la) - L2*la*mL*(-2*Flm + 6*Fsp + msp*delta* thetadot^2))/(4*epsilon*mL*L2^2 - epsilonbar*(4*moI - msp*gamma*la)*df);
-    
-    %damping
+   
     n = ((Ful * df + mL*ddf * sdot^2)*(4*moI - msp*gamma*la) - L2*la*mL*(-2*Flm + 2*Fd + 6*Fsp + msp*delta* thetadot^2))/(4*epsilon*mL*L2^2 - epsilonbar*(4*moI - msp*gamma*la)*df);
 
 else % If latch has been removed, no more normal force
@@ -215,7 +210,6 @@ else % If latch has been removed, no more normal force
 end
 
 end
-
 
 
 function f = f_perp(t, thetadot, theta, sdot, s, y1dot, y1, n, load, latch, spring, loading_motor, unlatching_motor)
@@ -241,6 +235,7 @@ alpha = asin(L1*(cos(theta0) -  cos(theta))./(l0 - y2)); %Angle the spring makes
     
 Fsp = zeros(num_iter,1);
 Flm = zeros(num_iter,1);
+Fd = zeros(num_iter,1);
 Ful = zeros(num_iter, 1);
 phi = zeros(num_iter, 1);
 df = zeros(num_iter, 1);
@@ -248,6 +243,7 @@ ddf = zeros(num_iter, 1);
 for i = 1:num_iter
     Fsp(i) = spring.Force(t(i), [y2(i) - y1(i), y2dot(i) - y1dot(i)]);
     Flm(i) = loading_motor.Force(t(i), [y1(i), y1dot(i)]);
+    Fd(i) = loading_motor.damping(t(i), [y1(i), y1dot(i)]);
     phi(i) = atan(latch.y_L{2}(s(i))); %angle of latch surface
     df(i) = latch.y_L{2}(s(i));
     ddf(i) = latch.y_L{3}(s(i));
@@ -260,17 +256,13 @@ ddots = (-mu*n.*cos(phi) + n.*sin(phi) + Ful)/latch.mass;
 if s < latch.max_width
     thetaddot = (ddf.*sdot.^2 + df.*ddots);
 else
-    thetaddot = (la.*(-2*Flm + 6*Fsp + msp*delta.*thetadot.^2))./(4*moI - msp*gamma.*la);
+    thetaddot = (la.*(-2*Flm + 2*Fd + 6*Fsp + msp*delta.*thetadot.^2))./(4*moI - msp*gamma.*la);
 end
 
-Fd = 0.5*y1dot;
 % if Fd > Flm
 %    Fd = Flm;
 % end
-%no damping
-%f =  (1/4)*(-2* Flm + 6*Fsp + msp * gamma .* thetaddot + msp * delta .* thetadot.^2 ) .* sin(pi/2 - theta - alpha); %spring force perpendicular to lever
 
-%damping
 f =  (1/4)*(-2* Flm + 2*Fd + 6*Fsp + msp * gamma .* thetaddot + msp * delta .* thetadot.^2 ) .* sin(pi/2 - theta - alpha); %spring force perpendicular to lever
 
 end
@@ -278,14 +270,14 @@ end
 
 function [sol, transition_times] = solve_massless(tspan, loading_motor, unlatching_motor, load, latch, spring, theta_final)
 
-dt = 1e-6;
+dt = 1e-5;
 y(1,:) = zeros(1,6);
 y(1,2) = load.theta_0;
 y(1,3) = latch.v_0;
 F_comp = zeros(1,4);
 F_perp(1) = 0;
 F_unlatching_motor(1) = 0;
-ul_offset = 0.05;
+ul_offset = unlatching_motor.activation_delay;
 NUM_ITER = tspan(2)/dt;
 
 l0 = spring.rest_length + loading_motor.rest_length;% initial length of spring + muscle
@@ -329,11 +321,13 @@ for i = 1:NUM_ITER
     
 % Solving theta and s
 
-    % Backwards Euler Method
-    dydt = @(x) x - [thetadot, theta, sdot, s] - dt*se_ode_massless(t, x, theta0, l0, L1, L2, mu, moI, mL, Flm, unlatching_motor, latch, ul_offset);
+    % Trapezoidal Rule
+    x0 = [thetadot, theta, sdot, s];
+    f_ode = @(t, x) se_ode_massless(t, x, theta0, l0, L1, L2, mu, moI, mL, Flm, unlatching_motor, latch, ul_offset);
+    dydt = @(x) x - x0 - (dt/2)*(f_ode(t + dt, x) + f_ode(t, x0));
 
     options = optimset('Display','off');
-    [y_new, ~, exitflag] = fsolve(dydt, [thetadot, theta, sdot, s], options);
+    [y_new, ~, exitflag] = fsolve(dydt, x0, options);
     
     % If fsolve fails, use forwards euler method
     if exitflag < 0
@@ -470,10 +464,11 @@ end
 
 
 function [position,isterminal,direction] = launching_end(t,y, theta_final)
-%A negative value of position ends the simulation
+%  A negative value of position ends the simulation
 %  theta final is the angle at which the load is parallel to the muscle and
 %  spring
-position = theta_final-y(2);
+
+position = max(theta_final-y(2),0);
 isterminal = 1;
 direction = 0;
 
