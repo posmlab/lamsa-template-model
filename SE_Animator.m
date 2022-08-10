@@ -5,9 +5,9 @@
 % assumes the others will be named as above.
 % Running the script will play an animation and save it to the variable
 % "frames"; it can be replayed by calling movie(frames) or, for better
-% control, by using the MovieViewer app. 
+% control, by using the VideoViewer app. 
 
-v = VideoWriter('temp.mp4');
+v = VideoWriter('test');
 open(v);
 % Set-up stuff
 L4 = spring.rest_length + loading_motor.rest_length;
@@ -28,6 +28,9 @@ angle = interp1(times, thetas, ints, 'spline');
 rawY1s = sol(:,12);
 y1s = interp1(times, rawY1s, ints, 'spline');
 
+rawSs = sol(:, 4);
+Ss = interp1(times, rawSs, ints, 'spline');
+
 frames = struct('cdata', cell(1, length(ints)),'colormap',cell(1, length(ints)));
 
 for k = 1:length(angle)
@@ -44,10 +47,11 @@ for k = 1:length(angle)
 
     %%%% ------- Uncomment this and comment out qMuscle and qSpring
     %%%% portions to ignore muscle/spring distinction; be warned that this
-    %%%% will hide fucky stuff with y1 ------------- %%%%%%%%%%%%%%%%%%
+    %%%% will hide any weird behaviour with y1 ------------- %%%%%%%%%%%%%%%%%%
 %     qSpringMuscle = quiver(-L2*cos(theta0), -L2*sin(theta0) - l0, fVec(1), fVec(2), 'LineStyle', '-', 'Color', 'k', 'AutoScale','off');
 %     qSpringMuscle.ShowArrowHead = 0;
     %%%% --------------------------------------------%%%%%%%%%%%%%%%%%%%
+
     qMuscle = quiver(-L2*cos(theta0), -L2*sin(theta0) - l0, mVec(1), mVec(2), 'LineStyle', '-', 'Color', 'r', 'AutoScale','off');
     qMuscle.ShowArrowHead = 0;
     
@@ -57,7 +61,10 @@ for k = 1:length(angle)
     plot(-L2*cos(theta0), -L2*sin(theta0) - l0, 'k.', 'MarkerSize', 6);
     plot(0, 0, 'k.', 'MarkerSize', 6);
 
-    % Clock and (un)latched Boolean
+
+%     plot(-L2*cos(theta0) - Ss(k), -L2*sin(theta0), 'k.', 'MarkerSize', 6);  % Adds crude latch animation
+   
+    % Writes out time and latched status
     txt = "Time: " + num2str(ints(k), 4);
     txt = txt + newline;
     if ints(k) > UL_time
@@ -77,3 +84,7 @@ for k = 1:length(angle)
     drawnow
 end
 close(v);
+
+% Convert to gif
+% !ffmpeg -i test.avi -vf "fps=30,palettegen=stats_mode=diff" palette.png
+% !ffmpeg -i test.avi -i palette.png -lavfi "fps=10,paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" test.gif
