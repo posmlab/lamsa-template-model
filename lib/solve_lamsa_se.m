@@ -1,13 +1,13 @@
 function  [sol, transition_times] = solve_lamsa_se(tspan, loading_motor,unlatching_motor,load,latch,spring,outputDirectory)
 %SOLVE_LAMSA_SE Solves equations of motion for series elastic system
-%   sol is an nx13 matrix and each column corresponds to t, arclength,
-%   arcvelocity, latch displacement, latch velocity, normal forces on the
+%   sol is an nx13 matrix and each column corresponds to t, angular position,
+%   angular velocity, latch displacement, latch velocity, normal forces on the
 %   latch and load, frictional forces on the latch and load, spring force,
 %   unlatching motor force, and the displacement and velocity of the point
 %   of connection between the spring and loading motor.
 % 
 %   transition_times is a 1x2 vector which shows the unlatching time and
-%   the time to maximum displacement respectively.
+%   the time to maximum velocity respectively.
 
 
 % If the latch gets stuck give back initial conditions
@@ -26,6 +26,7 @@ initial_conditions(3) = latch.v_0;
 l0 = spring.rest_length + loading_motor.rest_length;
 L1 = load.lengths(1);
 theta0 = load.theta_0;
+% theta_final is the angle at which load and muscle are parallel
 theta_final = atan((l0-L1)/(L1*cos(theta0)));
 
 % If the spring is massless, we need to do something else/
@@ -129,7 +130,7 @@ dydt(2) = y(1);
 dydt(4) = y(3);
 dydt(6) = y(5);
 
-% Different ddot theta depending on if in latched or unlatched state
+% Different accelerations depending on if in latched or unlatched state
 if y(4) < latch.max_width && (F_n >= 0 || y(3) == 0) %Latched
     dydt(3) = (L2*la*epsilonbar*(-2*Flm + 6*Fsp + msp*delta*y(1)^2) - (4*moI - msp*gamma*la)*epsilonbar*ddf*y(3)^2 - 4*epsilon*L2^2*Ful )...
         /((4*moI - msp*gamma*la)*df*epsilonbar - 4*epsilon*L2^2*mL);
@@ -199,10 +200,7 @@ if s < latch.max_width
     Fsp =  spring.Force(t, [y2 - y1, y2dot - y1dot]);
     Flm = loading_motor.Force(t, [y1, y1dot]); %Loading Motor force
     Fd = loading_motor.damping(t, [y1, y1dot]);
-%     if Fd > Flm
-%         Fd = Flm;
-%     end
-   
+
     n = ((Ful * df + mL*ddf * sdot^2)*(4*moI - msp*gamma*la) - L2*la*mL*(-2*Flm + 2*Fd + 6*Fsp + msp*delta* thetadot^2))/(4*epsilon*mL*L2^2 - epsilonbar*(4*moI - msp*gamma*la)*df);
 
 else % If latch has been removed, no more normal force
@@ -259,18 +257,17 @@ else
     thetaddot = (la.*(-2*Flm + 2*Fd + 6*Fsp + msp*delta.*thetadot.^2))./(4*moI - msp*gamma.*la);
 end
 
-% if Fd > Flm
-%    Fd = Flm;
-% end
-
 f =  (1/4)*(-2* Flm + 2*Fd + 6*Fsp + msp * gamma .* thetaddot + msp * delta .* thetadot.^2 ) .* sin(pi/2 - theta - alpha); %spring force perpendicular to lever
 
 end
 
 
 function [sol, transition_times] = solve_massless(tspan, loading_motor, unlatching_motor, load, latch, spring, theta_final)
+%solve_massless solves the equations of motion of a system with a massless spring
+% It uses a fixed timestep ode solver since the muscle contraction length is non-intertial
 
-dt = 1e-5;
+
+dt = 1e-5; %timestep size
 y(1,:) = zeros(1,6);
 y(1,2) = load.theta_0;
 y(1,3) = latch.v_0;
@@ -403,6 +400,7 @@ end
 
 
 function dydt = se_ode_massless(t, y, theta0, l0, L1, L2, mu, moI, mL, Flm, unlatching_motor, latch, ul_offset)
+% Equations of motion for the masless system
 
 beta = sqrt(2*L1^2*(1-cos(y(2)-theta0)) + l0^2 - 2*l0*L1*(sin(y(2))- sin(theta0)));
 gamma = (L1^2*sin(y(2)-theta0) - l0*L1*cos(y(2)))/beta;
@@ -440,8 +438,9 @@ end
 
 
 
-% update force history for standard linear solids
+
 function status = update_f(t, y, ~, load, spring, loading_motor)
+% update force history for standard linear solids
 
 if (isa(spring, 'StandardLinearSolid2') || isa(spring, 'StandardLinearSolid')) && (size(t,2)>0)
 
