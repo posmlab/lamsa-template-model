@@ -10,21 +10,21 @@ function [sol, transition_times] = solve_direct_actuation(motor,load)
 
 
 %% Ballistic phase:F motor only 
-launch_opts=odeset('Events',@(t,y) direct_actuation_end(t,y,motor),'RelTol',1E-7,'AbsTol',1E-10);
+launch_opts=odeset('Events',@(t,y) direct_actuation_end(t,y,motor),'RelTol',1E-5,'AbsTol',1E-7);
 ode=@(t,y) direct_actuation_ode(t,y,load,motor);
 
 t_guess_v=(motor.velocity*load.mass)/motor.max_force;
 t_guess_pos=sqrt((2*motor.range*load.mass)/motor.max_force);
 
 t_guess=max(t_guess_v,t_guess_pos);
-tspan=linspace(0,t_guess,10000);
+tspan=linspace(0,t_guess,1000);
 y0=[0,0];
 [t,y]=ode45(ode,tspan,y0,launch_opts);
 
 % run ode45 until the projectile launches
 while (t(end) == tspan(end))
     t_guess = 10 *t_guess;
-    tspan = linspace(0, t_guess,10000);
+    tspan = linspace(0, t_guess,1000);
     [t,y]=ode45(ode,tspan,y0,launch_opts);
 end
 
