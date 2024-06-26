@@ -16,7 +16,7 @@ function [combos, var_list] = sensitivity_analysis(lm,um,ld,lt,sp,x0,metric,labe
     start = x0;
     
     %%Function
-    wrapper_func = @(x0)init_solve(lm,um,ld,lt,sp,x0,metric,DA_flag)
+    wrapper_func = @(x0)init_solve(lm,um,ld,lt,sp,x0,metric,DA_flag);
     
     %%Data Dynamics
        
