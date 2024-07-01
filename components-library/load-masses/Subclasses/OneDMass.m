@@ -10,7 +10,7 @@ classdef OneDMass < Mass
     methods (Static)
         function parameters = parameters()
             parameters = ["mass" "mass of lever arm" "EMA";
-                "0.01" "0" "1";
+                "0.0" "0.00924" "0.1477";
                 "0" "0" "0.001";
                 "Inf" "Inf" "Inf"];
         end
