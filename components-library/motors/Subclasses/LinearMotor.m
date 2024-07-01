@@ -32,7 +32,7 @@ classdef LinearMotor < Motor
         function parameters = parameters()
             parameters = ["Fmax" "Vmax" "range of motion" "voltage fraction" "muscle length";
                 "0.25" "1" "0.005"  "1" "0.01";
-                "0.25" "1" "0.005"  "1" "0.01";
+                "0.0" "1" "1"  "1" "0.01";
                 "0" "0" "0" "0" "0";
                 "Inf" "Inf" "Inf" "Inf" "Inf"];
         end
