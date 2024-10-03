@@ -19,8 +19,8 @@ Table of Contents
 ## Installing the Model
 
 The software is available as either
-- a [standalone Windows executable installer](https://github.com/posmlab/lamsa-template-model/releases/download/v1.1.0/LaMSAModelInstaller_Windows.exe) (Windows only)
 - as a [ZIP archive of the MATLAB source code](https://github.com/posmlab/matlab-lamsa-model/archive/master.zip) (requires MATLAB)
+- a [standalone Windows executable installer](https://github.com/posmlab/lamsa-template-model/releases/download/v1.1.0/LaMSAModelInstaller_Windows.exe) (Windows only & does not include latest features/bug fixes)
 
 
 ## Using the Graphical User Interface
@@ -29,7 +29,7 @@ The software is available as either
 
 With the GUI open, you will see a small diagram of the system in the bottom right, with a large input parameter box on the left and plotting options in the top right. Since the default values for all of the parameters are already loaded, you should be able to run the simulation without changing anything in the parameters box and simply use the plotting options to gain familiarity with the GUI. 
 
-However, in order to best understand the capabilities of the GUI it is highly recommended you watch this [YouTube video on Using the LaMSA Template Model](https://youtu.be/c-lTELC9GgM) detailing the different kinds of plots that can be made and how to access them.
+However, in order to best understand the capabilities of the GUI it is recommended you watch this [YouTube video on Using the LaMSA Template Model](https://youtu.be/c-lTELC9GgM) detailing the different kinds of plots that can be made and how to access them. Although some of the information is out of date, the general structure of how to run the code is the same.
 <iframe width="560" height="315" src="https://www.youtube.com/embed/c-lTELC9GgM" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
 </iframe>
 
