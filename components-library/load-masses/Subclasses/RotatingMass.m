@@ -18,10 +18,10 @@ classdef RotatingMass < Mass
     
     methods (Static)
         function parameters = parameters()
-            parameters = ["mass" "mass of lever arm" "L1" "L2" "theta initial";
-                "0.01" "0" "0.001" "0.001" "0";
-                "0" "0" "0" "0" "0";
-                "Inf" "Inf" "Inf" "Inf" "1.57"];
+            parameters = ["mass" "mass of lever arm" "L1" "L2" "theta initial" "theta final";
+                "0.01" "0" "0.001" "0.001" "0" "0";
+                "0" "0" "0" "0" "-1.57" "-1.57";
+                "Inf" "Inf" "Inf" "Inf" "1.57" "1.57"];
         end
     end
     
@@ -29,8 +29,8 @@ classdef RotatingMass < Mass
         
         % constructor
         function obj = RotatingMass(m_end,varargin)
-            varargin_param_names = {'m_rod','L1','L2','theta_0'};
-            varargin_default_values = {0, .001 , .001, .001, 0};
+            varargin_param_names = {'m_rod','L1','L2','theta_0', 'theta_f'};
+            varargin_default_values = {0, .001 , .001, .001, 0, 0};
             % check and assign optional parameters
             if (nargin < 1)
                 error('load mass requires at least 1 argument');
@@ -54,6 +54,7 @@ classdef RotatingMass < Mass
             obj = obj@Mass(mass, EMA);
             obj.L1 = L1;
             obj.theta_0 = theta_0;
+            obj.theta_c = theta_f;
         end 
     end
 end
